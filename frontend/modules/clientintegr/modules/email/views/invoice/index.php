@@ -227,6 +227,17 @@ $this->registerJs('
                                             $link = 'iiko';
                                         }
                                     }
+                                    if (isset($licenses['odinsobsh'])) {
+                                        $sub0 = explode(' ', $licenses['odinsobsh']->td);
+                                        $sub1 = explode('-', $sub0[0]);
+                                        $licenses['odinsobsh']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
+                                        if ($licenses['odinsobsh']->status_id == 0) {
+                                            $lic_odinsobsh = 0;
+                                        }
+                                        if (($licenses['odinsobsh']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['odinsobsh']->td)))) {
+                                            $link = 'odinsobsh';
+                                        }
+                                    }
                                     if (isset($licenses['tillypad'])) {
                                         $sub0 = explode(' ', $licenses['tillypad']->td);
                                         $sub1 = explode('-', $sub0[0]);
@@ -377,21 +388,25 @@ $list_integration = '';
 
 if (!empty($integration)) {
     $links = [
-        'rk'       => [
+        'rk'        => [
             'title' => 'R-Keeper',
             'url'   => '/clientintegr/rkws/waybill/index'
         ],
-        'iiko'     => [
+        'iiko'      => [
             'title' => 'iiko Office',
             'url'   => '/clientintegr/iiko/waybill/index'
         ],
-        'tillypad' => [
+        'odinsobsh' => [
+            'title' => '1С Общепит',
+            'url'   => '/clientintegr/odinsobsh/waybill/index'
+        ],
+        'tillypad'  => [
             'title' => 'Tillypad',
             'url'   => '/clientintegr/tillypad/waybill/index'
         ]
     ];
     foreach ($integration as $key => $row) {
-        $list_integration .= '<br>' . \yii\helpers\Html::a($links[$key]['title'], \Yii::$app->urlManager->createUrl($links[$key]['url']), [
+        $list_integration .= '<br><br>' . \yii\helpers\Html::a($links[$key]['title'], \Yii::$app->urlManager->createUrl($links[$key]['url']), [
                 'class' => 'btn btn-primary'
             ]);
     }

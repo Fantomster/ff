@@ -17,6 +17,7 @@ return [
     'franchiseeHost'          => '//partner.mixcart.ru',
     'integratAdminID'         => [],
     'operatorsReportAdminIDs' => [1, 85, 16, 8832, 13580, 12814],
+    'timeKeepers' => [], //временно, те кто видят список заказов, включая последний час
     'licenseManagerPhone'     => '8 (499) 404-10-18',
     #id франчази к которому крепим организации, для которых не нашли франчей
     'default_franchisee_id'   => 1,

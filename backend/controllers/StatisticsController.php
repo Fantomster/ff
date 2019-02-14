@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 use backend\models\DynamicUsageSearch;
+use backend\models\ExtendedReportsSearch;
 use backend\models\MercuryReportSearch;
 use backend\models\OrgUseMercFrequently;
 use common\models\OrderStatus;
@@ -35,7 +36,7 @@ class StatisticsController extends Controller
                 ],
                 'rules'      => [
                     [
-                        'actions' => ['index', 'registered', 'orders', 'turnover', 'misc', 'dynamics', 'mercury', 'merc-active-org'],
+                        'actions' => ['index', 'registered', 'orders', 'turnover', 'misc', 'dynamics', 'mercury', 'merc-active-org','extended-reports'],
                         'allow'   => true,
                         'roles'   => [
                             Role::ROLE_ADMIN,
@@ -757,5 +758,17 @@ class StatisticsController extends Controller
             ]
         ]);
         return $this->render('merc-active-org', compact('dataProviderIn', 'dataProviderNotIn'));
+    }
+
+    public function actionExtendedReports()
+    {
+        $searchModel = new ExtendedReportsSearch();
+        $searchModel->initDates();
+
+        $report1 = $searchModel->FranchiseeTurnoverFiguresSearch();
+        $report2 = $searchModel->NewRegistrationsSearch();
+        $report3 = $searchModel->MercuryReportSearch();
+
+        return $this->render('extended-reports', compact('searchModel', 'report1', 'report2', 'report3'));
     }
 }

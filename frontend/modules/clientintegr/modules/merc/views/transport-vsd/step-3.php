@@ -83,7 +83,7 @@ JS;
                         'url' => $url,
                         'dataType' => 'json',
                         'data' => new JsExpression('function(params) { 
-                        return {q:params.term, hc:hc_guid}; }'),
+                        return {q:params.term}; }'),
                     ],
                     'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
                 ],
@@ -181,11 +181,11 @@ $("document").ready(function(){
     });
  
  function getHC(inn) {
-     var url = "$urlToGetHC?recipient_guid=" + recipient_guid;
+     var url = "$urlToGetHC";
      
      if(inn != null)
          {
-             url += "&inn=" + inn; 
+             url += "?inn=" + inn; 
          }
      
       $.ajax({

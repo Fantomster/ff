@@ -28,6 +28,7 @@ return [
             'rules'                   => [
                 'integration/vetis/<action>' => '/integration/vetis/default/<action>',
                 'integration/egais/<action>' => '/integration/egais/default/<action>',
+                'lazy-vendor/price/<action>' => '/lazy-vendor-price/<action>',
             ],
         ],
         'user'               => [

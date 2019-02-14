@@ -1868,6 +1868,10 @@ class Organization extends \yii\db\ActiveRecord
             $return['iiko'] = true;
         }
 
+        if (!empty(OneSService::getLicense())) {
+            $return['odinsobsh'] = true;
+        }
+
         if (!empty(TillypadService::getLicense())) {
             $return['tillypad'] = true;
         }

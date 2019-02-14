@@ -4,6 +4,7 @@ namespace common\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
+
 /**
  * This is the model class for table "{{%promo_action}}".
  *
@@ -56,12 +57,11 @@ class PromoAction extends \yii\db\ActiveRecord
         ];
     }
 
-
     public function checkCode()
     {
-        if(!empty($this->code)) {
-            if(self::find()->where('id <> :id and code = :code', [':id' => $this->id, ':code' => $this->code])->one() != null) {
-                $this->addError('code','Акция с таким кодом уже есть в системе');
+        if (!empty($this->code)) {
+            if (self::find()->where('id <> :id and code = :code', [':id' => $this->id, ':code' => $this->code])->one() != null) {
+                $this->addError('code', 'Акция с таким кодом уже есть в системе');
             }
         }
     }
@@ -82,5 +82,19 @@ class PromoAction extends \yii\db\ActiveRecord
         ];
     }
 
-
+    /**
+     * @param $params
+     * @return mixed|string
+     */
+    public function getCompleteMessage($params)
+    {
+        $pattern = '/:(lead_name|lead_city)\|"(.*?)"/';
+        preg_match_all($pattern, $this->message, $matches);
+        $message = $this->message;
+        foreach ($matches[0] as $key => $row) {
+            $replace = (isset($params[$matches[1][$key]])) ? $params[$matches[1][$key]] : $matches[2][$key];
+            $message = str_replace($row, $replace, $message);
+        }
+        return $message;
+    }
 }

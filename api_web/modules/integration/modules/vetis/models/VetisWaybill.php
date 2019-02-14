@@ -866,4 +866,32 @@ class VetisWaybill extends WebApi
 
         return $return;
     }
+
+    /**
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws BadRequestHttpException
+     */
+    public function getProductionJournalProducerFilter()
+    {
+        $query = MercStockEntry::find()->select(['producer_name', 'producer_guid'])->distinct()
+            ->where(['owner_guid' => $this->helper->getEnterpriseGuid($this->user->organization_id)])
+            ->andWhere(['not', ['producer_guid' => null]]);
+
+        return $query->all();
+    }
+
+    /**
+     * @return array
+     */
+    public function getProductionJournalSort()
+    {
+        return [
+            'product_name'  => \Yii::t('api_web', 'production_journal.product_name'),
+            '-product_name' => \Yii::t('api_web', 'production_journal.-product_name'),
+            'create_date'   => \Yii::t('api_web', 'production_journal.create_date'),
+            '-create_date'  => \Yii::t('api_web', 'production_journal.-create_date'),
+            'expiry_date'   => \Yii::t('api_web', 'production_journal.expiry_date'),
+            '-expiry_date'  => \Yii::t('api_web', 'production_journal.-expiry_date'),
+        ];
+    }
 }

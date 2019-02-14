@@ -16,6 +16,9 @@ use yii\filters\AccessControl;
  */
 class DefaultController extends WebApiController
 {
+    /**
+     * @return array
+     */
     public function behaviors()
     {
         $behaviors = parent::behaviors();
@@ -58,6 +61,8 @@ class DefaultController extends WebApiController
                         'delete-transport',
                         'delete-ingredient',
                         'production-journal-list',
+                        'production-journal-producer-filter',
+                        'production-journal-sort',
                     ],
                     'roles'      => [
                         Registry::MANAGER_RESTAURANT,
@@ -2136,6 +2141,110 @@ class DefaultController extends WebApiController
     public function actionProductionJournalList()
     {
         $this->response = (new VetisWaybill())->getStockEntryList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/production-journal-producer-filter",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка фильтра Производители",
+     *     description="Получение списка фильтра Производители",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "producer_name": "Вулканный, ООО Далькреветка(ул.Дзер жинского,36 г. Южно-Сахалинск)",
+     *                      "producer_guid": "694f631a-72d6-4208-994e-14b62ad418e2"
+     *                  },
+     *                  {
+     *                      "producer_name": "ЗАО Микояновский МК(г.Москва, ул.Пермская, вл.3)",
+     *                      "producer_guid": "cb5804ed-b479-c9ad-7479-df50d6db71f2"
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionProductionJournalProducerFilter()
+    {
+        $this->response = (new VetisWaybill())->getProductionJournalProducerFilter();
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/production-journal-sort",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка сортировки",
+     *     description="Получение списка сортировки",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "product_name": "Названию продукции А-Я",
+     *                  "-product_name": "Названию продукции А-Я",
+     *                  "create_date": "Дате создания продукции по возрастанию",
+     *                  "-create_date": "Дате создания продукции по убыванию",
+     *                  "expiry_date": "Сроку годности продукции по возрастанию",
+     *                  "-expiry_date": "Сроку годности продукции по убыванию"
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionProductionJournalSort()
+    {
+        $this->response = (new VetisWaybill())->getProductionJournalSort();
     }
 
 }

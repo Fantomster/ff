@@ -226,7 +226,7 @@ class EgaisMethods extends WebApi
         ]);
 
         if (empty($product)) {
-            throw new BadRequestHttpException('Продукта нет');
+            throw new BadRequestHttpException('dictionary.egais_get_product');
         }
 
         return $product;

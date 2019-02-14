@@ -5,10 +5,7 @@ namespace frontend\modules\clientintegr\modules\rkws\components;
 use api\common\models\RkCategory;
 use api\common\models\RkDicconst;
 use yii;
-use api\common\models\RkAccess;
-use api\common\models\RkSession;
 use frontend\modules\clientintegr\modules\rkws\components\UUID;
-use common\models\User;
 use api\common\models\RkTasks;
 use api\common\models\RkProduct;
 use api\common\models\RkDic;
@@ -27,9 +24,7 @@ class ProductHelper extends AuthHelper
     public function getProduct()
     {
         if (!$this->Authorizer()) {
-
-            echo "Can't perform authorization";
-            return;
+            throw new NotFoundHttpException(Yii::t('error', 'api.rkws.controllers.not.auth', ['ru' => 'Не удалось авторизоваться на сервере R-Keeper.']));
         }
 
         $rguid = UUID::uuid4();
@@ -103,9 +98,6 @@ class ProductHelper extends AuthHelper
                 }
             }
         }
-
-        // var_dump($res);
-
         return true;
     }
 
@@ -276,6 +268,7 @@ class ProductHelper extends AuthHelper
         $icount = 0;
         $scount = 0;
 
+        RkProduct::updateAll(['is_active' => 0], ['acc' => $acc]);
         foreach ($array as $a) {
 
             $checks = RkProduct::find()->andWhere('acc = :acc', [':acc' => $acc])
@@ -294,6 +287,7 @@ class ProductHelper extends AuthHelper
                 $amodel->unitname = $a['unit_name'];
                 $amodel->group_rid = $a['group_rid'];
                 $amodel->group_name = $a['group_name'];
+                $amodel->is_active = 1;
 
                 //    $amodel->agent_type = $a['type'];
                 $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
@@ -302,8 +296,12 @@ class ProductHelper extends AuthHelper
                     $er = $amodel->getErrors();
                     $this->log('ERROR:: Product ' . $amodel->rid . 'cannot be saved - ' . $er);
                 }
-
                 $scount++;
+            }
+            $checks->is_active = 1;
+            if (!$checks->save()) {
+                $er = $checks->getErrors();
+                $this->log('ERROR:: Product ' . $checks->rid . 'cannot be saved - ' . $er);
             }
             $icount++;
         }
@@ -334,7 +332,7 @@ class ProductHelper extends AuthHelper
             exit;
         }
 
-        $fcount = RkProduct::find()->andWhere('acc= :org_id', [':org_id' => $acc])->count('*');
+        $fcount = RkProduct::find()->andWhere('acc= :org_id', [':org_id' => $acc])->andWhere('is_active = 1')->count('*');
 
         $rmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         $rmodel->dicstatus_id = 6;

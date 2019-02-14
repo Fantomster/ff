@@ -49,7 +49,7 @@ class OrderSearch extends Order
      * @param array $params
      * @return ActiveDataProvider
      */
-    public function search($params, $delay = 0)
+    public function search($params)
     {
         $profileTable      = Profile::tableName();
         $organizationTable = Organization::tableName();
@@ -77,12 +77,7 @@ class OrderSearch extends Order
 
         // add conditions that should always apply here
         $query->where("vendor.blacklisted in (0, 1) ")
-                ->andWhere("$orderTable.status <> " . OrderStatus::STATUS_FORMING)
-                ->andWhere([
-                    '<',
-                    "$orderTable.created_at",
-                    \gmdate('Y-m-d H:i:s', strtotime("-$delay hour"))
-        ]);
+                ->andWhere("$orderTable.status <> " . OrderStatus::STATUS_FORMING);
 
 
         $dataProvider = new ActiveDataProvider([

@@ -569,6 +569,7 @@ class LazyVendorWebApi extends WebApi
      * @param $post
      * @return array|\yii\db\ActiveRecord[]
      * @throws BadRequestHttpException
+     * @throws ValidationException
      */
     public function contactUpdate($post)
     {
@@ -578,29 +579,19 @@ class LazyVendorWebApi extends WebApi
             throw new BadRequestHttpException('lazy_vendor.wrong_value');
         }
 
-        $this->getVendor($post['vendor_id']);
         $result = $this->validateNotifications($post['notifications']);
 
-        $notifications = OrganizationContact::find()
-            ->where(['id' => $result['notificationIds'], 'organization_id' => $post['vendor_id']])
-            ->with('organizationContactNotifications')->indexBy('id')
-            ->all();
+        $vendor = $this->getVendor($post['vendor_id']);
+        $n = $vendor->getOrganizationContact()->andWhere([
+            'id' => $result['notificationIds']
+        ])->all();
 
-        $attributeRules = (new OrganizationContactNotification())->getRulesAttributes();
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            foreach ($result['notificationIds'] as $index => $notification) {
-                if (empty($notifications[$index])) {
-                    throw new BadRequestHttpException('lazy_vendor.not_your_notifications');
-                } else {
-                    /**
-                     * @var $orgContact OrganizationContact
-                     */
-                    $orgContact = $notifications[$index]->organizationContactNotifications[0];
-                    foreach ($attributeRules as $rule => $attributeRule) {
-                        $orgContact->{$rule} = $result['notifications'][$index][$rule];
-                    }
-                    $orgContact->save();
+            /** @var OrganizationContact $nModel */
+            foreach ($n as $nModel) {
+                if (in_array($nModel->id, $result['notificationIds'])) {
+                    $nModel->setNotifications($this->user->organization_id, $result['notifications'][$nModel->id]);
                 }
             }
             $transaction->commit();
@@ -608,7 +599,7 @@ class LazyVendorWebApi extends WebApi
             $transaction->rollBack();
             throw $e;
         }
-        $request = ['id' => $post['vendor_id']];
-        return $this->contactList($request);
+
+        return $this->contactList(['id' => $vendor->id]);
     }
 }

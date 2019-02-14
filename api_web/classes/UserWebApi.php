@@ -177,7 +177,7 @@ class UserWebApi extends \api_web\components\WebApi
         $authAssign = new AuthAssignment([
             'item_name'       => RbacHelper::$dictRoles[$roleId],
             'user_id'         => $userId,
-            'organization_id' => $this->user->organization->id
+            'organization_id' => $this->user->organization_id
         ]);
 
         if (!$authAssign->save()) {
@@ -597,7 +597,7 @@ class UserWebApi extends \api_web\components\WebApi
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $where = [
-                'rest_org_id' => $this->user->organization->id,
+                'rest_org_id' => $this->user->organization_id,
                 'supp_org_id' => $vendor->id
             ];
 

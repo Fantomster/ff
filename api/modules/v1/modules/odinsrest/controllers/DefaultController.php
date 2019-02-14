@@ -222,7 +222,7 @@ class DefaultController extends Controller
         $i = 0;
         $returnArray = [];
         foreach ($positions as $position) {
-            if (!$position->is_changed) continue;
+            //if (!$position->is_changed) continue;
             $oneSPosition = $modelName::findOne(['org_id' => $res, 'cid' => $position->cid]);
             if (!$oneSPosition) {
                 $oneSPosition = new $modelName();

@@ -297,11 +297,12 @@ class ProductHelper extends AuthHelper
                     $this->log('ERROR:: Product ' . $amodel->rid . 'cannot be saved - ' . $er);
                 }
                 $scount++;
-            }
-            $checks->is_active = 1;
-            if (!$checks->save()) {
-                $er = $checks->getErrors();
-                $this->log('ERROR:: Product ' . $checks->rid . 'cannot be saved - ' . $er);
+            } else {
+                $checks->is_active = 1;
+                if (!$checks->save()) {
+                    $er = $checks->getErrors();
+                    $this->log('ERROR:: Product ' . $checks->rid . 'cannot be saved - ' . $er);
+                }
             }
             $icount++;
         }

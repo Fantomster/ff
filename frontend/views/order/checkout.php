@@ -337,15 +337,19 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
             <div class="row">
                 <div class="col-md-6 col-sm-8 col-xs-6">
                     <div class="btn-group" role="group" id="createAll">
-                        <?=
-                        Html::button('<i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-xs"> ' . Yii::t('message', 'frontend.views.order.make_all', ['ru' => 'Оформить все заказы']) . ' </span>', [
-                            'class' => 'btn btn-success createAll',
-                            'data'  => [
-                                'url' => Url::to(['/order/ajax-make-order']),
-                                'all' => true,
-                                'id'  => null,
-                            ]
-                        ]);
+                        <?php
+                        $user_id = Yii::$app->user->id;
+                        $role_id = User::find()->select('role_id')->where(['id' => $user_id])->column();
+                        if ($role_id[0] != Role::ROLE_RESTAURANT_ORDER_INITIATOR) {
+                            echo Html::button('<i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-xs"> ' . Yii::t('message', 'frontend.views.order.make_all', ['ru' => 'Оформить все заказы']) . ' </span>', [
+                                'class' => 'btn btn-success createAll',
+                                'data'  => [
+                                    'url' => Url::to(['/order/ajax-make-order']),
+                                    'all' => true,
+                                    'id'  => null,
+                                ]
+                            ]);
+                        }
                         ?>
                         <?=
                         ''
@@ -416,8 +420,8 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                     <?php
                                     $user_id = Yii::$app->user->id;
                                     $role_id = User::find()->select('role_id')->where(['id' => $user_id])->column();
-                                    if ($role_id != Role::ROLE_RESTAURANT_ORDER_INITIATOR) {
-                                        echo $this->render("_checkout-position-button", compact("cart"));
+                                    if ($role_id[0] != Role::ROLE_RESTAURANT_ORDER_INITIATOR) {
+                                        //echo $this->render("_checkout-position-button", compact("cart"));
                                     }
                                     ?>
                                     </span>

@@ -16,7 +16,7 @@ use common\models\Role;
         <?php
         $user_id = Yii::$app->user->id;
         $role_id = User::find()->select('role_id')->where(['id' => $user_id])->column();
-        if ($role_id != Role::ROLE_RESTAURANT_ORDER_INITIATOR) { ?>
+        if ($role_id[0] != Role::ROLE_RESTAURANT_ORDER_INITIATOR) { ?>
             <button type="button" class="btn btn-default alButton"
                     disabled="disabled"><?= Yii::t('message', 'frontend.views.order.make_order_two', ['ru' => 'Оформить заказ']) ?></button>
         <?php } ?>
@@ -30,14 +30,18 @@ use common\models\Role;
     <?php } else { ?>
         <p><?= Yii::t('app', 'включая доставку') ?></p><p><?= $cart['delivery_price'] ?> <?= $cart['currency'] ?></p>
     <?php } ?>
-    <?=
-    (!$cart['for_min_cart_price']) ? Html::button(Yii::t('message', 'frontend.views.order.make_order_two', ['ru' => 'Оформить заказ']), [
-        'class' => 'create',
-        'data'  => [
-            'url' => Url::to(['/order/ajax-make-order']),
-            'id'  => $cart['id'],
-            'all' => false
-        ],
-    ]) : '';
+    <?php
+    $user_id = Yii::$app->user->id;
+    $role_id = User::find()->select('role_id')->where(['id' => $user_id])->column();
+    if ($role_id[0] != Role::ROLE_RESTAURANT_ORDER_INITIATOR) {
+        echo (!$cart['for_min_cart_price']) ? Html::button(Yii::t('message', 'frontend.views.order.make_order_two', ['ru' => 'Оформить заказ']), [
+            'class' => 'create',
+            'data'  => [
+                'url' => Url::to(['/order/ajax-make-order']),
+                'id'  => $cart['id'],
+                'all' => false
+            ],
+        ]) : '';
+    }
     ?>
 </div>

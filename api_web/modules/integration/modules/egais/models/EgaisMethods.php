@@ -221,10 +221,8 @@ class EgaisMethods extends WebApi
     {
         $this->validateRequest($request, ['alc_code']);
 
-        $orgId = $request['org_id'] ?? $this->user->organization_id;
-
         $product = EgaisProductOnBalance::findOne([
-            'org_id'   => $orgId,
+            'org_id'   => $this->user->organization_id,
             'alc_code' => $request['alc_code']
         ]);
 
@@ -241,8 +239,6 @@ class EgaisMethods extends WebApi
      */
     public function getWrittenOffProductList(array $request)
     {
-        $orgId = $request['org_id'] ?? $this->user->organization_id;
-
         if (isset($request['date'])) {
             $dateStart = isset($request['date']['start'])
                 ? $this->formattedDate("{$request['date']['start']} 00:00:00")
@@ -255,7 +251,7 @@ class EgaisMethods extends WebApi
 
         $writtenOffProductList = EgaisWriteOffHistory::find()
             ->where([
-                'org_id' => $orgId
+                'org_id' => $this->user->organization_id
             ])
             ->andFilterWhere([
                 'BETWEEN',

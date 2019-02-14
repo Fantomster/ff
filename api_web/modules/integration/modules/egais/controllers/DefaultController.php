@@ -399,7 +399,6 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "org_id":3768,
      *                      "alc_code":0150325000001195171,
      *                  }
      *              )
@@ -462,7 +461,6 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "org_id":3768,
      *                      "date": {
      *                          "start": "10.02.2019",
      *                          "end": "15.02.2019"

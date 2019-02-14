@@ -144,6 +144,10 @@ if ($countSettingChange > 0) {
                          'label' => 'Оператор заказов',
                          'url'   => ['/order/operator'],
                      ],
+                     [
+                         'label' => 'Промо-акции',
+                         'url'   => ['/promo-action/index'],
+                     ],
                  ],
                 ],
                 [

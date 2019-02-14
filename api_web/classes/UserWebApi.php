@@ -2,7 +2,6 @@
 
 namespace api_web\classes;
 
-use api_web\components\FireBase;
 use api_web\components\Registry;
 use api_web\helpers\WebApiHelper;
 use api_web\models\ForgotForm;
@@ -22,6 +21,7 @@ use common\models\UserToken;
 use api_web\components\Notice;
 use common\models\RelationSuppRestPotential;
 use common\models\Organization;
+use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
@@ -162,46 +162,27 @@ class UserWebApi extends \api_web\components\WebApi
         }
         $user->setRegisterAttributes($role_id, $status);
         $user->save();
+        $this->addRbacRole($user->id, $role_id);
 
         return $user;
     }
 
     /**
-     * @param array $post
-     * @param       $role_id
-     * @param null  $status
-     * @return User
-     * @throws BadRequestHttpException
+     * @param $userId
+     * @param $roleId
      * @throws ValidationException
      */
-    public function createEmployee(array $post, $role_id, $status = null)
+    public function addRbacRole($userId, $roleId): void
     {
-        if (User::findOne(['email' => $post['user']['email']])) {
-            throw new BadRequestHttpException('This email is already present in the system.');
-        }
-
-        $post['user']['newPassword'] = $post['user']['password'];
-        unset($post['user']['password']);
-
-        $user = new User(["scenario" => "register"]);
-        $user->load($post, 'user');
-        if (!$user->validate()) {
-            throw new ValidationException($user->getFirstErrors());
-        }
-        $user->setRegisterAttributes($role_id, $status);
-        $user->save();
-
         $authAssign = new AuthAssignment([
-            'item_name'       => RbacHelper::$dictRoles[$role_id],
-            'user_id'         => $user->id,
+            'item_name'       => RbacHelper::$dictRoles[$roleId],
+            'user_id'         => $userId,
             'organization_id' => $this->user->organization->id
         ]);
 
         if (!$authAssign->save()) {
             throw new ValidationException($authAssign->getFirstErrors());
         }
-
-        return $user;
     }
 
     /**
@@ -833,19 +814,22 @@ class UserWebApi extends \api_web\components\WebApi
      * Возвращает GMT из базы, если его нет сохраняет из headers, добавляет плюс к не отрицательному таймзону
      *
      * @return string $gmt
-     * */
+     * @throws ValidationException
+     */
     public function checkGMTFromDb()
     {
         $gmt = $this->getGmt()['GMT'];
 
-        if (!empty($this->user) && !empty($this->user->organization)) {
+        if (!empty($this->user) && !is_null($this->user->organization_id)) {
             $model = $this->user->organization;
-            if (!isset($model->gmt)) {
+            if (is_null($model->gmt)) {
                 $model->gmt = $gmt;
                 if (!$model->validate() || !$model->save()) {
                     throw new ValidationException($model->getFirstErrors());
                 }
             }
+
+            $gmt = $model->gmt;
         }
 
         if (strpos($gmt, '-') === 0) {
@@ -940,6 +924,7 @@ class UserWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('no such user relation');
         }
         $modelName = '\common\models\notifications\\' . $modelName;
+        /** @var ActiveRecord $modelName */
         $notification = $modelName::findOne(['user_id' => $userId, 'rel_user_org_id' => $relation]);
         if (!$notification) {
             $notification = new ${$modelName}();

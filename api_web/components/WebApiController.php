@@ -13,7 +13,6 @@ use api_web\helpers\Logger;
 use common\models\licenses\License;
 use common\models\Organization;
 use yii\web\HttpException;
-use \api_web\components\MyCompositeAuth;
 
 /**
  * @SWG\Swagger(
@@ -276,7 +275,7 @@ class WebApiController extends \yii\rest\Controller
      */
     private function checkLicense()
     {
-        if (!empty($this->user) && !empty($this->user->organization)) {
+        if (!empty($this->user) && !is_null($this->user->organization_id)) {
             //Проверяем лицензию только для ресторанов
             if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
                 //Методы к которым пускаем без лицензии

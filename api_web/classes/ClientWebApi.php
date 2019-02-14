@@ -631,17 +631,9 @@ class ClientWebApi extends WebApi
 
         //Интуем роль
         $role_id = (int)$post['role_id'];
-        //Проверка, можно ли проставить эту роль что прислали
-        $list = Role::find()
-            ->where([
-                'organization_type' => Organization::TYPE_RESTAURANT
-            ])
-            ->indexBy('id')
-            ->column();
 
-        if (!in_array($post['role_id'], $list)) {
-            throw new BadRequestHttpException('user.role_set_access');
-        }
+        //Проверка, можно ли проставить эту роль что прислали
+        $this->checkReceivedRoleId($role_id);
 
         $user = User::findOne(['email' => $post['email']]);
 
@@ -677,7 +669,7 @@ class ClientWebApi extends WebApi
                     ]
                 ];
                 //Создаем пользователя
-                $user = $user_api->createEmployee($request, $role_id, User::STATUS_ACTIVE);
+                $user = $user_api->createUser($request, $role_id, User::STATUS_ACTIVE);
                 //Устанавливаем текущую организацию
                 $user->setOrganization($this->user->organization, true);
                 //Создаем профиль пользователя
@@ -743,16 +735,7 @@ class ClientWebApi extends WebApi
 
             if (!empty($post['role_id'])) {
 
-                $list = Role::find()
-                    ->where([
-                        'organization_type' => Organization::TYPE_RESTAURANT
-                    ])
-                    ->indexBy('id')
-                    ->column();
-
-                if (!in_array($post['role_id'], $list)) {
-                    throw new BadRequestHttpException('user.role_set_access');
-                }
+                $this->checkReceivedRoleId($post['role_id']);
 
                 if ($user->role_id != $post['role_id']) {
                     $authAssign = AuthAssignment::findOne([
@@ -760,10 +743,10 @@ class ClientWebApi extends WebApi
                         'organization_id' => $user->organization_id,
                     ]);
 
-                    if (!empty($authAssign)) {
+                    if ($authAssign) {
                         $authAssign->item_name = RbacHelper::$dictRoles[$post['role_id']];
                         if (!$authAssign->save()) {
-                            throw new BadRequestHttpException(serialize($relation->getFirstErrors()));
+                            throw new BadRequestHttpException($authAssign->getFirstErrors());
                         }
                     }
                 }
@@ -840,7 +823,7 @@ class ClientWebApi extends WebApi
                 }
             }
 
-            if (!empty($authAssign)) {
+            if ($authAssign) {
                 if (!$authAssign->delete()) {
                     throw new ValidationException($relation->getFirstErrors());
                 }
@@ -918,5 +901,23 @@ class ClientWebApi extends WebApi
         }
 
         return $model;
+    }
+
+    /**
+     * @param $roleId
+     * @throws BadRequestHttpException
+     */
+    private function checkReceivedRoleId($roleId): void
+    {
+        $list = Role::find()
+            ->where([
+                'organization_type' => Organization::TYPE_RESTAURANT
+            ])
+            ->indexBy('id')
+            ->column();
+
+        if (!in_array($roleId, $list)) {
+            throw new BadRequestHttpException('user.role_set_access');
+        }
     }
 }

@@ -16,7 +16,10 @@ use yii\db\Query;
 
 class RbacHelper
 {
-    /**@var array $statuses */
+    /**
+     * Маппинг старых role_id к новым ролям в RBAC
+     * @var array $dictRoles
+     */
     static $dictRoles = [
         1  => Registry::ADMINISTRATOR_MIXCART,
         7  => Registry::MANAGER_MIXCART,

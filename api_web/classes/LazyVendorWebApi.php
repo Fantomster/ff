@@ -589,9 +589,7 @@ class LazyVendorWebApi extends WebApi
         try {
             /** @var OrganizationContact $nModel */
             foreach ($n as $nModel) {
-                if (in_array($nModel->id, $result['notificationIds'])) {
-                    $nModel->setNotifications($this->user->organization_id, $result['notifications'][$nModel->id]);
-                }
+                $nModel->setNotifications($this->user->organization_id, $result['notifications'][$nModel->id]);
             }
             $transaction->commit();
         } catch (\Exception $e) {

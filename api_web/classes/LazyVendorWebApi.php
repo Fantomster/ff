@@ -569,7 +569,6 @@ class LazyVendorWebApi extends WebApi
      * @param $post
      * @return array|\yii\db\ActiveRecord[]
      * @throws BadRequestHttpException
-     * @throws ValidationException
      */
     public function contactUpdate($post)
     {

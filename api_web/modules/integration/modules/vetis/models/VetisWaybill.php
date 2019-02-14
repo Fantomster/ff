@@ -5,6 +5,7 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
+use common\models\search\MercStockEntrySearch;
 use api_web\components\Registry;
 use api_web\components\ValidateRequest;
 use api_web\components\WebApi;
@@ -24,7 +25,7 @@ use common\models\vetis\VetisProductItem;
 use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
-use common\models\VetisTransport;
+use common\models\vetis\VetisTransport;
 use frontend\modules\clientintegr\modules\merc\models\productForm;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
@@ -797,5 +798,125 @@ class VetisWaybill extends WebApi
         }
 
         return ['result' => (bool)$model->delete()];
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function getStockEntryList($request)
+    {
+        $reqPag = $request['pagination'] ?? [];
+        $sort = $request['sort'] ?? null;
+        $reqSearch = $request['search'] ?? null;
+        $page = $this->helper->isSetDef($reqPag['page'] ?? null, 1);
+        $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
+        $enterpriseGuid = $this->helper->getEnterpriseGuid($this->user->organization_id);
+        $search = new MercStockEntrySearch();
+        $dataProvider = $search->search($reqSearch, $enterpriseGuid);
+
+        $arSortFields = [
+            'product_name',
+            'create_date',
+            'expiry_date',
+        ];
+
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+        $result = [];
+        if ($sort && in_array(ltrim($sort, '-'), $arSortFields)) {
+            $sortDirection = SORT_ASC;
+            if (strpos($sort, '-') !== false) {
+                $sortDirection = SORT_DESC;
+            }
+            $dataProvider->query->orderBy([ltrim($sort, '-') => $sortDirection]);
+        } else {
+            $dataProvider->query->orderBy('id DESC');
+        }
+
+        /**@var MercStockEntry $model */
+        foreach ($dataProvider->models as $model) {
+            $result[] = [
+                'number'          => $model->entryNumber,
+                'name'            => $model->product_name,
+                'uuid'            => $model->uuid,
+                'guid'            => $model->guid,
+                'producer'        => $model->producer_name,
+                'country'         => $model->producer_country,
+                'balance'         => $model->amount,
+                'unit'            => $model->unit,
+                'created_at'      => WebApiHelper::asDatetime($model->create_date),
+                'production_date' => WebApiHelper::asDatetime($model->production_date),
+                'expiry_date'     => $model->expiry_date,
+            ];
+        }
+
+        $return = [
+            'result'     => $result,
+            'pagination' => [
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
+
+        return $return;
+    }
+
+    /**
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws BadRequestHttpException
+     */
+    public function getProductionJournalProducerFilter()
+    {
+        $query = MercStockEntry::find()->select(['producer_name', 'producer_guid'])->distinct()
+            ->where(['owner_guid' => $this->helper->getEnterpriseGuid($this->user->organization_id)])
+            ->andWhere(['not', ['producer_guid' => null]]);
+
+        return $query->all();
+    }
+
+    /**
+     * @return array
+     */
+    public function getProductionJournalSort()
+    {
+        return [
+            'product_name'  => \Yii::t('api_web', 'production_journal.product_name'),
+            '-product_name' => \Yii::t('api_web', 'production_journal.-product_name'),
+            'create_date'   => \Yii::t('api_web', 'production_journal.create_date'),
+            '-create_date'  => \Yii::t('api_web', 'production_journal.-create_date'),
+            'expiry_date'   => \Yii::t('api_web', 'production_journal.expiry_date'),
+            '-expiry_date'  => \Yii::t('api_web', 'production_journal.-expiry_date'),
+        ];
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getProductionJournalShortInfo($request)
+    {
+        $this->validateRequest($request, ['uuid']);
+        $model = MercStockEntry::findOne(['uuid' => $request['uuid']]);
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\Products();
+        $attributes = unserialize($model->raw_data);
+        if (isset($attributes->batch->subProduct->guid)) {
+            $productionName = VetisSubproductByProduct::find()->select(['name'])
+                ->where(['guid' => $attributes->batch->subProduct->guid])->one();
+        }
+
+        return [
+            'product_form' => $productionName->name ?? null,
+            'batch_id'     => $model->batch_id,
+            'packing'      => $attributes->batch->packageList->package->packingType->name ?? null,
+
+        ];
     }
 }

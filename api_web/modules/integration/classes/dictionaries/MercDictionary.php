@@ -19,7 +19,7 @@ use common\models\OuterDictionary;
 use common\models\vetis\VetisBusinessEntity;
 use common\models\vetis\VetisForeignEnterprise;
 use common\models\vetis\VetisRussianEnterprise;
-use common\models\VetisTransport;
+use common\models\vetis\VetisTransport;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 

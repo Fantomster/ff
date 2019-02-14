@@ -2,9 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\email\controllers;
 
-use common\models\CatalogBaseGoods;
 use common\models\IntegrationInvoice;
-use common\models\IntegrationInvoiceContent;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OrderStatus;
@@ -154,6 +152,28 @@ class InvoiceController extends Controller
                 }
                 if (($licenses['iiko']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['iiko']->td)))) {
                     $link = 'iiko';
+                }
+            }
+            if (isset($licenses['odinsobsh'])) {
+                $sub0 = explode(' ', $licenses['odinsobsh']->td);
+                $sub1 = explode('-', $sub0[0]);
+                $licenses['odinsobsh']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
+                if ($licenses['odinsobsh']->status_id == 0) {
+                    $lic_odinsobsh = 0;
+                }
+                if (($licenses['odinsobsh']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['odinsobsh']->td)))) {
+                    $link = 'odinsobsh';
+                }
+            }
+            if (isset($licenses['tillypad'])) {
+                $sub0 = explode(' ', $licenses['tillypad']->td);
+                $sub1 = explode('-', $sub0[0]);
+                $licenses['tillypad']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
+                if ($licenses['tillypad']->status_id == 0) {
+                    $lic_tillypad = 0;
+                }
+                if (($licenses['tillypad']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['tillypad']->td)))) {
+                    $link = 'tillypad';
                 }
             }
 

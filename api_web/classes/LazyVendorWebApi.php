@@ -499,7 +499,7 @@ class LazyVendorWebApi extends WebApi
      * @param $vendor_id
      * @return bool
      */
-    private function isMyVendor($vendor_id)
+    protected function isMyVendor($vendor_id)
     {
         return (bool)RelationSuppRest::find()->where([
             'supp_org_id' => $vendor_id,
@@ -512,7 +512,7 @@ class LazyVendorWebApi extends WebApi
      * @return Organization|null
      * @throws BadRequestHttpException
      */
-    private function getVendor($vendor_id)
+    protected function getVendor($vendor_id)
     {
         $model = Organization::findOne(['id' => $vendor_id, 'type_id' => Organization::TYPE_LAZY_VENDOR]);
         if (empty($model)) {

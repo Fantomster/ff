@@ -758,7 +758,7 @@ class User extends \amnah\yii2\user\models\User
          */
         $emailNotification                  = new notifications\EmailNotification();
         $emailNotification->user_id         = $this->id;
-        $emailNotification->rel_user_org_id = $this->relationUserOrganization->id;
+        $emailNotification->rel_user_org_id = $rel->id;
         $emailNotification->orders          = 1;
         $emailNotification->requests        = 1;
         $emailNotification->changes         = 1;
@@ -774,7 +774,7 @@ class User extends \amnah\yii2\user\models\User
             $smsNotification = new notifications\SmsNotification();
         }
         $smsNotification->user_id         = $this->id;
-        $smsNotification->rel_user_org_id = $this->relationUserOrganization->id;
+        $smsNotification->rel_user_org_id = $rel->id;
         $smsNotification->orders          = 1;
         $smsNotification->requests        = 1;
         $smsNotification->changes         = 1;

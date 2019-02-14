@@ -31,7 +31,6 @@ class UserController extends WebApiController
                     'actions'    => [
                         'get',
                         'vendors',
-                        'organization',
                     ],
                     'roles'      => [Registry::OPERATOR],
                     'roleParams' => ['user' => $this->user]

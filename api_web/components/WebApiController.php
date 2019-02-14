@@ -276,7 +276,7 @@ class WebApiController extends \yii\rest\Controller
      */
     private function checkLicense()
     {
-        if (!empty($this->user)) {
+        if (!empty($this->user) && !empty($this->user->organization)) {
             //Проверяем лицензию только для ресторанов
             if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
                 //Методы к которым пускаем без лицензии

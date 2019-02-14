@@ -11,10 +11,9 @@
 namespace backend\modules\rbac\controllers;
 
 use common\models\rbac\AssignmentModel;
-use backend\modules\rbac\helpers\RbacHelper;
+use common\models\rbac\helpers\RbacHelper;
 use common\models\rbac\search\AssignmentSearch;
 use Yii;
-use yii\helpers\ArrayHelper;
 use yii\web\Response;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;

@@ -10,6 +10,8 @@ use common\models\licenses\License;
 use common\models\ManagerAssociate;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
+use common\models\rbac\AuthAssignment;
+use common\models\rbac\helpers\RbacHelper;
 use common\models\RelationSuppRest;
 use common\models\RelationUserOrganization;
 use common\models\Role;
@@ -160,6 +162,44 @@ class UserWebApi extends \api_web\components\WebApi
         }
         $user->setRegisterAttributes($role_id, $status);
         $user->save();
+
+        return $user;
+    }
+
+    /**
+     * @param array $post
+     * @param       $role_id
+     * @param null  $status
+     * @return User
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function createEmployee(array $post, $role_id, $status = null)
+    {
+        if (User::findOne(['email' => $post['user']['email']])) {
+            throw new BadRequestHttpException('This email is already present in the system.');
+        }
+
+        $post['user']['newPassword'] = $post['user']['password'];
+        unset($post['user']['password']);
+
+        $user = new User(["scenario" => "register"]);
+        $user->load($post, 'user');
+        if (!$user->validate()) {
+            throw new ValidationException($user->getFirstErrors());
+        }
+        $user->setRegisterAttributes($role_id, $status);
+        $user->save();
+
+        $authAssign = new AuthAssignment([
+            'item_name'       => RbacHelper::$dictRoles[$role_id],
+            'user_id'         => $user->id,
+            'organization_id' => $this->user->organization->id
+        ]);
+
+        if (!$authAssign->save()) {
+            throw new ValidationException($authAssign->getFirstErrors());
+        }
 
         return $user;
     }
@@ -798,15 +838,14 @@ class UserWebApi extends \api_web\components\WebApi
     {
         $gmt = $this->getGmt()['GMT'];
 
-        if (!empty($this->user)) {
+        if (!empty($this->user) && !empty($this->user->organization)) {
             $model = $this->user->organization;
-            if (is_null($model->gmt)) {
+            if (!isset($model->gmt)) {
                 $model->gmt = $gmt;
                 if (!$model->validate() || !$model->save()) {
                     throw new ValidationException($model->getFirstErrors());
                 }
             }
-            $gmt = $model->gmt;
         }
 
         if (strpos($gmt, '-') === 0) {

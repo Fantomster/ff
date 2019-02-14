@@ -57,6 +57,7 @@ class DefaultController extends WebApiController
                         'create-transport',
                         'delete-transport',
                         'delete-ingredient',
+                        'transport-storage-type-list'
                     ],
                     'roles'      => [
                         Registry::MANAGER_RESTAURANT,

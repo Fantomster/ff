@@ -7,17 +7,18 @@ use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\BaseHelper;
 use api_web\helpers\WebApiHelper;
-use common\models\{
-    AdditionalEmail,
+use common\models\{AdditionalEmail,
     notifications\EmailNotification,
     notifications\SmsNotification,
     Organization,
+    rbac\AuthAssignment,
+    rbac\AuthItem,
+    rbac\helpers\RbacHelper,
     RelationUserOrganization,
     Role,
     search\UserSearch,
     User,
-    vetis\VetisCountry
-};
+    vetis\VetisCountry};
 use yii\data\Pagination;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
@@ -517,17 +518,23 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
 
-        $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
-        $result = [];
-        if (!empty($list)) {
-            foreach ($list as $item) {
-                $result[] = [
-                    'role_id' => (int)$item->id,
-                    'name'    => $item->name,
-                ];
-            }
+        $authItemList = AuthItem::find()
+            ->where(['IN', 'name', array_values(RbacHelper::$dictRoles)])
+            ->all();
+
+        $dictionary = array_flip(RbacHelper::$dictRoles);
+
+        $roleList = [];
+        foreach ($authItemList as $role) {
+            $roleList[] = [
+                'role_id' => $dictionary[$role->name],
+                'name'    => $role->description
+            ];
         }
-        return $result;
+
+        ArrayHelper::multisort($roleList, 'role_id', SORT_ASC);
+
+        return $roleList;
     }
 
     /**
@@ -619,28 +626,38 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
 
+        // Проверка полей
+        $this->validateRequest($post, ['email', 'name', 'phone', 'role_id']);
+
+        //Интуем роль
+        $role_id = (int)$post['role_id'];
+        //Проверка, можно ли проставить эту роль что прислали
+        $list = Role::find()
+            ->where([
+                'organization_type' => Organization::TYPE_RESTAURANT
+            ])
+            ->indexBy('id')
+            ->column();
+
+        if (!in_array($post['role_id'], $list)) {
+            throw new BadRequestHttpException('user.role_set_access');
+        }
+
+        $user = User::findOne(['email' => $post['email']]);
+
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            /**
-             * Проверка полей
-             */
-            $this->validateRequest($post, ['email', 'name', 'phone', 'role_id']);
-
-            //Интуем роль
-            $role_id = (int)$post['role_id'];
-            //Проверка, можно ли проставить эту роль что прислали
-            $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
-            if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
-                throw new BadRequestHttpException('user.role_set_access');
-            }
-
             //Ищем пользователя
-            $user = User::findOne(['email' => $post['email']]);
             if (!empty($user)) {
                 //Смотрим, вдруг он уже работает в этом ресторане
-                $relation = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $this->user->organization->id]);
+                $relation = RelationUserOrganization::findOne([
+                    'user_id'         => $user->id,
+                    'organization_id' => $this->user->organization->id
+                ]);
+
                 if (!empty($relation)) {
-                    throw new BadRequestHttpException('user.work_in_role|' . Role::findOne($relation->role_id)->name);
+                    $role = Role::findOne($relation->role_id);
+                    throw new BadRequestHttpException("user.work_in_role|{$role->name}");
                 }
             } else {
                 /**
@@ -660,7 +677,7 @@ class ClientWebApi extends WebApi
                     ]
                 ];
                 //Создаем пользователя
-                $user = $user_api->createUser($request, $role_id, User::STATUS_ACTIVE);
+                $user = $user_api->createEmployee($request, $role_id, User::STATUS_ACTIVE);
                 //Устанавливаем текущую организацию
                 $user->setOrganization($this->user->organization, true);
                 //Создаем профиль пользователя
@@ -699,11 +716,6 @@ class ClientWebApi extends WebApi
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $user = $this->userGet($post['id']);
-            if ($user->id != $this->user->id) {
-                if (!in_array($this->user->role_id, [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_ADMIN])) {
-                    throw new BadRequestHttpException('user.employee.update.access_denied');
-                }
-            }
 
             $relation = RelationUserOrganization::findOne([
                 'user_id'         => $user->id,
@@ -731,13 +743,34 @@ class ClientWebApi extends WebApi
 
             if (!empty($post['role_id'])) {
 
-                $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
-                if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
+                $list = Role::find()
+                    ->where([
+                        'organization_type' => Organization::TYPE_RESTAURANT
+                    ])
+                    ->indexBy('id')
+                    ->column();
+
+                if (!in_array($post['role_id'], $list)) {
                     throw new BadRequestHttpException('user.role_set_access');
+                }
+
+                if ($user->role_id != $post['role_id']) {
+                    $authAssign = AuthAssignment::findOne([
+                        'user_id'         => $user->id,
+                        'organization_id' => $user->organization_id,
+                    ]);
+
+                    if (!empty($authAssign)) {
+                        $authAssign->item_name = RbacHelper::$dictRoles[$post['role_id']];
+                        if (!$authAssign->save()) {
+                            throw new BadRequestHttpException(serialize($relation->getFirstErrors()));
+                        }
+                    }
                 }
 
                 $user->role_id = $post['role_id'];
                 $relation->role_id = $user->role_id;
+
             }
 
             //Валидация и сохранение
@@ -782,10 +815,6 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('user.delete_myself');
         }
 
-        if ($this->user->role_id != Role::ROLE_RESTAURANT_MANAGER) {
-            throw new BadRequestHttpException('user.employee.delete.access_denied');
-        }
-
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $user = $this->userGet($post['id']);
@@ -795,6 +824,11 @@ class ClientWebApi extends WebApi
                 'organization_id' => $this->user->organization->id
             ]);
 
+            $authAssign = AuthAssignment::findOne([
+                'user_id'         => $user->id,
+                'organization_id' => $user->organization_id,
+            ]);
+
             if (isset($user->organization->id) && $user->organization->id == $this->user->organization->id) {
                 $user->organization_id = null;
                 $user->save();
@@ -802,6 +836,12 @@ class ClientWebApi extends WebApi
 
             if (!empty($relation)) {
                 if (!$relation->delete()) {
+                    throw new ValidationException($relation->getFirstErrors());
+                }
+            }
+
+            if (!empty($authAssign)) {
+                if (!$authAssign->delete()) {
                     throw new ValidationException($relation->getFirstErrors());
                 }
             }

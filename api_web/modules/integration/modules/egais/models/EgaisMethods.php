@@ -49,15 +49,15 @@ class EgaisMethods extends WebApi
             if (array_key_exists($defaultSetting->name, $request)) {
                 $settingValue = IntegrationSettingValue::findOne([
                     'setting_id' => $defaultSetting->id,
-                    'org_id' => $orgId
+                    'org_id'     => $orgId
                 ]);
                 if (!empty($settingValue)) {
                     $settingValue->value = $request[$defaultSetting->name];
                 } else {
                     $settingValue = new IntegrationSettingValue([
                         'setting_id' => $defaultSetting->id,
-                        'org_id' => $orgId,
-                        'value' => $request[$defaultSetting->name],
+                        'org_id'     => $orgId,
+                        'value'      => $request[$defaultSetting->name],
                     ]);
                 }
                 if (!$settingValue->save()) {
@@ -207,5 +207,28 @@ class EgaisMethods extends WebApi
         }
 
         return (new EgaisHelper())->getOneIncomingDoc($settings['egais_url'], $request);
+    }
+
+    /**
+     * @param array $request
+     * @return EgaisProductOnBalance
+     * @throws BadRequestHttpException
+     */
+    public function getProductBalanceInfo(array $request)
+    {
+        $this->validateRequest($request, ['alc_code']);
+
+        $orgId = !empty($request['org_id']) ? $request['org_id'] : $this->user->organization_id;
+
+        $product = EgaisProductOnBalance::findOne([
+            'org_id'   => $orgId,
+            'alc_code' => $request['alc_code']
+        ]);
+
+        if (empty($product)) {
+            throw new BadRequestHttpException('dictionary.egais_get_product');
+        }
+
+        return $product;
     }
 }

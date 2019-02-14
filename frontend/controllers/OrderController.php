@@ -139,8 +139,8 @@ class OrderController extends DefaultController
                             'blocked-products', // Блокирует выбранные товары
                             'clear-all-blocked', // Разблокирует все товары
                             'checkout', // Сохраняет изменения в корзине
-                            'ajax-make-order', // Оформляет заказы
                             // Действия, на которые не имеет прав роль "Инициатор закупки":
+                            'ajax-make-order', // Оформляет заказы
                             'ajax-order-update-waybill', // Добавляет в заказ номер приходной накладной
                             'complete-obsolete' // Завершает заказ
                         ],
@@ -209,7 +209,6 @@ class OrderController extends DefaultController
                             'ajax-add-to-order', // Добавляет товар в заказ
                             'ajax-order-grid', // Создаёт таблицу данных заказа для показа
                             'checkout', // Сохраняет изменения в корзине
-                            'ajax-make-order', // Оформляет заказы
                         ],
                         'allow'   => true,
                         // Allow restaurant managers

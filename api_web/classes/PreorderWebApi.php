@@ -382,6 +382,52 @@ class PreorderWebApi extends WebApi
     }
 
     /**
+     * Подтверждение одного заказа
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    public function confirmOrder($request)
+    {
+        $this->validateRequest($request, ['id', 'order_id']);
+
+        $model = Preorder::findOne([
+            'id'              => (int)$request['id'],
+            'organization_id' => $this->user->organization_id
+        ]);
+        if (empty($model)) {
+            throw new BadRequestHttpException('preorder.not_found');
+        }
+
+        /** @var Order $order */
+        $order = $model->getOrders()->andWhere(['order.id' => $request['order_id']])->one();
+        if (empty($order)) {
+            throw new BadRequestHttpException('order.not_found');
+        }
+
+        $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+        if (!$order->save()) {
+            throw new ValidationException($model->getFirstErrors());
+        }
+        //Емайл и смс о новом заказе
+        try {
+            Notice::init('Order')->sendEmailAndSmsOrderCreated($this->user->organization, $order);
+            //Сообщение в очередь поставщику, что есть новый заказ
+            Notice::init('Order')->sendOrderToTurnVendor($order->vendor);
+            //Сообщение в очередь, Изменение количества товара в корзине
+            Notice::init('Order')->sendOrderToTurnClient($this->user);
+        } catch (\Exception $e) {
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+        }
+
+        return (new OrderWebApi())->getOrderInfo($order);
+    }
+
+    /**
      * Подготовка модели к выдаче фронту
      *
      * @param Preorder $model
@@ -575,6 +621,7 @@ class PreorderWebApi extends WebApi
 
     /**
      * Добавление новых продуктов в предзаказ
+     *
      * @param array $preOrderContent
      * @param int   $preorderId
      * @throws \Exception

@@ -151,7 +151,8 @@ class DefaultController extends WebApiController
      *                      "producer_short_name": "АО 'ЛВЗ' 'Топаз'",
      *                      "address_country": 643,
      *                      "address_region_code": 50,
-     *                      "address_description": "РОССИЯ,,МОСКОВСКАЯ ОБЛ,,Пушкино г,,Октябрьская ул, д. 46,, | (за исключением литера Б, 1 этаж, № на плане 8)"
+     *                      "address_description": "РОССИЯ,,МОСКОВСКАЯ ОБЛ,,Пушкино г,,Октябрьская ул, д. 46,, | (за
+     *                      исключением литера Б, 1 этаж, № на плане 8)"
      *                  },
      *                  {
      *                      "id": 250,
@@ -171,16 +172,17 @@ class DefaultController extends WebApiController
      *                      "producer_short_name": "АО 'Татспиртпром'",
      *                      "address_country": 643,
      *                      "address_region_code": 16,
-     *                      "address_description": "РОССИЯ,,ТАТАРСТАН РЕСП,Нижнекамский муниципальный район,Нижнекамск г,,Чистопольская ул, д. 45,,"
+     *                      "address_description": "РОССИЯ,,ТАТАРСТАН РЕСП,Нижнекамский муниципальный район,Нижнекамск
+     *                      г,,Чистопольская ул, д. 45,,"
      *                  }
      *              }
      *          )
      *     ),
-     *     @SWG\Response(
+     * @SWG\Response(
      *         response = 400,
      *         description = "BadRequestHttpException"
      *     ),
-     *     @SWG\Response(
+     * @SWG\Response(
      *         response = 401,
      *         description = "error"
      *     )
@@ -380,5 +382,68 @@ class DefaultController extends WebApiController
     public function actionOneIncomingDoc()
     {
         return $this->response = (new EgaisMethods())->getOneIncomingDoc($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/egais/product-balance-info",
+     *     tags={"Integration/egais"},
+     *     summary="Получение конкретной позиции из остатков",
+     *     description="Получение конкретной позиции из остатков в ЕГАИС по alc_code",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "org_id":3768,
+     *                      "alc_code":0150325000001195171,
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "id": 13,
+     *                  "org_id": 3768,
+     *                  "quantity": "1.0000",
+     *                  "inform_a_reg_id": "TEST-FA-000000016790162",
+     *                  "inform_b_reg_id": "TEST-FB-000000036818404",
+     *                  "full_name": "Водка 'Журавли'",
+     *                  "alc_code": "0150325000001195171",
+     *                  "capacity": null,
+     *                  "alc_volume": null,
+     *                  "product_v_code": 200,
+     *                  "producer_client_reg_id": "010000000467",
+     *                  "producer_inn": "5038002790",
+     *                  "producer_kpp": "503801001",
+     *                  "producer_full_name": "Акционерное общество 'Ликеро-водочный завод Топаз'",
+     *                  "producer_short_name": "АО 'ЛВЗ Топаз'",
+     *                  "address_country": 643,
+     *                  "address_region_code": 50,
+     *                  "address_description": "РОССИЯ,,МОСКОВСКАЯ ОБЛ,,Пушкино г,,Октябрьская ул, д. 46,, | (за исключением литера Б, 1 этаж, № на плане 8)"
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionProductBalanceInfo()
+    {
+        return $this->response = (new EgaisMethods())->getProductBalanceInfo($this->request);
     }
 }

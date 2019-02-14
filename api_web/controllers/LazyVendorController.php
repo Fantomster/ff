@@ -485,13 +485,25 @@ class LazyVendorController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={{
-     *                      "id": 2,
-     *                      "order_created": 1,
-     *                      "order_canceled": 1,
-     *                      "order_changed": 1,
-     *                      "order_done": 1,
-     *                  }}
+     *                  default={
+     *                       "vendor_id": 15,
+     *                       "notifications": {
+     *                           {
+     *                               "id": 1,
+     *                               "order_created": 1,
+     *                               "order_canceled": 1,
+     *                               "order_changed": 1,
+     *                               "order_done": 1,
+     *                           },
+     *                           {
+     *                               "id": 2,
+     *                               "order_created": 1,
+     *                               "order_canceled": 1,
+     *                               "order_changed": 1,
+     *                               "order_done": 1,
+     *                           }
+     *                       }
+     *                  }
      *              )
      *         )
      *     ),
@@ -501,21 +513,21 @@ class LazyVendorController extends WebApiController
      *         @SWG\Schema(
      *              default={
      *                  {
-     *                      "id": 13963,
+     *                      "id": 1,
      *                      "order_created": 0,
      *                      "order_canceled": 1,
      *                      "order_changed": 1,
      *                      "order_done": 0,
      *                  },
      *                  {
-     *                      "id": 3983,
+     *                      "id": 2,
      *                      "order_created": 1,
      *                      "order_canceled": 1,
      *                      "order_changed": 1,
      *                      "order_done": 1,
      *                  },
      *                  {
-     *                      "id": 2,
+     *                      "id": 3,
      *                      "order_created": 1,
      *                      "order_canceled": 1,
      *                      "order_changed": 1,

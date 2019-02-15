@@ -39,7 +39,8 @@ class AnalogController extends WebApiController
      *                     "pagination": {
      *                         "page": 1,
      *                         "page_size": 12
-     *                     }
+     *                     },
+     *                     "sort":"vendor_name"
      *                  }
      *              )
      *         )
@@ -50,12 +51,53 @@ class AnalogController extends WebApiController
      *         @SWG\Schema(
      *              default={
      *                  "items": {
+     *                        {
+     *                          "product": {
+     *                              "id": 524910,
+     *                              "name": "Test Product",
+     *                              "ed": "кг",
+     *                              "price": "500.00",
+     *                              "article": "A5626292411",
+     *                              "coefficient": 1.000001,
+     *                              "analog_group": 1,
+     *                              "sort_value": 1
+     *                          },
+     *                          "vendor": {
+     *                              "id": 3998,
+     *                              "name": "name vendor"
+     *                          },
+     *                          "currency": {
+     *                              "id": 1,
+     *                              "symbol": "RUB"
+     *                          }
+     *                       },
+     *                       {
+     *                          "product": {
+     *                              "id": 524910,
+     *                              "name": "Test Product 1",
+     *                              "ed": "кг",
+     *                              "price": "501.00",
+     *                              "article": "A5626292412",
+     *                              "coefficient": null,
+     *                              "analog_group": null,
+     *                              "sort_value": null
+     *                          },
+     *                          "vendor": {
+     *                              "id": 3998,
+     *                              "name": "name vendor"
+     *                          },
+     *                          "currency": {
+     *                              "id": 1,
+     *                              "symbol": "RUB"
+     *                          }
+     *                       }
      *                  },
      *                  "pagination": {
      *                      "page": 1,
      *                      "total_page": 17,
      *                      "page_size": 12
-     *                  }
+     *                  },
+     *                  "sort":"vendor_name"
      *              }
      *         )
      *     ),
@@ -102,22 +144,46 @@ class AnalogController extends WebApiController
      *         @SWG\Schema(
      *              default={
      *                  "items": {
-     *                      {
-     *                          "product_id": "524910",
-     *                          "product_name": "Test Product",
-     *                          "article": "A5626292411",
-     *                          "vendor_id": "3998",
-     *                          "vendor_name": "name vendor",
-     *                          "price": "500.00"
-     *                      },
-     *                      {
-     *                          "product_id": "524913",
-     *                          "product_name": "Test Product 2",
-     *                          "article": "A5626292412",
-     *                          "vendor_id": "3998",
-     *                          "vendor_name": "name vendor",
-     *                          "price": "500.00"
-     *                      }
+     *                        {
+     *                          "product": {
+     *                              "id": 524910,
+     *                              "name": "Test Product",
+     *                              "ed": "кг",
+     *                              "price": "500.00",
+     *                              "article": "A5626292411",
+     *                              "coefficient": 1.000001,
+     *                              "analog_group": 1,
+     *                              "sort_value": 1
+     *                          },
+     *                          "vendor": {
+     *                              "id": 3998,
+     *                              "name": "name vendor"
+     *                          },
+     *                          "currency": {
+     *                              "id": 1,
+     *                              "symbol": "RUB"
+     *                          }
+     *                       },
+     *                       {
+     *                          "product": {
+     *                              "id": 524910,
+     *                              "name": "Test Product 1",
+     *                              "ed": "кг",
+     *                              "price": "501.00",
+     *                              "article": "A5626292412",
+     *                              "coefficient": null,
+     *                              "analog_group": null,
+     *                              "sort_value": null
+     *                          },
+     *                          "vendor": {
+     *                              "id": 3998,
+     *                              "name": "name vendor"
+     *                          },
+     *                          "currency": {
+     *                              "id": 1,
+     *                              "symbol": "RUB"
+     *                          }
+     *                       }
      *                  }
      *              }
      *         )

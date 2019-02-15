@@ -946,8 +946,8 @@ class VetisWaybill extends WebApi
             $production2lvl = VetisProductByType::find()->select(['name'])
                 ->where(['guid' => $attributes->batch->product->guid])->one();
         }
+        $arResearch = [];
         if (isset($attributes->vetEventList->laboratoryResearch)) {
-            $arResearch = [];
             foreach ($attributes->vetEventList->laboratoryResearch as $research) {
                 $arResearch[] = [
                     'issue_id'      => $research->referencedDocument->issueNumber ?? null,

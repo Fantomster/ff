@@ -28,8 +28,7 @@ class TransferIntegrationController extends Controller
         $iikoProduct = iikoProduct::tableName();
         $iikoStore = iikoStore::tableName();
 
-        $query = "INSERT INTO $outerProductMap (outer_product_id, outer_store_id, outer_unit_id, organization_id, product_id, service_id, coefficient, vat, vendor_id, created_at, updated_at)
-SELECT DISTINCT
+        $selQuery = "SELECT DISTINCT
   iiko.*
 FROM (SELECT
         (
@@ -43,6 +42,8 @@ FROM (SELECT
             )
             AND
             $outerProduct.service_id = all_map.service_id
+            AND 
+            $outerProduct.org_id = all_map.org_id
         )                                         as outer_product_id,
         (
           SELECT id
@@ -55,6 +56,8 @@ FROM (SELECT
             )
             AND
             $outerStore.service_id = all_map.service_id
+               AND 
+            $outerStore.org_id = all_map.org_id
         )                                         as outer_store_id,
         NULL                                      as outer_unit_id,
         org_id                                    as organization_id,
@@ -79,15 +82,18 @@ WHERE
   AND
   opm.id is null;";
 
+        if (count(\Yii::$app->db_api->createCommand($selQuery)->queryAll()) > 0) {
+            $query = "INSERT INTO $outerProductMap (outer_product_id, outer_store_id, outer_unit_id, organization_id, product_id, service_id, coefficient, vat, vendor_id, created_at, updated_at) $selQuery";
 
-        \Yii::$app->db_api->createCommand($query)->execute();
+            \Yii::$app->db_api->createCommand($query)->execute();
+        }
 
         echo "Transfer r-keeper" . PHP_EOL;
 
         $rkProduct = RkProduct::tableName();
         $rkStore = RkStoretree::tableName();
 
-        $query = "INSERT INTO $outerProductMap (outer_product_id, outer_store_id, outer_unit_id, organization_id, product_id, service_id, coefficient, vat, vendor_id, created_at, updated_at)
+        $selQuery = "
 SELECT DISTINCT
   rkws.*
 FROM (SELECT
@@ -102,6 +108,8 @@ FROM (SELECT
             )
             AND
             $outerProduct.service_id = all_map.service_id
+            AND 
+            $outerProduct.org_id = all_map.org_id
         )                                         as outer_product_id,
         (
           SELECT id
@@ -114,6 +122,8 @@ FROM (SELECT
             )
             AND
             $outerStore.service_id = all_map.service_id
+            AND
+            $outerStore.org_id = all_map.org_id
         )                                         as outer_store_id,
         NULL                                      as outer_unit_id,
         org_id                                    as organization_id,
@@ -138,7 +148,11 @@ WHERE
   AND
   opm.id is null;";
 
-        \Yii::$app->db_api->createCommand($query)->execute();
+        if (count(\Yii::$app->db_api->createCommand($selQuery)->queryAll()) > 0) {
+            $query = "INSERT INTO $outerProductMap (outer_product_id, outer_store_id, outer_unit_id, organization_id, product_id, service_id, coefficient, vat, vendor_id, created_at, updated_at) $selQuery";
+
+            \Yii::$app->db_api->createCommand($query)->execute();
+        }
         echo "FINISH" . PHP_EOL;
     }
 

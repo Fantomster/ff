@@ -618,9 +618,6 @@ class LazyVendorWebApi extends WebApi
         /**@var $link RelationSuppRest */
         $link = RelationSuppRest::find()
             ->where(['rest_org_id' => $restId, 'supp_org_id' => $vendId, 'invite' => 1])->one();
-        if (empty($link)) {
-            throw new BadRequestHttpException('lazy_vendor.not_is_my_vendor');
-        }
         $catId = (int)$this->user->organization->getCatalogs($vendId);
         $transaction = \Yii::$app->db->beginTransaction();
         try {

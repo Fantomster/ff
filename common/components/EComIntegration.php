@@ -251,7 +251,7 @@ class EComIntegration extends Component
             $arr[$contID]['PRICE'] = (float)$position->PRICEWITHVAT ?? (float)$position->PRICE;
             $arr[$contID]['PRICEWITHVAT'] = (float)$position->PRICEWITHVAT ?? 0.00;
             $arr[$contID]['TAXRATE'] = (float)$position->TAXRATE ?? 0.00;
-            $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
+            $arr[$contID]['BARCODE'] = $position->PRODUCT;
             $arr[$contID]['WAYBILLNUMBER'] = $position->WAYBILLNUMBER ?? null;
             $arr[$contID]['WAYBILLDATE'] = $position->WAYBILLDATE ?? null;
             $arr[$contID]['DELIVERYNOTENUMBER'] = $position->DELIVERYNOTENUMBER ?? null;
@@ -341,7 +341,7 @@ class EComIntegration extends Component
                     $contID = (int)$position->PRODUCT;
                 }
                 if (!$contID) continue;
-                $barcode = (int)$position->PRODUCT;
+                $barcode = $position->PRODUCT;
                 if (!in_array($contID, $ordContArr) && !in_array($barcode, $barcodeArray)) {
                     $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
                     if (!$good) continue;
@@ -416,7 +416,9 @@ class EComIntegration extends Component
         $barcodeArray = [];
         foreach ($goods as $good) {
             $barcode = (String)$good->PRODUCT[0];
-            if (!$barcode) continue;
+            if (!$barcode) {
+                continue;
+            }
             $barcodeArray[] = $barcode;
             $goodsArray[$barcode]['name'] = (String)$good->PRODUCTNAME ?? '';
             $goodsArray[$barcode]['price'] = (float)$good->UNITPRICE ?? 0.0;

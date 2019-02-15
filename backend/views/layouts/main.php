@@ -92,6 +92,10 @@ if ($countSettingChange > 0) {
                     'label' => 'Разное',
                     'url'   => ['/statistics/misc'],
                 ],
+                [
+                    'label' => 'Расширенная отчетность',
+                    'url'   => ['/statistics/extended-reports'],
+                ],
             ],
         ],
     ];
@@ -139,6 +143,10 @@ if ($countSettingChange > 0) {
                      [
                          'label' => 'Оператор заказов',
                          'url'   => ['/order/operator'],
+                     ],
+                     [
+                         'label' => 'Промо-акции',
+                         'url'   => ['/promo-action/index'],
                      ],
                  ],
                 ],

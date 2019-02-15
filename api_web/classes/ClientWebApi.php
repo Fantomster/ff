@@ -2,25 +2,28 @@
 
 namespace api_web\classes;
 
+use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\BaseHelper;
 use api_web\helpers\WebApiHelper;
-use common\models\{
-    AdditionalEmail,
+use common\models\{AdditionalEmail,
     notifications\EmailNotification,
     notifications\SmsNotification,
     Organization,
+    rbac\AuthAssignment,
+    rbac\AuthItem,
+    rbac\helpers\RbacHelper,
     RelationUserOrganization,
     Role,
     search\UserSearch,
     User,
-    vetis\VetisCountry
-};
+    vetis\VetisCountry};
 use yii\data\Pagination;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 
 /**
  * Class ClientWebApi
@@ -86,6 +89,13 @@ class ClientWebApi extends WebApi
                 if ($vetisCountryModel) {
                     $model->vetis_country_uuid = $vetisCountryModel->uuid;
                 }
+            }
+
+            if (\Yii::$app->user->can(Registry::OPERATOR) &&
+                !\Yii::$app->user->can(Registry::ADMINISTRATOR_RESTAURANT) &&
+                !isset($post['is_allowed_for_franchisee'])
+            ) {
+                throw new ForbiddenHttpException(\Yii::t('yii', 'You are not allowed to perform this action.'));
             }
 
             $this->helper->set($model, $post, ['about', 'contact_name', 'phone', 'email', 'name', 'gmt']);
@@ -257,7 +267,15 @@ class ClientWebApi extends WebApi
             $relations[] = $rel->id;
         }
 
+        $additional_emails = $this->user->organization->additionalEmail;
+        if (!\Yii::$app->user->can(Registry::ADMINISTRATOR_RESTAURANT, ['user' => $this->user])) {
+            $users = $this->user->id;
+            $additional_emails = [];
+        }
+
         $user_emails = EmailNotification::find()->where(['user_id' => $users, 'rel_user_org_id' => $relations])->orderBy('created_at')->all();
+        $user_phones = SmsNotification::find()->where(['user_id' => $users, 'rel_user_org_id' => $relations])->orderBy('created_at')->all();
+
         if (!empty($user_emails)) {
             foreach ($user_emails as $user_email) {
                 $value = $user_email->user->email;
@@ -280,7 +298,6 @@ class ClientWebApi extends WebApi
             }
         }
 
-        $user_phones = SmsNotification::find()->where(['user_id' => $users, 'rel_user_org_id' => $relations])->orderBy('created_at')->all();
         if (!empty($user_phones)) {
             /** @var SmsNotification $user_phone */
             foreach ($user_phones as $user_phone) {
@@ -305,7 +322,6 @@ class ClientWebApi extends WebApi
 
         ArrayHelper::multisort($result, 'user_id', SORT_ASC, SORT_REGULAR);
 
-        $additional_emails = $this->user->organization->additionalEmail;
         if (!empty($additional_emails)) {
             foreach ($additional_emails as $row) {
                 $result[] = [
@@ -502,17 +518,23 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
 
-        $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
-        $result = [];
-        if (!empty($list)) {
-            foreach ($list as $item) {
-                $result[] = [
-                    'role_id' => (int)$item->id,
-                    'name'    => $item->name,
-                ];
-            }
+        $authItemList = AuthItem::find()
+            ->where(['IN', 'name', array_values(RbacHelper::$dictRoles)])
+            ->all();
+
+        $dictionary = array_flip(RbacHelper::$dictRoles);
+
+        $roleList = [];
+        foreach ($authItemList as $role) {
+            $roleList[] = [
+                'role_id' => $dictionary[$role->name],
+                'name'    => $role->description
+            ];
         }
-        return $result;
+
+        ArrayHelper::multisort($roleList, 'role_id', SORT_ASC);
+
+        return $roleList;
     }
 
     /**
@@ -526,6 +548,29 @@ class ClientWebApi extends WebApi
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
             throw new BadRequestHttpException('method_access_to_vendor');
+        }
+
+        $attr = new User();
+
+        $headers = [
+            'headers' => [
+                'id'    => $attr->getAttributeLabel('id'),
+                'name'  => $attr->getAttributeLabel('name'),
+                'email' => $attr->getAttributeLabel('email'),
+                'phone' => $attr->getAttributeLabel('phone'),
+                'role'  => $attr->getAttributeLabel('role')
+            ],
+        ];
+
+        if (!\Yii::$app->user->can(Registry::ADMINISTRATOR_RESTAURANT, ['user' => $this->user])) {
+            return ArrayHelper::merge($headers, [
+                'employees'  => [$this->prepareEmployee($this->user)],
+                'pagination' => [
+                    'page'       => 1,
+                    'page_size'  => 1,
+                    'total_page' => 1
+                ]
+            ]);
         }
 
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
@@ -555,15 +600,7 @@ class ClientWebApi extends WebApi
             }
         }
 
-        $h = new User();
         $return = [
-            'headers'    => [
-                'id'    => $h->getAttributeLabel('id'),
-                'name'  => $h->getAttributeLabel('name'),
-                'email' => $h->getAttributeLabel('email'),
-                'phone' => $h->getAttributeLabel('phone'),
-                'role'  => $h->getAttributeLabel('role')
-            ],
             'employees'  => $result,
             'pagination' => [
                 'page'       => ($dataProvider->pagination->page + 1),
@@ -572,7 +609,7 @@ class ClientWebApi extends WebApi
             ]
         ];
 
-        return $return;
+        return ArrayHelper::merge($headers, $return);
     }
 
     /**
@@ -589,28 +626,30 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
 
+        // Проверка полей
+        $this->validateRequest($post, ['email', 'name', 'phone', 'role_id']);
+
+        //Интуем роль
+        $role_id = (int)$post['role_id'];
+
+        //Проверка, можно ли проставить эту роль что прислали
+        $this->checkReceivedRoleId($role_id);
+
+        $user = User::findOne(['email' => $post['email']]);
+
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            /**
-             * Проверка полей
-             */
-            $this->validateRequest($post, ['email', 'name', 'phone', 'role_id']);
-
-            //Интуем роль
-            $role_id = (int)$post['role_id'];
-            //Проверка, можно ли проставить эту роль что прислали
-            $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
-            if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
-                throw new BadRequestHttpException('user.role_set_access');
-            }
-
             //Ищем пользователя
-            $user = User::findOne(['email' => $post['email']]);
             if (!empty($user)) {
                 //Смотрим, вдруг он уже работает в этом ресторане
-                $relation = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $this->user->organization->id]);
+                $relation = RelationUserOrganization::findOne([
+                    'user_id'         => $user->id,
+                    'organization_id' => $this->user->organization->id
+                ]);
+
                 if (!empty($relation)) {
-                    throw new BadRequestHttpException('user.work_in_role|' . Role::findOne($relation->role_id)->name);
+                    $role = Role::findOne($relation->role_id);
+                    throw new BadRequestHttpException("user.work_in_role|{$role->name}");
                 }
             } else {
                 /**
@@ -669,11 +708,6 @@ class ClientWebApi extends WebApi
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $user = $this->userGet($post['id']);
-            if ($user->id != $this->user->id) {
-                if (!in_array($this->user->role_id, [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_ADMIN])) {
-                    throw new BadRequestHttpException('user.employee.update.access_denied');
-                }
-            }
 
             $relation = RelationUserOrganization::findOne([
                 'user_id'         => $user->id,
@@ -701,13 +735,25 @@ class ClientWebApi extends WebApi
 
             if (!empty($post['role_id'])) {
 
-                $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
-                if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
-                    throw new BadRequestHttpException('user.role_set_access');
+                $this->checkReceivedRoleId($post['role_id']);
+
+                if ($user->role_id != $post['role_id']) {
+                    $authAssign = AuthAssignment::findOne([
+                        'user_id'         => $user->id,
+                        'organization_id' => $user->organization_id,
+                    ]);
+
+                    if ($authAssign) {
+                        $authAssign->item_name = RbacHelper::$dictRoles[$post['role_id']];
+                        if (!$authAssign->save()) {
+                            throw new BadRequestHttpException($authAssign->getFirstErrors());
+                        }
+                    }
                 }
 
                 $user->role_id = $post['role_id'];
                 $relation->role_id = $user->role_id;
+
             }
 
             //Валидация и сохранение
@@ -752,10 +798,6 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('user.delete_myself');
         }
 
-        if ($this->user->role_id != Role::ROLE_RESTAURANT_MANAGER) {
-            throw new BadRequestHttpException('user.employee.delete.access_denied');
-        }
-
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $user = $this->userGet($post['id']);
@@ -765,6 +807,11 @@ class ClientWebApi extends WebApi
                 'organization_id' => $this->user->organization->id
             ]);
 
+            $authAssign = AuthAssignment::findOne([
+                'user_id'         => $user->id,
+                'organization_id' => $user->organization_id,
+            ]);
+
             if (isset($user->organization->id) && $user->organization->id == $this->user->organization->id) {
                 $user->organization_id = null;
                 $user->save();
@@ -772,6 +819,12 @@ class ClientWebApi extends WebApi
 
             if (!empty($relation)) {
                 if (!$relation->delete()) {
+                    throw new ValidationException($relation->getFirstErrors());
+                }
+            }
+
+            if ($authAssign) {
+                if (!$authAssign->delete()) {
                     throw new ValidationException($relation->getFirstErrors());
                 }
             }
@@ -848,5 +901,23 @@ class ClientWebApi extends WebApi
         }
 
         return $model;
+    }
+
+    /**
+     * @param $roleId
+     * @throws BadRequestHttpException
+     */
+    private function checkReceivedRoleId($roleId): void
+    {
+        $list = Role::find()
+            ->where([
+                'organization_type' => Organization::TYPE_RESTAURANT
+            ])
+            ->indexBy('id')
+            ->column();
+
+        if (!in_array($roleId, $list)) {
+            throw new BadRequestHttpException('user.role_set_access');
+        }
     }
 }

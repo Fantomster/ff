@@ -76,7 +76,7 @@ class VetisHelper extends BaseHelper
      */
     static $transport_storage_types = [
         1 => 'замороженные',
-        2 => 'охлаженные',
+        2 => 'охлажденные',
         3 => 'охлаждаемые',
         4 => 'вентилируемые',
     ];
@@ -143,12 +143,10 @@ class VetisHelper extends BaseHelper
         $this->getShortInfoVsd($uuid);
 
         $hc = cerberApi::getInstance()->getEnterpriseByGuid($this->vsdModel->sender_guid);
-        if (isset($hc)) {
-            if (isset($hc->owner)) {
-                $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
-            }
+        if (isset($hc) && isset($hc->owner)) {
+            $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
         }
-        $this->consignor_business = isset($hc) ? $hc->name . ', ИНН:' . $hc->inn : null;
+        $this->consignor_business = isset($hc) ? $hc->name . ', ИНН:' . $hc->inn ?? null : null;
         $this->product_type = isset($this->vsdModel->product_type) ?
             MercVsd::$product_types[$this->vsdModel->product_type] : null;
         $product = VetisProductByType::findOne(['guid' => $this->vsdModel->product_guid]);
@@ -408,13 +406,13 @@ class VetisHelper extends BaseHelper
      * @param string $type
      * @throws ValidationException
      */
-    public function writeInJournal($message, int $userId, int $orgId = 0, $type = 'success'): void
+    public function writeInJournal($message, int $userId, int $orgId = 0, $type = 'success', $logGuid = 'Vetis'): void
     {
         $journal = new Journal();
         $journal->response = is_array($message) ? json_encode($message) : $message;
         $journal->service_id = Registry::MERC_SERVICE_ID;
         $journal->type = $type;
-        $journal->log_guide = 'CreateVetisProductItem';
+        $journal->log_guide = $logGuid;
         $journal->organization_id = $orgId;
         $journal->user_id = $userId;
         $journal->operation_code = '0';

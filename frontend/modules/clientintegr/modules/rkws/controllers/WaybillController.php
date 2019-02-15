@@ -512,7 +512,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     "unitname" => "unitname"
                 ])
                 ->from('rk_product')
-                ->andWhere(['acc' => $orgId])
+                ->andWhere(['acc' => $orgId, 'is_active' => 1])
                 ->andWhere("denom LIKE :term", [':term' => $term . '%'])
                 ->orderBy(['denom' => SORT_ASC, "unitname" => SORT_ASC])
                 ->limit(15);
@@ -524,7 +524,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     "unitname" => "unitname"
                 ])
                 ->from('rk_product')
-                ->andWhere(['acc' => $orgId])
+                ->andWhere(['acc' => $orgId, 'is_active' => 1])
                 ->andWhere("denom LIKE :term", [':term' => '%' . $term . '%'])
                 ->orderBy(['denom' => SORT_ASC, "unitname" => SORT_ASC])
                 ->limit(10);
@@ -538,7 +538,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 ->from('rk_product')
                 ->union($query2)
                 ->union($query3)
-                ->andWhere(['acc' => $orgId])
+                ->andWhere(['acc' => $orgId, 'is_active' => 1])
                 ->andWhere(['denom' => ':term'], [':term' => $term])
                 ->orderBy(['denom' => SORT_ASC, "unitname" => SORT_ASC])
                 ->limit(10);
@@ -561,7 +561,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     "txt" => "CONCAT(denom, ' (' ,unitname, ')')"
                 ])
                 ->from('rk_product')
-                ->andWhere(['acc' => $orgId])
+                ->andWhere(['acc' => $orgId, 'is_active' => 1])
                 ->orderBy(['txt' => SORT_ASC])
                 ->limit(100);
             $result = $query->all(\Yii::$app->get('db_api'));

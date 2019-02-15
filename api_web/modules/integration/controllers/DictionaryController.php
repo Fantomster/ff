@@ -12,6 +12,7 @@ use api_web\components\Registry;
 use api_web\modules\integration\classes\dictionaries\AbstractDictionary;
 use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\classes\Integration;
+use yii\filters\AccessControl;
 use api_web\modules\integration\modules\vetis\models\VetisWaybill;
 use yii\web\BadRequestHttpException;
 
@@ -23,6 +24,57 @@ use yii\web\BadRequestHttpException;
  */
 class DictionaryController extends \api_web\components\WebApiController
 {
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'list',
+                    ],
+                    'roles'      => [
+                        Registry::MANAGER_RESTAURANT,
+                        Registry::BOOKER_RESTAURANT,
+                    ],
+                    'roleParams' => ['user' => $this->user]
+                ],
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'product-list',
+                        'agent-list',
+                        'agent-update',
+                        'store-list',
+                        'store-flat-list',
+                        'unit-list',
+                        'category-list',
+                        'category-set-selected',
+                        'check-agent-name',
+                        'product-type-list',
+                        'product-type-set-selected',
+                        'vetis-business-entity',
+                        'vetis-russian-enterprise',
+                        'vetis-foreign-enterprise',
+                        'vetis-transport',
+                        'vetis-product-item',
+                    ],
+                    'roles'      => [
+                        Registry::OPERATOR
+                    ],
+                    'roleParams' => ['user' => $this->user]
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
+
     /**
      * @param $action
      * @return bool
@@ -1087,21 +1139,28 @@ class DictionaryController extends \api_web\components\WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  {
-     *                      "name": "Curvaceiras",
-     *                      "uuid": "00000c3b-48d1-40bf-ba74-4899f99d032a",
-     *                      "guid": "0605cda7-e107-49af-abfe-970714f99849",
-     *                      "inn": null,
-     *                      "address": "Estrada da Lamarosa, Paialvo - Tomar",
-     *                      "active": 1
+     *                  "result": {
+     *                      {
+     *                          "name": "Curvaceiras",
+     *                          "uuid": "00000c3b-48d1-40bf-ba74-4899f99d032a",
+     *                          "guid": "0605cda7-e107-49af-abfe-970714f99849",
+     *                          "inn": null,
+     *                          "address": "Estrada da Lamarosa, Paialvo - Tomar",
+     *                          "active": 1
+     *                      },
+     *                      {
+     *                          "name": "ФОП Гастов И.В.",
+     *                          "uuid": "0000331b-68ec-42a7-9ef6-b1715af275fa",
+     *                          "guid": "58b751b5-d236-4c97-9f3c-fa21268e7f21",
+     *                          "inn": null,
+     *                          "address": "Киевская область, пгт Ворзель, ул.Ворошилова 44",
+     *                          "active": 1
+     *                      }
      *                  },
-     *                  {
-     *                      "name": "ФОП Гастов И.В.",
-     *                      "uuid": "0000331b-68ec-42a7-9ef6-b1715af275fa",
-     *                      "guid": "58b751b5-d236-4c97-9f3c-fa21268e7f21",
-     *                      "inn": null,
-     *                      "address": "Киевская область, пгт Ворзель, ул.Ворошилова 44",
-     *                      "active": 1
+     *                  "pagination": {
+     *                       "page": 1,
+     *                       "total_page": 17,
+     *                       "page_size": 12
      *                  }
      *              }
      *          )
@@ -1123,6 +1182,78 @@ class DictionaryController extends \api_web\components\WebApiController
         /** @var \api_web\modules\integration\classes\dictionaries\MercDictionary $factory */
         $factory = (new Dictionary(Registry::MERC_SERVICE_ID, 'Dictionary'));
         $this->response = $factory->getForeignEnterpriseList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/vetis-transport",
+     *     tags={"Integration/dictionary"},
+     *     summary="Словарь Транспортных средств",
+     *     description="Словарь Транспортных средств",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "org_id": 1,
+     *                      "pagination":{
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "vehicle_number": "номер машины",
+     *                          "trailer_number": "номер полуприцепа",
+     *                          "container_number": "номер контейнера",
+     *                          "transport_storage_type": "способ хранения",
+     *                          "id": 1
+     *                      },
+     *                      {
+     *                          "vehicle_number": "номер машины",
+     *                          "trailer_number": "номер полуприцепа",
+     *                          "container_number": "номер контейнера",
+     *                          "transport_storage_type": "способ хранения",
+     *                          "id": 2
+     *                      }
+     *                  },
+     *                  "pagination": {
+     *                       "page": 1,
+     *                       "total_page": 17,
+     *                       "page_size": 12
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function actionVetisTransport()
+    {
+        /** @var \api_web\modules\integration\classes\dictionaries\MercDictionary $factory */
+        $factory = (new Dictionary(Registry::MERC_SERVICE_ID, 'Dictionary'));
+        $this->response = $factory->getTransportList($this->request);
     }
 
     /**

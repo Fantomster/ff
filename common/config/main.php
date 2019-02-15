@@ -16,6 +16,10 @@ return [
     'components'     => [
         'authManager'           => [
             'class'        => 'common\components\DbManager',
+            'itemTable'       => 'auth_item',
+            'itemChildTable'  => 'auth_item_child',
+            'assignmentTable' => 'auth_assignment',
+            'ruleTable'       => 'auth_rule',
             'defaultRoles' => ['guest'],
         ],
         'formatter'             => [
@@ -89,7 +93,7 @@ return [
 //                    'class' => 'yii\i18n\PhpMessageSource'
 //                ],
                 'yii'          => [
-                    'class' => 'yii\i18n\PhpMessageSource'
+                    'class' => 'yii\i18n\DbMessageSource'
                 ],
                 'app'          => [
                     'class' => 'yii\i18n\DbMessageSource',

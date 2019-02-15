@@ -3,8 +3,10 @@
 namespace api_web\controllers;
 
 use api_web\classes\CartWebApi;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
 use common\models\Order;
+use yii\filters\AccessControl;
 
 /**
  * Class CartController
@@ -15,6 +17,49 @@ use common\models\Order;
 class CartController extends WebApiController
 {
     public $className = CartWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'add',
+                        'items',
+                        'clear',
+                        'product-comment',
+                    ],
+                    'roles'      => [Registry::PROCUREMENT_INITIATOR],
+                    'roleParams' => ['user' => $this->user]
+                ],
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'registration',
+                    ],
+                    'roles'      => [Registry::PURCHASER_RESTAURANT],
+                    'roleParams' => ['user' => $this->user]
+                ],
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'check-recipient',
+                        'product-comment',
+                    ],
+                    'roles'      => [Registry::OPERATOR],
+                    'roleParams' => ['user' => $this->user]
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @SWG\Post(path="/cart/add",

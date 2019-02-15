@@ -5,6 +5,8 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
+use api_web\modules\integration\modules\vetis\api\mercury\Mercury;
+use common\models\search\MercStockEntrySearch;
 use api_web\components\Registry;
 use api_web\components\ValidateRequest;
 use api_web\components\WebApi;
@@ -24,8 +26,10 @@ use common\models\vetis\VetisProductItem;
 use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
-use common\models\VetisTransport;
+use common\models\vetis\VetisTransport;
+use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use frontend\modules\clientintegr\modules\merc\models\productForm;
+use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
@@ -640,17 +644,29 @@ class VetisWaybill extends WebApi
         if (!$model) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
         }
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\Products();
+        $attributes = unserialize($model->data);
+        if (isset($attributes->producing->location->guid)) {
+            $productionName = VetisRussianEnterprise::find()->select(['name', 'uuid', 'guid'])
+                ->where(['guid' => $attributes->producing->location->guid])->one();
+        }
 
         return [
-            'form'         => $model->subProduct->name ?? null,
-            'name'         => $model->name,
-            'uuid'         => $model->uuid,
-            'guid'         => $model->guid,
-            'article'      => $model->code,
-            'gtin'         => $model->globalID,
-            'gost'         => $model->gost,
-            'active'       => $model->active,
-            'package_type' => $model->unit->name ?? null,
+            'form'             => $model->subProduct->name ?? null,
+            'name'             => $model->name,
+            'uuid'             => $model->uuid,
+            'guid'             => $model->guid,
+            'article'          => $model->code,
+            'gtin'             => $model->globalID,
+            'gost'             => $model->gost,
+            'active'           => $model->active,
+            'package_type'     => $model->unit->name ?? null,
+            'package_quantity' => $model->packagingQuantity ?? null,
+            'package_volume'   => $model->packagingVolume ?? null,
+            'package_unit'     => $model->packingType->name ?? null,
+            'producer_name'    => $this->getBusinessEntity()->name ?? null,
+            'production_name'  => $productionName ?? null,
         ];
     }
 
@@ -658,11 +674,68 @@ class VetisWaybill extends WebApi
      * @param $request
      * @return array
      * @throws BadRequestHttpException
+     * @TODO_: refactoring duble code with getProductInfo method
+     */
+    public function getProductFullInfo($request)
+    {
+        $this->validateRequest($request, ['guid']);
+        /**@var VetisProductItem $model */
+        $model = VetisProductItem::find()->joinWith(['subProduct', 'unit'])
+            ->where(['vetis_product_item.guid' => $request['guid']])->one();
+        if (!$model) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+        }
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\Products();
+        $_ = new Mercury();
+        $attributes = unserialize($model->data);
+        if (isset($attributes->producing->location->guid)) {
+            $productionName = VetisRussianEnterprise::find()->select(['name', 'uuid', 'guid'])
+                ->where(['guid' => $attributes->producing->location->guid])->one();
+        }
+
+        return [
+            'product_type_lvl1' => VetisHelper::$vetis_product_types[$model->productType],
+            'product_type_lvl2' => $model->product->name ?? null,
+            'form'              => $model->subProduct->name ?? null,
+            'name'              => $model->name,
+            'uuid'              => $model->uuid,
+            'guid'              => $model->guid,
+            'article'           => $model->code,
+            'gtin'              => $model->globalID,
+            'gost'              => $model->gost,
+            'active'            => $model->active,
+            'package_type'      => $model->unit->name ?? null,
+            'package_quantity'  => $model->packagingQuantity ?? null,
+            'package_volume'    => $model->packagingVolume ?? null,
+            'package_unit'      => $model->packingType->name ?? null,
+            'producer_name'     => $this->getBusinessEntity()->name ?? null,
+            'production_name'   => $productionName ?? null,
+            'perishable'        => $model->perishable,
+            'expiration_date'   => $model->expiration_date,
+            'ingredients'       => $model->ingredients,
+        ];
+    }
+
+    /**
+     * @param array  $request
+     * @param string $operation
+     * @return array
+     * @throws BadRequestHttpException
      * @throws ValidationException
      * @throws \yii\base\InvalidArgumentException
      */
-    public function createProductItem($request)
+    public function createProductItem($request, $operation)
     {
+        $uuid = null;
+        if ($operation == 'UPDATE') {
+            $this->validateRequest($request, ['uuid']);
+            $uuid = $request['uuid'];
+            $product = VetisProductItem::findOne(['uuid' => $uuid, 'last' => true, 'active' => true]);
+            if (!$product) {
+                throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+            }
+        }
         $this->validateRequest($request, ['name', 'product_type', 'form_guid', 'subtype_guid']);
         $model = new productForm();
 
@@ -677,7 +750,7 @@ class VetisWaybill extends WebApi
 
         if ($model->validate()) {
             try {
-                $result = mercuryApi::getInstance()->modifyProducerStockListOperation('CREATE', null, $model);
+                $result = mercuryApi::getInstance()->modifyProducerStockListOperation($operation, $uuid, $model);
                 if (!isset($result)) {
                     throw new \Exception('Error create Product');
                 }
@@ -686,7 +759,8 @@ class VetisWaybill extends WebApi
                     $this->addIngredients($productItem->guid, $request['ingredients']);
                 }
             } catch (\Throwable $e) {
-                $this->helper->writeInJournal($e->getMessage(), $this->user->id, $this->user->organization_id);
+                $this->helper->writeInJournal($e->getMessage(), $this->user->id, $this->user->organization_id, 'error', 'CreateVetisProductItem');
+                return ['result' => false];
             }
         } else {
             throw new ValidationException($model->errors);
@@ -703,14 +777,35 @@ class VetisWaybill extends WebApi
     private function addIngredients($guid, $ingredients)
     {
         foreach ($ingredients as $ingredient) {
-            $model = new VetisIngredients();
-            $model->guid = $guid;
-            $model->product_name = $ingredient['name'];
+            $model = VetisIngredients::findOne(['guid' => $guid, 'product_name' => $ingredient['name']]);
+            if (!$model) {
+                $model = new VetisIngredients();
+                $model->guid = $guid;
+                $model->product_name = $ingredient['name'];
+            }
             $model->amount = $ingredient['amount'];
             if (!$model->save()) {
                 throw new ValidationException($model->getFirstErrors());
             }
         }
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function deleteIngredient($request)
+    {
+        $this->validateRequest($request, ['id']);
+        $model = VetisIngredients::findOne($request['id']);
+        if (!$model) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+        }
+
+        return ['result' => (bool)$model->delete()];
     }
 
     /**
@@ -754,5 +849,265 @@ class VetisWaybill extends WebApi
         }
 
         return ['result' => (bool)$model->delete()];
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function getStockEntryList($request)
+    {
+        $reqPag = $request['pagination'] ?? [];
+        $sort = $request['sort'] ?? null;
+        $reqSearch = $request['search'] ?? null;
+        $page = $this->helper->isSetDef($reqPag['page'] ?? null, 1);
+        $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
+        $enterpriseGuid = $this->helper->getEnterpriseGuid($this->user->organization_id);
+        $search = new MercStockEntrySearch();
+        $dataProvider = $search->search($reqSearch, $enterpriseGuid);
+
+        $arSortFields = [
+            'product_name',
+            'create_date',
+            'expiry_date',
+        ];
+
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+        $result = [];
+        if ($sort && in_array(ltrim($sort, '-'), $arSortFields)) {
+            $sortDirection = SORT_ASC;
+            if (strpos($sort, '-') !== false) {
+                $sortDirection = SORT_DESC;
+            }
+            $dataProvider->query->orderBy([ltrim($sort, '-') => $sortDirection]);
+        } else {
+            $dataProvider->query->orderBy('id DESC');
+        }
+
+        /**@var MercStockEntry $model */
+        foreach ($dataProvider->models as $model) {
+            $result[] = [
+                'number'          => $model->entryNumber,
+                'id'              => $model->id,
+                'name'            => $model->product_name,
+                'uuid'            => $model->uuid,
+                'guid'            => $model->guid,
+                'producer'        => $model->producer_name,
+                'country'         => $model->producer_country,
+                'balance'         => $model->amount,
+                'unit'            => $model->unit,
+                'created_at'      => $model->create_date,
+                'production_date' => $model->production_date,
+                'expiry_date'     => $model->expiry_date,
+            ];
+        }
+
+        $return = [
+            'result'     => $result,
+            'pagination' => [
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
+
+        return $return;
+    }
+
+    /**
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws BadRequestHttpException
+     */
+    public function getProductionJournalProducerFilter()
+    {
+        $query = MercStockEntry::find()->select(['producer_name', 'producer_guid'])->distinct()
+            ->where(['owner_guid' => $this->helper->getEnterpriseGuid($this->user->organization_id)])
+            ->andWhere(['not', ['producer_guid' => null]])->orderBy('producer_name');
+
+        return $query->all();
+    }
+
+    /**
+     * @return array
+     */
+    public function getProductionJournalSort()
+    {
+        return [
+            'product_name'  => \Yii::t('api_web', 'production_journal.product_name'),
+            '-product_name' => \Yii::t('api_web', 'production_journal.-product_name'),
+            'create_date'   => \Yii::t('api_web', 'production_journal.create_date'),
+            '-create_date'  => \Yii::t('api_web', 'production_journal.-create_date'),
+            'expiry_date'   => \Yii::t('api_web', 'production_journal.expiry_date'),
+            '-expiry_date'  => \Yii::t('api_web', 'production_journal.-expiry_date'),
+        ];
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getProductionJournalShortInfo($request)
+    {
+        $this->validateRequest($request, ['uuid']);
+        $model = MercStockEntry::findOne(['uuid' => $request['uuid']]);
+        if (!$model) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+        }
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\Products();
+        $attributes = unserialize($model->raw_data);
+        if (isset($attributes->batch->subProduct->guid)) {
+            $productionName = VetisSubproductByProduct::find()->select(['name'])
+                ->where(['guid' => $attributes->batch->subProduct->guid])->one();
+        }
+
+        return [
+            'product_form' => $productionName->name ?? null,
+            'batch_id'     => $model->batch_id,
+            'packing'      => $attributes->batch->packageList->package->packingType->name ?? null,
+
+        ];
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getProductionJournalFullInfo($request)
+    {
+        $this->validateRequest($request, ['uuid']);
+        $model = MercStockEntry::findOne(['uuid' => $request['uuid']]);
+        if (!$model) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+        }
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\Products();
+        $attributes = unserialize($model->raw_data);
+        if (isset($attributes->batch->subProduct->guid)) {
+            $productionForm = VetisSubproductByProduct::find()->select(['name'])
+                ->where(['guid' => $attributes->batch->subProduct->guid])->one();
+        }
+        if (isset($attributes->batch->product->guid)) {
+            $production2lvl = VetisProductByType::find()->select(['name'])
+                ->where(['guid' => $attributes->batch->product->guid])->one();
+        }
+        $arResearch = [];
+        if (isset($attributes->vetEventList->laboratoryResearch)) {
+            foreach ($attributes->vetEventList->laboratoryResearch as $research) {
+                if (isset($research->referencedDocument)) {
+                    $arResearch[] = [
+                        'issue_id'      => $research->referencedDocument->issueNumber ?? null,
+                        'expertise_id'  => $research->expertiseID ?? null,
+                        'laboratory'    => $research->operator->name ?? null,
+                        'method'        => $research->method->name ?? null,
+                        'indicator'     => $research->indicator->name ?? null,
+                        'result_date'   => $research->actualDateTime ?? null,
+                        'research_date' => $research->referencedDocument->issueDate ?? null,
+                        'result'        => $research->result ?? null,
+                        'conclusion'    => $research->conclusion ?? null,
+                    ];
+                }
+            }
+        }
+
+        return [
+            'name'                 => $model->product_name,
+            'product_type'         => VetisHelper::$vetis_product_types[$model->product_type],
+            'production_type_lvl2' => $production2lvl['name'] ?? null,
+            'product_form'         => $productionForm->name ?? null,
+            'number'               => $model->entryNumber,
+            'create_date'          => $model->create_date,
+            'batch_id'             => $model->batch_id,
+            'balance'              => $model->amount,
+            'production_date'      => $model->production_date,
+            'expiry_date'          => $model->expiry_date,
+            'packing'              => $attributes->batch->packageList->package->packingType->name ?? null,
+            'enterprise'           => $attributes->batch->origin->producer->enterprise->name ?? null,
+            'country'              => $model->producer_country,
+            'research'             => $arResearch
+        ];
+    }
+
+    /**
+     * Метод полного списания все продукции по id
+     *
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function resolveDiscrepancy($request)
+    {
+        $this->validateRequest($request, ['id']);
+        if (!is_array($request['id'])) {
+            throw new ValidationException([], 'common.param_must_be_an_array');
+        }
+        try {
+            $datas = [];
+            foreach ($request['id'] as $id) {
+                $model = MercStockEntry::findOne(['id' => $id]);
+                if ($model) {
+                    $datas[] = $model->raw_data;
+                }
+            }
+
+            $form = new createStoreEntryForm();
+            $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($form, createStoreEntryForm::INV_PRODUCT_ALL, $datas);
+            if (!isset($result)) {
+                throw new \Exception(\Yii::t('api_web', 'vetis.error_resolve_discrepancy'));
+            }
+        } catch (\Throwable $t) {
+            $this->helper->writeInJournal($t->getMessage(), $this->user->id, $this->user->organization_id, 'resolveDiscrepancyOperation');
+            return ['result' => false];
+        }
+
+        return ['result' => true];
+    }
+
+    /**
+     * Метод фактического списания продукции по id, устанавливает кол-во == amount в Меркурии
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function resolveDiscrepancyPartial($request)
+    {
+        $this->validateRequest($request, ['id', 'amount', 'reason']);
+        $model = new rejectedForm();
+        $model->volume = $request['amount'];
+        $model->reason = $request['reason'];
+        $model->description = $request['description'];
+        $data = MercStockEntry::findOne(['id' => $request['id']]);
+        if (!$data) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+        }
+
+        if ($model->validate()) {
+            try {
+                $form = new createStoreEntryForm();
+                $form->attributes = $model->attributes;
+                $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($form, createStoreEntryForm::INV_PRODUCT, [$data->raw_data]);
+                if (!isset($result)) {
+                    throw new \Exception('vetis.error_resolve_discrepancy_partial');
+                }
+            } catch (\Throwable $t) {
+                $this->helper->writeInJournal($t->getMessage(), $this->user->id, $this->user->organization_id, 'error', 'resolveDiscrepancyPartialOperation');
+                return ['result' => false];
+            }
+        } else {
+            throw new ValidationException($model->errors);
+        }
+
+        return ['result' => true];
     }
 }

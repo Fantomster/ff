@@ -7,6 +7,7 @@ use api_web\components\Registry;
 use api_web\components\WebApiController;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use api_web\modules\integration\modules\vetis\models\VetisWaybill;
+use yii\filters\AccessControl;
 
 /**
  * Class DefaultController
@@ -15,6 +16,74 @@ use api_web\modules\integration\modules\vetis\models\VetisWaybill;
  */
 class DefaultController extends WebApiController
 {
+    /**
+     * @return array
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'groups-list',
+                        'short-info-vsd',
+                        'full-info-vsd',
+                        'filter-sender',
+                        'filter-product',
+                        'filter-status',
+                        'filter-vsd',
+                        'filters',
+                        'get-vsd-pdf',
+                        'list',
+                        'return-vsd',
+                        'partial-acceptance',
+                        'repay-vsd',
+                        'acquirer-filter',
+                        'get-not-confirmed-vsd',
+                        'regionalization-get',
+                        'product-item-list',
+                        'product-type-list',
+                        'product-subtype-list',
+                        'product-form-list',
+                        'unit-list',
+                        'packing-type-list',
+                        'russian-enterprise-list',
+                        'business-entity',
+                        'ingredient-list',
+                        'product-ingredient-list',
+                        'product-info',
+                        'create-product-item',
+                        'create-transport',
+                        'delete-transport',
+                        'delete-ingredient',
+                        'transport-storage-type-list',
+                        'production-journal-list',
+                        'production-journal-producer-filter',
+                        'production-journal-sort',
+                        'production-journal-short-info',
+                        'production-journal-full-info',
+                        'resolve-discrepancy',
+                        'product-full-info',
+                        'resolve-discrepancy-partial',
+                    ],
+                    'roles'      => [
+                        Registry::MANAGER_RESTAURANT,
+                        Registry::BOOKER_RESTAURANT,
+                    ],
+                    'roleParams' => ['user' => $this->user]
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
+
     /**
      * @param $action
      * @return bool
@@ -1044,6 +1113,10 @@ class DefaultController extends WebApiController
      *                          "gost": "null",
      *                          "active": 1
      *                      }
+     *                  },
+     *                  "pagination": {
+     *                      "page": 1,
+     *                      "page_size": 12
      *                  }
      *              }
      *          )
@@ -1090,28 +1163,36 @@ class DefaultController extends WebApiController
      *            @SWG\Schema(
      *              default={
      *                  {
-     *                      "1": "Мясо и мясопродукты."
+     *                      "id": 1,
+     *                      "name": "Мясо и мясопродукты."
      *                  },
      *                  {
-     *                      "2": "Корма и кормовые добавки."
+     *                      "id": 2,
+     *                      "name": "Корма и кормовые добавки."
      *                  },
      *                  {
-     *                      "3": "Живые животные."
+     *                      "id": 3,
+     *                      "name": "Живые животные."
      *                  },
      *                  {
-     *                      "4": "Лекарственные средства."
+     *                      "id": 4,
+     *                      "name": "Лекарственные средства."
      *                  },
      *                  {
-     *                      "5": "Пищевые продукты."
+     *                      "id": 5,
+     *                      "name": "Пищевые продукты."
      *                  },
      *                  {
-     *                      "6": "Непищевые продукты и другое."
+     *                      "id": 6,
+     *                      "name": "Непищевые продукты и другое."
      *                  },
      *                  {
-     *                      "7": "Рыба и морепродукты."
+     *                      "id": 7,
+     *                      "name": "Рыба и морепродукты."
      *                  },
      *                  {
-     *                      "8": "Продукция, не требующая разрешения."
+     *                      "id": 8,
+     *                      "name": "Продукция, не требующая разрешения."
      *                  }
      *              }
      *          )
@@ -1130,7 +1211,7 @@ class DefaultController extends WebApiController
     {
         $arResponse = [];
         foreach (VetisHelper::$vetis_product_types as $key => $item) {
-            $arResponse[] = [$key => $item];
+            $arResponse[] = ['id' => $key, 'name' => $item];
         }
         $this->response = $arResponse;
     }
@@ -1161,16 +1242,20 @@ class DefaultController extends WebApiController
      *            @SWG\Schema(
      *              default={
      *                  {
-     *                      "1": "замороженные"
+     *                      "id": 1,
+     *                      "name": "замороженные"
      *                  },
      *                  {
-     *                      "2": "охлаженные"
+     *                      "id": 2,
+     *                      "name": "охлаженные"
      *                  },
      *                  {
-     *                      "3": "охлаждаемые"
+     *                      "id": 3,
+     *                      "name": "охлаждаемые"
      *                  },
      *                  {
-     *                      "4": "вентилируемые"
+     *                      "id": 4,
+     *                      "name": "вентилируемые"
      *                  }
      *              }
      *          )
@@ -1189,7 +1274,7 @@ class DefaultController extends WebApiController
     {
         $arResponse = [];
         foreach (VetisHelper::$transport_storage_types as $key => $item) {
-            $arResponse[] = [$key => $item];
+            $arResponse[] = ['id' => $key, 'name' => $item];
         }
         $this->response = $arResponse;
     }
@@ -1249,8 +1334,8 @@ class DefaultController extends WebApiController
     /**
      * @SWG\Post(path="/integration/vetis/product-form-list",
      *     tags={"Integration/vetis"},
-     *     summary="Получение списка Продукция",
-     *     description="Получение списка Продукция",
+     *     summary="Получение списка Вид Продукции",
+     *     description="Получение списка Вид Продукции",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -1568,8 +1653,8 @@ class DefaultController extends WebApiController
     /**
      * @SWG\Post(path="/integration/vetis/product-ingredient-list",
      *     tags={"Integration/vetis"},
-     *     summary="Получение списка Ингредиентов",
-     *     description="Получение списка Ингредиентов",
+     *     summary="Получение списка Ингредиентов для конкретной продукции из нашего справочника",
+     *     description="Получение списка Ингредиентов для конкретной продукции из нашего справочника",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -1622,8 +1707,8 @@ class DefaultController extends WebApiController
     /**
      * @SWG\Post(path="/integration/vetis/product-info",
      *     tags={"Integration/vetis"},
-     *     summary="Получение списка Ингредиентов",
-     *     description="Получение списка Ингредиентов",
+     *     summary="Краткая информация о продукции",
+     *     description="Краткая информация о продукции",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -1670,6 +1755,59 @@ class DefaultController extends WebApiController
     public function actionProductInfo()
     {
         $this->response = (new VetisWaybill())->getProductInfo($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/product-full-info",
+     *     tags={"Integration/vetis"},
+     *     summary="Полная информация о продукции",
+     *     description="Полная информация о продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "guid": "f73bad6a-8894-44e6-911e-b7f1c1e71466"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "name": "Агуша БиоКефир 3.2% 204г БЗ 12Х",
+     *                  "uuid": "0001b743-21c1-41a3-aac0-bd4e6d21cfa6",
+     *                  "guid": "308a4f21-a5fd-47c4-bb98-71a967999561",
+     *                  "form": "кисломолочный напиток",
+     *                  "article": "340033884",
+     *                  "gtin": "4602541000035",
+     *                  "gost": "ТУ 10.86.10-115-05268977-2014",
+     *                  "active": 1,
+     *                  "package_type": "кг",
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionProductFullInfo()
+    {
+        $this->response = (new VetisWaybill())->getProductFullInfo($this->request);
     }
 
     /**
@@ -1742,7 +1880,81 @@ class DefaultController extends WebApiController
      */
     public function actionCreateProductItem()
     {
-        $this->response = (new VetisWaybill())->createProductItem($this->request);
+        $this->response = (new VetisWaybill())->createProductItem($this->request, 'CREATE');
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/update-product-item",
+     *     tags={"Integration/vetis"},
+     *     summary="Обновление продукции в справочник наименований продукции",
+     *     description="Обновление продукции в справочник наименований продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuid": "20dda083-72d0-93e0-de2c-76ac4f88c5ce",
+     *                      "product_type": 3,
+     *                      "form_guid": "20dda083-72d0-93e0-de2c-76ac4f88c5ce",
+     *                      "subtype_guid": "98748766-2894-b5db-ab2f-035db5f44945",
+     *                      "name": "new Kotleta()",
+     *                      "article": "7d7df18c5832",
+     *                      "gtin": "4602471014317",
+     *                      "has_gost": true,
+     *                      "gost": "ГОСТ-123",
+     *                      "ingredients": {
+     *                          {
+     *                              "name": "Грибы",
+     *                              "amount": 0.001,
+     *                          },
+     *                          {
+     *                              "name": "Грибы",
+     *                              "amount": 0.001,
+     *                          }
+     *                      },
+     *                      "subject": "41fb53ea-31c3-b116-9ce2-7d7df18c5832",
+     *                      "producers": {
+     *                          "41fb53ea-31c3-b116-9ce2-7d7df18c5832",
+     *                          "41fb53ea-31c3-b116-9ce2-7d7df18c5832"
+     *                      },
+     *                      "package": {
+     *                          "type_guid": "41fb53ea-31c3-b116-9ce2-7d7df18c5832",
+     *                          "amount": 1,
+     *                          "volume": 12,
+     *                          "unit_guid": "41fb53ea-31c3-b116-9ce2-7d7df18c5832"
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionUpdateProductItem()
+    {
+        $this->response = (new VetisWaybill())->createProductItem($this->request, 'UPDATE');
     }
 
     /**
@@ -1841,5 +2053,448 @@ class DefaultController extends WebApiController
         $this->response = (new VetisWaybill())->deleteTransport($this->request);
     }
 
+    /**
+     * @SWG\Post(path="/integration/vetis/delete-ingredient",
+     *     tags={"Integration/vetis"},
+     *     summary="Удаление ингредиента продукции из нашего внутреннего справочника",
+     *     description="Удаление ингредиента продукции из нашего внутреннего справочника",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": 1,
+     *                      "org_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionDeleteIngredient()
+    {
+        $this->response = (new VetisWaybill())->deleteIngredient($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/production-journal-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка продукции в Журнал продукции",
+     *     description="Получение списка продукции в Журнал продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "search": {
+     *                          "production_name": "Кролик фермерский",
+     *                          "name": "Кро",
+     *                          "producer_guid": "f8805c8f-1da4-4bda-aaca-a08b5d1cab1b",
+     *                          "create_date": {
+     *                              "from": "23.08.2018",
+     *                              "to": "24.08.2018"
+     *                          },
+     *                          "production_date": {
+     *                              "from": "23.08.2018",
+     *                              "to": "24.08.2018"
+     *                          },
+     *                          "expiry_date": {
+     *                              "from": "23.08.2018",
+     *                              "to": "24.08.2018"
+     *                          }
+     *                      },
+     *                      "pagination": {
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      },
+     *                      "sort": {
+     *                          "product_name",
+     *                          "create_date",
+     *                          "expiry_date"
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "number": "13786453",
+     *                          "name": "курица домашняя: cубпродукты охлажденные",
+     *                          "uuid": "00f4334f-23d5-468b-81c7-258f097bab0e",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                          "producer": "ЕвроТрейдБрест ООО, СП(г. Брест, ул. Катин Бор, 111б)",
+     *                          "country": "Беларусь",
+     *                          "balance": "35.000",
+     *                          "unit": "кг",
+     *                          "created_at": "2018-07-30T09:39:07+03:00",
+     *                          "production_date": "2018-05-07T03:00:00+03:00",
+     *                          "expiry_date": "2018-5-15 0:00:00"
+     *                      },
+     *                      {
+     *                          "number": "13786453",
+     *                          "name": "курица домашняя: cубпродукты охлажденные",
+     *                          "uuid": "00f4334f-23d5-468b-81c7-258f097bab0e",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                          "producer": "ЕвроТрейдБрест ООО, СП(г. Брест, ул. Катин Бор, 111б)",
+     *                          "country": "Беларусь",
+     *                          "balance": "35.000",
+     *                          "unit": "кг",
+     *                          "created_at": "2018-07-30T09:39:07+03:00",
+     *                          "production_date": "2018-05-07T03:00:00+03:00",
+     *                          "expiry_date": "2018-5-15 0:00:00"
+     *                      }
+     *                  },
+     *                  "pagination": {
+     *                      "page": 1,
+     *                      "page_size": 12
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionProductionJournalList()
+    {
+        $this->response = (new VetisWaybill())->getStockEntryList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/production-journal-producer-filter",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка фильтра Производители",
+     *     description="Получение списка фильтра Производители",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "producer_name": "Вулканный, ООО Далькреветка(ул.Дзер жинского,36 г. Южно-Сахалинск)",
+     *                      "producer_guid": "694f631a-72d6-4208-994e-14b62ad418e2"
+     *                  },
+     *                  {
+     *                      "producer_name": "ЗАО Микояновский МК(г.Москва, ул.Пермская, вл.3)",
+     *                      "producer_guid": "cb5804ed-b479-c9ad-7479-df50d6db71f2"
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionProductionJournalProducerFilter()
+    {
+        $this->response = (new VetisWaybill())->getProductionJournalProducerFilter();
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/production-journal-sort",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка сортировки",
+     *     description="Получение списка сортировки",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "product_name": "Названию продукции А-Я",
+     *                  "-product_name": "Названию продукции А-Я",
+     *                  "create_date": "Дате создания продукции по возрастанию",
+     *                  "-create_date": "Дате создания продукции по убыванию",
+     *                  "expiry_date": "Сроку годности продукции по возрастанию",
+     *                  "-expiry_date": "Сроку годности продукции по убыванию"
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionProductionJournalSort()
+    {
+        $this->response = (new VetisWaybill())->getProductionJournalSort();
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/production-journal-short-info",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение краткой информации о продукции",
+     *     description="Получение краткой информации о продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuid": "94a54162-a7ca-4534-9f96-39cacc934e8f"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "product_form": "говядина",
+     *                  "batch_id": "123456",
+     *                  "packing": null
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionProductionJournalShortInfo()
+    {
+        $this->response = (new VetisWaybill())->getProductionJournalShortInfo($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/production-journal-full-info",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение полной информации о продукции",
+     *     description="Получение полной информации о продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuid": "94a54162-a7ca-4534-9f96-39cacc934e8f"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "product_form": "говядина",
+     *                  "batch_id": "123456",
+     *                  "packing": null
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionProductionJournalFullInfo()
+    {
+        $this->response = (new VetisWaybill())->getProductionJournalFullInfo($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/resolve-discrepancy",
+     *     tags={"Integration/vetis"},
+     *     summary="Полное списание продукции",
+     *     description="Полное списание продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": {1,2,3,4}
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionResolveDiscrepancy()
+    {
+        $this->response = (new VetisWaybill())->resolveDiscrepancy($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/resolve-discrepancy-partial",
+     *     tags={"Integration/vetis"},
+     *     summary="Частичное списание продукции",
+     *     description="Частичное списание продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": 1,
+     *                      "amount": 1,
+     *                      "reason": "Причина",
+     *                      "description": "Описание",
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionResolveDiscrepancyPartial()
+    {
+        $this->response = (new VetisWaybill())->resolveDiscrepancyPartial($this->request);
+    }
 
 }

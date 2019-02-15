@@ -13,11 +13,13 @@ use api_web\helpers\BaseHelper;
 use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\classes\Integration;
 use api_web\modules\integration\interfaces\DictionaryInterface;
+use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
 use common\models\vetis\VetisBusinessEntity;
 use common\models\vetis\VetisForeignEnterprise;
 use common\models\vetis\VetisRussianEnterprise;
+use common\models\vetis\VetisTransport;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 
@@ -225,6 +227,56 @@ class MercDictionary extends WebApi implements DictionaryInterface
                 'inn'     => $model->inn,
                 'address' => $model->addressView,
                 'active'  => $model->active,
+            ];
+        }
+
+        $return = [
+            'result'     => $result,
+            'pagination' => [
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
+
+        return $return;
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws \yii\base\InvalidArgumentException
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function getTransportList($request)
+    {
+        $orgId = $request['org_id'] ?? $this->user->organization_id;
+        $this->validateOrgId($orgId);
+        $reqPag = $request['pagination'] ?? [];
+        $page = $this->helper->isSetDef($reqPag['page'] ?? null, 1);
+        $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
+
+        $query = VetisTransport::find()->where(['org_id' => $orgId]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+        $result = [];
+
+        /**@var VetisTransport $model */
+        foreach ($dataProvider->models as $model) {
+            $result[] = [
+                'org_id'                 => $model->org_id,
+                'vehicle_number'         => $model->vehicle_number,
+                'trailer_number'         => $model->trailer_number,
+                'container_number'       => $model->container_number,
+                'transport_storage_type' => VetisHelper::$transport_storage_types[$model->transport_storage_type] ?? null,
+                'id'                     => $model->id,
             ];
         }
 

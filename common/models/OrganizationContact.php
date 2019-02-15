@@ -2,8 +2,13 @@
 
 namespace common\models;
 
+use api_web\exceptions\ValidationException;
+use common\components\mailer\Mailer;
 use common\models\notifications\{EmailNotification, SmsNotification};
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Exception;
+use yii\web\BadRequestHttpException;
 
 /**
  * This is the model class for table "{{%organization_contact}}".
@@ -29,6 +34,21 @@ class OrganizationContact extends ActiveRecord
         self::TYPE_EMAIL => EmailNotification::class,
         self::TYPE_PHONE => SmsNotification::class
     ];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ]
+        ];
+    }
 
     /**
      * {@inheritdoc}
@@ -81,6 +101,36 @@ class OrganizationContact extends ActiveRecord
     public function getOrganizationContactNotifications()
     {
         return $this->hasMany(OrganizationContactNotification::class, ['organization_contact_id' => 'id']);
+    }
+
+    /**
+     * Установка уведомлений для текущего контакта
+     *
+     * @param       $client_id
+     * @param array $rules
+     * @throws ValidationException
+     */
+    public function setNotifications($client_id, $rules = []): void
+    {
+        //Поиск или создание модели
+        $model = OrganizationContactNotification::findOne([
+            'organization_contact_id' => $this->id,
+            'client_id'               => $client_id
+        ]);
+        if (!$model) {
+            $model = new OrganizationContactNotification([
+                'organization_contact_id' => $this->id,
+                'client_id'               => $client_id
+            ]);
+        }
+        //Заполняем атрибуты уведомлений
+        $attributes = $model->getRulesAttributes();
+        foreach ($attributes as $attribute => $value) {
+            $model->setAttribute($attribute, $rules[$attribute] ?? $value ?? 0);
+        }
+        if (!$model->save()) {
+            throw new ValidationException($model->getFirstErrors());
+        }
     }
 
     /**
@@ -149,5 +199,72 @@ class OrganizationContact extends ActiveRecord
             $object->phone = null;
         }
         return $object;
+    }
+
+    /**
+     * @return bool
+     */
+    public function sendTestMessage()
+    {
+        try {
+            $message = \Yii::t('app', 'organization_contact.test_message', ['ru' => 'MixCart шлет привет!']);
+            if ($this->type_id == self::TYPE_EMAIL) {
+                /** @var \common\components\mailer\Message $s */
+                $s = new \common\components\mailer\Message();
+                $s->setFrom('no-reply@mixcart.ru');
+                $s->setTo($this->contact);
+                $s->setSubject($message);
+                $s->setBody($message);
+                /** @var Mailer $mailer */
+                \Yii::$app->mailer->send($s);
+            }
+            if ($this->type_id == self::TYPE_PHONE) {
+                \Yii::$app->get('sms')->send($message, $this->contact);
+            }
+            return true;
+        } catch (\Exception $e) {
+            \Yii::error($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Получить тип контакта
+     *
+     * @param $contact
+     * @return int
+     * @throws BadRequestHttpException
+     */
+    public static function checkType($contact)
+    {
+        if (filter_var($contact, FILTER_VALIDATE_EMAIL)) {
+            return self::TYPE_EMAIL;
+        }
+        if (self::validatePhoneNumber($contact)) {
+            return self::TYPE_PHONE;
+        }
+        throw new BadRequestHttpException('organization_contact.type_check_error');
+    }
+
+    /**
+     * Валидация номера телефона
+     *
+     * @param $number
+     * @return bool
+     */
+    public static function validatePhoneNumber($number)
+    {
+        $formats = [
+            '+###########',
+            '###########',
+            '+#(###)#######',
+            '#(###)#######',
+            '##########'
+        ];
+
+        return in_array(
+            trim(preg_replace('/[0-9]/', '#', $number)),
+            $formats
+        );
     }
 }

@@ -25,6 +25,7 @@ class mercuryApi extends baseApi
     public function init()
     {
         require_once(__DIR__ . "/Mercury.php");
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
         $this->system = 'mercury';
         $this->wsdlClassName = Mercury::class;
         parent::init();
@@ -405,7 +406,7 @@ class mercuryApi extends baseApi
      * @throws \yii\base\InvalidConfigException
      * @throws \Exception
      */
-    public function resolveDiscrepancyOperation($model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)
+    public function resolveDiscrepancyOperation(createStoreEntryForm $model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)
     {
         $result = null;
 
@@ -652,6 +653,18 @@ class mercuryApi extends baseApi
             $productItem->producing = new ProductItemProducing();
             $productItem->producing->location = new Enterprise();
             $productItem->producing->location->guid = $this->enterpriseGuid;
+
+            /*if(isset($form->packagingType_guid))
+            {
+                $packaging = new Packaging();
+                $packaging->packagingType = new PackingType();
+                $packaging->packagingType->guid = $form->packagingType_guid;
+                if(isset($form->unit_guid)) {
+                    $packaging->unit = new Unit();
+                    $packaging->unit->guid = $form->unit_guid;
+                }
+                $productItem->packaging = $packaging;
+            }*/
 
             $resultingList->productItem = $productItem;
             $request_body->modificationOperation->resultingList = $resultingList;

@@ -9,9 +9,11 @@
 namespace api_web\controllers;
 
 use api_web\classes\IntegrationWebApi;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
 use api_web\helpers\WaybillHelper;
 use api_web\helpers\WebApiHelper;
+use yii\filters\AccessControl;
 
 /**
  * Class WaybillController
@@ -22,6 +24,41 @@ use api_web\helpers\WebApiHelper;
 class WaybillController extends WebApiController
 {
     public $className = IntegrationWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'create-waybill',
+                        'update-waybill-content',
+                        'regenerate-by-order',
+                        'move-order-content-to-waybill',
+                        'delete-waybill',
+                        'reset-waybill-content',
+                        'show-waybill-content',
+                        'create-waybill-content',
+                        'delete-waybill-content',
+                        'create-and-send-waybill-async',
+                    ],
+                    'roles'      => [
+                        Registry::MANAGER_RESTAURANT,
+                        Registry::BOOKER_RESTAURANT,
+                    ],
+                    'roleParams' => ['user' => $this->user]
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @SWG\Post(path="/waybill/regenerate-by-order",

@@ -36,7 +36,9 @@
                 $priceWithVat = $position['price'] + ($position['price'] * $vat / 100);
                 $edi_supplier_article = (isset($product->edi_supplier_article) && $product->edi_supplier_article != '') ? $product->edi_supplier_article : $position['id'];
                 $article = (isset($product->article) && $product->article != '') ? $product->article : $position['id'];
-                if (!$barcode) continue;
+                if (!$barcode) {
+                    continue;
+                }
                 ?>
                 <POSITION>
                     <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>

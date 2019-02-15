@@ -526,7 +526,7 @@ class LazyVendorWebApi extends WebApi
 
     /**
      * Изменение информации о поставщике
-     * 
+     *
      * @param $post
      * @return mixed
      * @throws BadRequestHttpException

@@ -175,6 +175,56 @@ class AnalogWebApi extends WebApi
     }
 
     /**
+     * Вренуть список групп аналогов
+     *
+     * @param $request
+     * @return array
+     * @throws
+     */
+    public function getProductAnalogListGroup($request)
+    {
+        $query = new Query();
+        $result = $query->select([
+            'product_id'   => 'cbg.id',
+            'product_name' => 'cbg.product',
+            'article'      => 'cbg.article',
+            'vendor_id'    => 'o.id',
+            'vendor_name'  => 'o.name',
+            'price'        => 'cg.price',
+            'coefficient'  => 'pa.coefficient',
+            'ed'           => 'cbg.ed',
+            'currency_id'  => 'cur.id',
+            'currency_sym' => 'cur.symbol',
+            'group_id'     => 'pa.id',
+            'sort_value'   => 'pa.sort_value',
+            'analog_count' => 'COUNT(p_count.id)'
+        ])
+            ->from(ProductAnalog::tableName() . ' as pa')
+            ->leftJoin(ProductAnalog::tableName() . " as p_count", "p_count.parent_id = pa.id")
+            ->innerJoin(CatalogBaseGoods::tableName() . ' as cbg', "pa.product_id = cbg.id")
+            ->innerJoin(CatalogGoods::tableName() . ' as cg', "cbg.id = cg.base_goods_id")
+            ->innerJoin(Catalog::tableName() . ' as cat', "cat.id = cg.cat_id")
+            ->leftJoin(Currency::tableName() . ' as cur', "cur.id = cat.currency_id")
+            ->innerJoin(Organization::tableName() . ' as o', "cbg.supp_org_id = o.id")
+            ->where(['pa.client_id' => $this->user->organization_id])
+            ->andWhere('pa.parent_id is NULL')
+            ->groupBy('pa.id')
+            ->orderBy(['product_name' => SORT_ASC])
+            ->all();
+
+        $items = [];
+        $defaultCurrency = Currency::findOne(Registry::DEFAULT_CURRENCY_ID);
+
+        if ($result) {
+            foreach (WebApiHelper::generator($result) as $row) {
+                $items[] = $this->prepareRow($row, $defaultCurrency);
+            }
+        }
+
+        return ["items" => $items];
+    }
+
+    /**
      * @param $request
      * @return array
      * @throws \Throwable
@@ -307,6 +357,10 @@ class AnalogWebApi extends WebApi
             'currency' => null,
         ];
 
+        if (isset($row['analog_count'])) {
+            $r['analog_count'] = (int)$row['analog_count'];
+        }
+
         if ($row['product_id']) {
             $r['product'] = [
                 'id'           => (int)$row['product_id'],
@@ -336,7 +390,6 @@ class AnalogWebApi extends WebApi
                 'symbol' => $c->symbol
             ];
         }
-
         return $r;
     }
 }

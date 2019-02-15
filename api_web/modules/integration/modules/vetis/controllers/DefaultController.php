@@ -66,6 +66,7 @@ class DefaultController extends WebApiController
                         'production-journal-sort',
                         'production-journal-short-info',
                         'production-journal-full-info',
+                        'resolve-discrepancy',
                     ],
                     'roles'      => [
                         Registry::MANAGER_RESTAURANT,
@@ -2344,6 +2345,52 @@ class DefaultController extends WebApiController
     public function actionProductionJournalFullInfo()
     {
         $this->response = (new VetisWaybill())->getProductionJournalFullInfo($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/resolve-discrepancy",
+     *     tags={"Integration/vetis"},
+     *     summary="Полное списание продукции",
+     *     description="Полное списание продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": {1,2,3,4}
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionResolveDiscrepancy()
+    {
+        $this->response = (new VetisWaybill())->resolveDiscrepancy($this->request);
     }
 
 }

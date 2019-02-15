@@ -25,6 +25,7 @@ class mercuryApi extends baseApi
     public function init()
     {
         require_once(__DIR__ . "/Mercury.php");
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
         $this->system = 'mercury';
         $this->wsdlClassName = Mercury::class;
         parent::init();

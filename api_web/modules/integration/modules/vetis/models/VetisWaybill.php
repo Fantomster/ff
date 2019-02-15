@@ -26,6 +26,7 @@ use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
 use common\models\vetis\VetisTransport;
+use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use frontend\modules\clientintegr\modules\merc\models\productForm;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
@@ -709,7 +710,8 @@ class VetisWaybill extends WebApi
                     $this->addIngredients($productItem->guid, $request['ingredients']);
                 }
             } catch (\Throwable $e) {
-                $this->helper->writeInJournal($e->getMessage(), $this->user->id, $this->user->organization_id);
+                $this->helper->writeInJournal($e->getMessage(), $this->user->id, $this->user->organization_id, 'CreateVetisProductItem');
+                return ['result' => false];
             }
         } else {
             throw new ValidationException($model->errors);
@@ -842,6 +844,7 @@ class VetisWaybill extends WebApi
         foreach ($dataProvider->models as $model) {
             $result[] = [
                 'number'          => $model->entryNumber,
+                'id'              => $model->id,
                 'name'            => $model->product_name,
                 'uuid'            => $model->uuid,
                 'guid'            => $model->guid,
@@ -981,5 +984,39 @@ class VetisWaybill extends WebApi
             'country'              => $model->producer_country,
             'research'             => $arResearch
         ];
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function resolveDiscrepancy($request)
+    {
+        $this->validateRequest($request, ['id']);
+        if (!is_array($request['id'])) {
+            throw new ValidationException([], 'common.param_must_be_an_array');
+        }
+        try {
+            $datas = [];
+            foreach ($request['id'] as $id) {
+                $model = MercStockEntry::findOne(['id' => $id]);
+                if ($model) {
+                    $datas[] = $model->raw_data;
+                }
+            }
+
+            $form = new createStoreEntryForm();
+            $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($form, createStoreEntryForm::INV_PRODUCT_ALL, $datas);
+            if (!isset($result)) {
+                throw new \Exception(\Yii::t('api_web', 'vetis.error_resolve_discrepancy'));
+            }
+        } catch (\Throwable $t) {
+            $this->helper->writeInJournal($t->getMessage(), $this->user->id, $this->user->organization_id, 'resolveDiscrepancyOperation');
+            return ['result' => false];
+        }
+
+        return ['result' => true];
     }
 }

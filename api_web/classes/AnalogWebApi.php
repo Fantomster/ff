@@ -7,20 +7,11 @@
 
 namespace api_web\classes;
 
-use api_web\components\Registry;
-use api_web\components\WebApi;
-use api_web\helpers\CurrencyHelper;
-use api_web\helpers\WebApiHelper;
-use common\models\Catalog;
-use common\models\CatalogBaseGoods;
-use common\models\CatalogGoods;
-use common\models\Currency;
-use common\models\Organization;
-use common\models\ProductAnalog;
-use yii\data\ActiveDataProvider;
-use yii\data\Pagination;
-use yii\db\Expression;
-use yii\db\Query;
+use api_web\components\{Registry, WebApi};
+use api_web\helpers\{CurrencyHelper, WebApiHelper};
+use common\models\{Catalog, CatalogBaseGoods, CatalogGoods, Currency, Organization, ProductAnalog};
+use yii\data\{ActiveDataProvider, Pagination};
+use yii\db\{Expression, Query};
 
 class AnalogWebApi extends WebApi
 {
@@ -112,6 +103,18 @@ class AnalogWebApi extends WebApi
     }
 
     /**
+     * @return array
+     */
+    public function getListSortFields()
+    {
+        return [
+            'product_name'  => \Yii::t('api_web', 'analog_web_api.sort.product_name', ['ru' => 'Наименованию А-Я']),
+            '-product_name' => \Yii::t('api_web', 'analog_web_api.sort._product_name', ['ru' => 'Наименованию Я-А']),
+            'vendor_name'   => \Yii::t('api_web', 'analog_web_api.sort.vendor_name', ['ru' => 'Поставщику']),
+        ];
+    }
+
+    /**
      * Вренуть список аналогов для продукта
      *
      * @param $request
@@ -188,17 +191,15 @@ class AnalogWebApi extends WebApi
                 'ed'           => $row['ed'],
                 'price'        => CurrencyHelper::asDecimal($row['price']),
                 'article'      => $row['article'],
-                'coefficient'  => $row['coefficient'] ?? null,
+                'coefficient'  => $row['coefficient'] ? round($row['coefficient'], 6) : null,
                 'analog_group' => $row['group_id'] ? (int)$row['group_id'] : null,
                 'sort_value'   => $row['sort_value'] ? (int)$row['sort_value'] : null,
             ];
         }
 
         if ($row['vendor_id']) {
-            $r['vendor'] = [
-                'id'   => (int)$row['vendor_id'],
-                'name' => $row['vendor_name']
-            ];
+            $vendor = Organization::findOne((int)$row['vendor_id']);
+            $r['vendor'] = WebApiHelper::prepareOrganization($vendor);
         }
 
         if ($row['currency_id']) {

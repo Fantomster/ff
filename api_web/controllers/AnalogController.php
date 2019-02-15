@@ -118,6 +118,53 @@ class AnalogController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/analog/get-list-sort-fields",
+     *     tags={"Analog"},
+     *     summary="Список полей сортировок аналогов",
+     *     description="Список полей сортировок аналогов",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *             @SWG\Property(property="user", ref="#/definitions/User"),
+     *             @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "field":"title",
+     *                  "field1":"title",
+     *                  "field2":"title",
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionGetListSortFields()
+    {
+        $this->response = $this->classWebApi->getListSortFields();
+    }
+
+    /**
      * @SWG\Post(path="/analog/get-product-analog-list",
      *     tags={"Analog"},
      *     summary="Список аналогов конкретного продукта",

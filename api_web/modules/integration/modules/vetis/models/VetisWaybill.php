@@ -5,6 +5,7 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
+use api_web\modules\integration\modules\vetis\api\mercury\Mercury;
 use common\models\search\MercStockEntrySearch;
 use api_web\components\Registry;
 use api_web\components\ValidateRequest;
@@ -28,6 +29,7 @@ use common\models\vetis\VetisUnit;
 use common\models\vetis\VetisTransport;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use frontend\modules\clientintegr\modules\merc\models\productForm;
+use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
@@ -669,6 +671,53 @@ class VetisWaybill extends WebApi
     }
 
     /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @TODO_: refactoring duble code with getProductInfo method
+     */
+    public function getProductFullInfo($request)
+    {
+        $this->validateRequest($request, ['guid']);
+        /**@var VetisProductItem $model */
+        $model = VetisProductItem::find()->joinWith(['subProduct', 'unit'])
+            ->where(['vetis_product_item.guid' => $request['guid']])->one();
+        if (!$model) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+        }
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\Products();
+        $_ = new Mercury();
+        $attributes = unserialize($model->data);
+        if (isset($attributes->producing->location->guid)) {
+            $productionName = VetisRussianEnterprise::find()->select(['name', 'uuid', 'guid'])
+                ->where(['guid' => $attributes->producing->location->guid])->one();
+        }
+
+        return [
+            'product_type_lvl1' => VetisHelper::$vetis_product_types[$model->productType],
+            'product_type_lvl2' => $model->product->name ?? null,
+            'form'              => $model->subProduct->name ?? null,
+            'name'              => $model->name,
+            'uuid'              => $model->uuid,
+            'guid'              => $model->guid,
+            'article'           => $model->code,
+            'gtin'              => $model->globalID,
+            'gost'              => $model->gost,
+            'active'            => $model->active,
+            'package_type'      => $model->unit->name ?? null,
+            'package_quantity'  => $model->packagingQuantity ?? null,
+            'package_volume'    => $model->packagingVolume ?? null,
+            'package_unit'      => $model->packingType->name ?? null,
+            'producer_name'     => $this->getBusinessEntity()->name ?? null,
+            'production_name'   => $productionName ?? null,
+            'perishable'        => $model->perishable,
+            'expiration_date'   => $model->expiration_date,
+            'ingredients'       => $model->ingredients,
+        ];
+    }
+
+    /**
      * @param array  $request
      * @param string $operation
      * @return array
@@ -987,7 +1036,9 @@ class VetisWaybill extends WebApi
     }
 
     /**
-     * @param $request
+     * Метод полного списания все продукции по id,
+     *
+     * @param array $request
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
@@ -1015,6 +1066,34 @@ class VetisWaybill extends WebApi
         } catch (\Throwable $t) {
             $this->helper->writeInJournal($t->getMessage(), $this->user->id, $this->user->organization_id, 'resolveDiscrepancyOperation');
             return ['result' => false];
+        }
+
+        return ['result' => true];
+    }
+
+    public function resolveDiscrepancyPartial($request)
+    {
+        $this->validateRequest($request, ['id', 'amount', 'reason']);
+        $model = new rejectedForm();
+        $data = MercStockEntry::findOne(['id' => $request['id']]);
+        if (!$data) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+        }
+
+        if ($model->validate()) {
+            try {
+                $form = new createStoreEntryForm();
+                $form->attributes = $model->attributes;
+                $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($form, createStoreEntryForm::INV_PRODUCT, [$data->raw_data]);
+                if (!isset($result)) {
+                    throw new \Exception('vetis.error_resolve_discrepancy_partial');
+                }
+            } catch (\Throwable $t) {
+                $this->helper->writeInJournal($t->getMessage(), $this->user->id, $this->user->organization_id, 'resolveDiscrepancyPartialOperation');
+                return ['result' => false];
+            }
+        } else {
+            throw new ValidationException($model->errors);
         }
 
         return ['result' => true];

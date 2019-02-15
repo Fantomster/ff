@@ -406,7 +406,7 @@ class mercuryApi extends baseApi
      * @throws \yii\base\InvalidConfigException
      * @throws \Exception
      */
-    public function resolveDiscrepancyOperation($model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)
+    public function resolveDiscrepancyOperation(createStoreEntryForm $model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)
     {
         $result = null;
 

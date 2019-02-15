@@ -67,6 +67,7 @@ class DefaultController extends WebApiController
                         'production-journal-short-info',
                         'production-journal-full-info',
                         'resolve-discrepancy',
+                        'product-full-info',
                     ],
                     'roles'      => [
                         Registry::MANAGER_RESTAURANT,
@@ -1756,6 +1757,59 @@ class DefaultController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/integration/vetis/product-full-info",
+     *     tags={"Integration/vetis"},
+     *     summary="Полная информация о продукции",
+     *     description="Полная информация о продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "guid": "f73bad6a-8894-44e6-911e-b7f1c1e71466"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "name": "Агуша БиоКефир 3.2% 204г БЗ 12Х",
+     *                  "uuid": "0001b743-21c1-41a3-aac0-bd4e6d21cfa6",
+     *                  "guid": "308a4f21-a5fd-47c4-bb98-71a967999561",
+     *                  "form": "кисломолочный напиток",
+     *                  "article": "340033884",
+     *                  "gtin": "4602541000035",
+     *                  "gost": "ТУ 10.86.10-115-05268977-2014",
+     *                  "active": 1,
+     *                  "package_type": "кг",
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionProductFullInfo()
+    {
+        $this->response = (new VetisWaybill())->getProductFullInfo($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/integration/vetis/create-product-item",
      *     tags={"Integration/vetis"},
      *     summary="Добавление новой продукции в справочник наименований продукции",
@@ -2391,6 +2445,55 @@ class DefaultController extends WebApiController
     public function actionResolveDiscrepancy()
     {
         $this->response = (new VetisWaybill())->resolveDiscrepancy($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/resolve-discrepancy-partial",
+     *     tags={"Integration/vetis"},
+     *     summary="Частичное списание продукции",
+     *     description="Частичное списание продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": 1,
+     *                      "amount": 1,
+     *                      "reason": "Причина",
+     *                      "description": "Описание",
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionResolveDiscrepancyPartial()
+    {
+        $this->response = (new VetisWaybill())->resolveDiscrepancyPartial($this->request);
     }
 
 }

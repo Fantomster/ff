@@ -8,10 +8,12 @@
 namespace api_web\classes;
 
 use api_web\components\{Registry, WebApi};
+use api_web\exceptions\ValidationException;
 use api_web\helpers\{CurrencyHelper, WebApiHelper};
 use common\models\{Catalog, CatalogBaseGoods, CatalogGoods, Currency, Organization, ProductAnalog};
 use yii\data\{ActiveDataProvider, Pagination};
 use yii\db\{Expression, Query};
+use yii\helpers\ArrayHelper;
 
 class AnalogWebApi extends WebApi
 {
@@ -135,6 +137,7 @@ class AnalogWebApi extends WebApi
 
         $query = new Query();
         $result = $query
+            ->distinct()
             ->select([
                 'product_id'   => 'cbg.id',
                 'product_name' => 'cbg.product',
@@ -169,6 +172,126 @@ class AnalogWebApi extends WebApi
         }
 
         return ["items" => $items];
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws \Throwable
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function saveGroup($request)
+    {
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            $firstProduct = current($request);
+            $analogs = $this->findAnalogGroup($firstProduct['analog_group']);
+            if (empty($analogs)) {
+                $this->createAnalogGroup($request);
+            } else {
+                $this->updateAnalogGroup($request, $analogs, $firstProduct['analog_group']);
+            }
+            $t->commit();
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+        return $this->getProductAnalogList(['product_id' => $firstProduct['id']]);
+    }
+
+    /**
+     * @param $id
+     * @return array|ProductAnalog[]|\yii\db\ActiveRecord[]
+     */
+    private function findAnalogGroup($id)
+    {
+        return ProductAnalog::find()->where([
+            'OR',
+            ['=', 'id', $id],
+            ['=', 'parent_id', $id]
+        ])
+            ->orderBy(['sort_value' => SORT_ASC])
+            ->all();
+    }
+
+    /**
+     * @param $products
+     * @throws ValidationException
+     */
+    private function createAnalogGroup($products): void
+    {
+        ArrayHelper::multisort($products, 'sort_value');
+        $parent_id = null;
+
+        foreach ($products as $product) {
+            $model = new ProductAnalog();
+            $model->product_id = (int)$product['id'];
+            $model->client_id = $this->user->organization_id;
+            $model->sort_value = (int)$product['sort_value'];
+            $model->coefficient = $product['coefficient'];
+            $model->parent_id = $parent_id;
+
+            if ($model->save()) {
+                $parent_id = $parent_id ?? $model->id;
+            } else {
+                throw new ValidationException($model->getFirstErrors());
+            }
+        }
+    }
+
+    /**
+     * @param $products
+     * @param $analogs
+     * @param $oldGroupId
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    private function updateAnalogGroup($products, $analogs, $oldGroupId)
+    {
+        $productsIds = ArrayHelper::getColumn($products, 'id');
+        ArrayHelper::multisort($products, 'sort_value');
+        /** @var ProductAnalog $model */
+        foreach ($analogs as $model) {
+            if (!in_array($model->product_id, $productsIds)) {
+                $model->delete();
+            }
+        }
+
+        foreach ($products as $product) {
+            $model = ProductAnalog::findOne([
+                'client_id'  => $this->user->organization_id,
+                'product_id' => $product['id']
+            ]);
+            if (!$model) {
+                $model = new ProductAnalog();
+                $model->product_id = (int)$product['id'];
+                $model->client_id = $this->user->organization_id;
+            }
+
+            $model->sort_value = (int)$product['sort_value'];
+            $model->coefficient = $product['coefficient'];
+            $model->parent_id = $oldGroupId;
+
+            if (!$model->save()) {
+                throw new ValidationException($model->getFirstErrors());
+            }
+        }
+
+        $firstProductId = current($products)['id'];
+        $parentModel = ProductAnalog::findOne([
+            'client_id'  => $this->user->organization_id,
+            'product_id' => $firstProductId
+        ]);
+
+        ProductAnalog::updateAll(['parent_id' => $parentModel->id], [
+            'client_id'  => $this->user->organization_id,
+            'product_id' => $productsIds
+        ]);
+
+        $parentModel->parent_id = null;
+        if (!$parentModel->save()) {
+            throw new ValidationException($parentModel->getFirstErrors());
+        }
     }
 
     /**

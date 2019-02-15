@@ -134,7 +134,7 @@ class RkServicedata extends \yii\db\ActiveRecord
 
                 if (!$model->save()) {
                     \Yii::error('Не удалось сохранить запись в таблице rk_dic');
-                    print_r($model->getErrors());
+                    \Yii::error($model->getErrors());
                 }
             }
         }

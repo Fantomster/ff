@@ -50,11 +50,13 @@ class AnalogWebApi extends WebApi
             ->from(Catalog::tableName() . ' as cat')
             ->innerJoin(CatalogBaseGoods::tableName() . ' as cbg', "cat.id = cbg.cat_id")
             ->innerJoin(CatalogGoods::tableName() . ' as cg', "cbg.id = cg.base_goods_id")
-            ->leftJoin(ProductAnalog::tableName() . ' as pa', "pa.product_id = cbg.id")
+            ->leftJoin(ProductAnalog::tableName() . ' as pa', "pa.product_id = cbg.id AND pa.client_id = :cid", [
+                ":cid" => $this->user->organization->id
+            ])
             ->leftJoin(Currency::tableName() . ' as cur', "cur.id = cat.currency_id")
             ->innerJoin(Organization::tableName() . ' as o', "cbg.supp_org_id = o.id")
             ->andWhere([
-                'cat.id' => $this->user->organization->getCatalogsLazyVendor()
+                'cat.id' => explode(',', $this->user->organization->getCatalogs())
             ]);
 
         if ($sort && in_array(ltrim($sort, '-'), $this->arAvailableFields)) {

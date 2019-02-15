@@ -647,11 +647,14 @@ class LazyVendorWebApi extends WebApi
                 throw new ValidationException($link->getFirstErrors());
             }
             $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
         }
         return ['result' => true];
     }
-  
-  /**
+
+    /**
      * Изменение информации о поставщике
      *
      * @param $post

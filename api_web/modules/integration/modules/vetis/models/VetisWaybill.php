@@ -946,20 +946,22 @@ class VetisWaybill extends WebApi
             $production2lvl = VetisProductByType::find()->select(['name'])
                 ->where(['guid' => $attributes->batch->product->guid])->one();
         }
+        $arResearch = [];
         if (isset($attributes->vetEventList->laboratoryResearch)) {
-            $arResearch = [];
             foreach ($attributes->vetEventList->laboratoryResearch as $research) {
-                $arResearch[] = [
-                    'issue_id'      => $research->referencedDocument->issueNumber ?? null,
-                    'expertise_id'  => $research->expertiseID ?? null,
-                    'laboratory'    => $research->operator->name ?? null,
-                    'method'        => $research->method->name ?? null,
-                    'indicator'     => $research->indicator->name ?? null,
-                    'result_date'   => $research->actualDateTime ?? null,
-                    'research_date' => $research->referencedDocument->issueDate ?? null,
-                    'result'        => $research->result ?? null,
-                    'conclusion'    => $research->conclusion ?? null,
-                ];
+                if (isset($research->referencedDocument)) {
+                    $arResearch[] = [
+                        'issue_id'      => $research->referencedDocument->issueNumber ?? null,
+                        'expertise_id'  => $research->expertiseID ?? null,
+                        'laboratory'    => $research->operator->name ?? null,
+                        'method'        => $research->method->name ?? null,
+                        'indicator'     => $research->indicator->name ?? null,
+                        'result_date'   => $research->actualDateTime ?? null,
+                        'research_date' => $research->referencedDocument->issueDate ?? null,
+                        'result'        => $research->result ?? null,
+                        'conclusion'    => $research->conclusion ?? null,
+                    ];
+                }
             }
         }
 

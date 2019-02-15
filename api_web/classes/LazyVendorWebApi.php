@@ -617,7 +617,7 @@ class LazyVendorWebApi extends WebApi
         $this->getVendor($vendId);
         /**@var $link RelationSuppRest */
         $link = RelationSuppRest::find()
-            ->where(['rest_org_id' => $restId, 'supp_org_id' => $vendId, 'deleted' => 0])->one();
+            ->where(['rest_org_id' => $restId, 'supp_org_id' => $vendId, 'invite' => 1])->one();
         if (empty($link)) {
             throw new BadRequestHttpException('lazy_vendor.not_is_my_vendor');
         }
@@ -627,12 +627,14 @@ class LazyVendorWebApi extends WebApi
             if ($catId > 0) {
                 $cat = Catalog::find()->where(['id' => $catId])->one();
                 /**@var $cat Catalog */
-                $cat->status = 0;
+                $cat->status = Catalog::STATUS_OFF;
                 if (!$cat->save()) {
                     throw new ValidationException($cat->getFirstErrors());
                 }
             }
-            $link->deleted = 1;
+            $link->deleted = RelationSuppRest::CATALOG_STATUS_OFF;
+            $link->invite = RelationSuppRest::INVITE_OFF;
+            $link->status = RelationSuppRest::CATALOG_STATUS_OFF;
             if (!$link->save()) {
                 throw new ValidationException($link->getFirstErrors());
             }

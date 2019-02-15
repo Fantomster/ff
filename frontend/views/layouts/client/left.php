@@ -78,7 +78,7 @@ $licenses = $user->organization->getLicenseList();
                     ['label'   => Yii::t('message', 'frontend.views.layouts.client.left.fullmap', ['ru' => 'Сопоставление']), 'icon' => 'signal',
                      'url'     => ['/clientintegr/fullmap'],
                      'options' => ['class' => 'hidden-xs'],
-                     'visible' => (!in_array($user->role_id, $disabled_roles) && !empty(Organization::getLicenseList()) && ($suppliersCount != 0))],
+                     'visible' => (!in_array($user->role_id, $disabled_roles) && !empty((new Organization)->getLicenseList()) && ($suppliersCount != 0))],
 //                        ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/client/tutorial', 'video' => 'video']],
                     // ['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],
                     //   ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.mixcart.ru?news', 'options' => ['class' => 'hidden-xs']],

@@ -290,8 +290,8 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
     }
 
     /**
-     * @param $waybill_id
      * @return string
+     * @throws NotFoundHttpException
      */
     public function actionMap()
     {

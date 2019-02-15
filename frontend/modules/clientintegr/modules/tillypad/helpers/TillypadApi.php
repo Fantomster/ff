@@ -3,9 +3,10 @@
 namespace frontend\modules\clientintegr\modules\tillypad\helpers;
 
 use api\common\models\iiko\iikoDicconst;
-use api\common\models\iiko\TillypadWaybill;
+use api\common\models\tillypad\TillypadWaybill;
 use api_web\modules\integration\modules\tillypad\helpers\TillypadLogger;
 use common\models\Waybill;
+use frontend\modules\clientintegr\components\CreateWaybillByOrderInterface;
 use yii\helpers\ArrayHelper;
 
 class TillypadApi
@@ -137,10 +138,11 @@ class TillypadApi
     /**
      * @param TillypadWaybill|Waybill $model
      * @return mixed
+     * @throws \Exception
      */
     public function sendWaybill($model)
     {
-        if ($model instanceof TillypadWaybill || $model instanceof \api_web\modules\integration\models\TillypadWaybill) {
+        if ($model instanceof CreateWaybillByOrderInterface) {
             $url = '/documents/import/incomingInvoice';
             return $this->sendXml($url, $model->getXmlDocument());
         }

@@ -3,41 +3,54 @@
 namespace api\common\models\tillypad;
 
 use api\common\models\AllMaps;
+use api\common\models\iiko\iikoAgent;
+use api\common\models\iiko\iikoDicconst;
+use api\common\models\iiko\iikoService;
+use api\common\models\iiko\iikoStore;
+use api\common\models\iiko\iikoWaybill;
+use api\common\models\iiko\iikoWaybillData;
+use api\common\models\iiko\iikoWaybillStatus;
+use api_web\helpers\TillypadApi;
 use api_web\helpers\WebApiHelper;
-use api_web\modules\integration\classes\DocumentWebApi;
 use common\helpers\DBNameHelper;
 use common\models\Order;
 use common\models\OrderContent;
 use frontend\modules\clientintegr\components\CreateWaybillByOrderInterface;
 use Yii;
 use frontend\controllers\ClientController;
-use yii\helpers\ArrayHelper;
-use frontend\modules\clientintegr\modules\iiko\helpers\TillypadApi;
 use api_web\components\Registry;
 
 /**
  * This is the model class for table "iiko_waybill".
  *
- * @property integer $id
- * @property string  $agent_uuid
- * @property integer $org
- * @property integer $order_id
- * @property string  $num_code
- * @property string  $text_code
- * @property integer $readytoexport
- * @property integer $status_id
- * @property integer $store_id
- * @property string  $note
- * @property integer $is_duedate
- * @property integer $active
- * @property integer $vat_included
- * @property string  $doc_date
- * @property string  $created_at
- * @property string  $exported_at
- * @property string  $updated_at
- * @property integer $payment_delay_date
- * @property integer $service_id
- * @property Order   $order;
+ * @property integer             $id
+ * @property string              $agent_uuid
+ * @property integer             $org
+ * @property integer             $order_id
+ * @property string              $num_code
+ * @property string              $text_code
+ * @property integer             $readytoexport
+ * @property integer             $status_id
+ * @property integer             $store_id
+ * @property string              $note
+ * @property integer             $is_duedate
+ * @property integer             $active
+ * @property integer             $vat_included
+ * @property string              $doc_date
+ * @property string              $created_at
+ * @property string              $exported_at
+ * @property string              $updated_at
+ * @property integer             $payment_delay_date
+ * @property integer             $service_id
+ * @property Order               $order         ;
+ * @property int                 $payment_delay [int(11)]  Отсрочка платежа по данной накладной [тип: число, по умолчанию: 0, NOT NULL]
+ * @property \yii\db\ActiveQuery $status
+ * @property mixed               $xmlDocument
+ * @property array               $vatList
+ * @property \yii\db\ActiveQuery $store
+ * @property \yii\db\ActiveQuery $waybillData
+ * @property \yii\db\ActiveQuery $agent
+ * @property int                 $autostatus_id [int(11)]  Идентификатор статуса автоматической выгрузки накладной (0 - отклонена, 1 - выгружена автоматически, 2 - выгружена вручную, 3 - сформирована)
  */
 class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInterface
 {
@@ -55,7 +68,8 @@ class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrd
     }
 
     /**
-     * @return \yii\db\Connection the database connection used by this AR class.
+     * @return object
+     * @throws \yii\base\InvalidConfigException
      */
     public static function getDb()
     {
@@ -192,6 +206,7 @@ class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrd
 
     /**
      * @return mixed
+     * @throws \yii\base\InvalidConfigException
      */
     public function getXmlDocument()
     {
@@ -294,15 +309,15 @@ class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrd
 
         $res = true;
 
-        $order = \common\models\Order::findOne(['id' => $order_id]);
+        $order = Order::findOne(['id' => $order_id]);
 
         if (!$order) {
             \Yii::error('Cant find order during sending waybill');
             throw new \Exception('Ошибка при отправке.' . $order_id);
         }
 
-        $allMapTableName = DBNameHelper::getApiName().'.'.AllMaps::tableName();
-        $client_id = self::getClientIDcondition($order->client_id, $allMapTableName.'.product_id');
+        $allMapTableName = DBNameHelper::getApiName() . '.' . AllMaps::tableName();
+        $client_id = self::getClientIDcondition($order->client_id, $allMapTableName . '.product_id');
         $orderContentTableName = OrderContent::tableName();
         $stories = OrderContent::find()
             ->select("$allMapTableName.store_rid")
@@ -348,19 +363,29 @@ class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrd
         return $res;
     }
 
+    /**
+     * @param $org_id
+     * @param $product_field
+     * @return string
+     */
     private static function getClientIDcondition($org_id, $product_field)
     {
         $client_id = $org_id;
         $mainOrg = iikoService::getMainOrg($org_id);
 
         if ($mainOrg != $org_id) {
-            $dbName = DBNameHelper::getApiName().".".AllMaps::tableName();
+            $dbName = DBNameHelper::getApiName() . "." . AllMaps::tableName();
             $client_id = "IF($product_field in (select product_id from $dbName where service_id = " . Registry::IIKO_SERVICE_ID . " and org_id = $client_id), $client_id, $mainOrg)";
         }
 
         return $client_id;
     }
 
+    /**
+     * @param $order_id
+     * @return bool
+     * @throws \Exception
+     */
     public static function exportWaybill($order_id)
     {
         $res = true;
@@ -404,26 +429,29 @@ class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrd
         return $res;
     }
 
+    /**
+     * @param int $service_id
+     */
     protected function createWaybillData($service_id = Registry::IIKO_SERVICE_ID)
     {
         $dbName = DBNameHelper::getApiName();
 
         $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
-        $allmapTableName = $dbName.".".AllMaps::tableName();
+        $allmapTableName = $dbName . "." . AllMaps::tableName();
 
         if ($waybillMode !== '0') {
             $client_id = self::getClientIDcondition($this->org, $dbName . '.all_map.product_id');
             if ($this->store_id === null) {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin($allmapTableName, OrderContent::tableName().".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ('$client_id')")
-                    ->andWhere($allmapTableName.'.store_rid is null')
+                    ->leftJoin($allmapTableName, OrderContent::tableName() . ".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ('$client_id')")
+                    ->andWhere($allmapTableName . '.store_rid is null')
                     ->all();
             } else {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin($allmapTableName, OrderContent::tableName().".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ('$client_id')")
+                    ->leftJoin($allmapTableName, OrderContent::tableName() . ".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ('$client_id')")
                     ->andWhere($allmapTableName . '.store_rid =' . $this->store_id)
                     ->all();
             }
@@ -498,7 +526,7 @@ class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrd
             }
             $transaction->commit();
         } catch (\Exception $ex) {
-            \yii::error($ex->getTraceAsString());
+            \Yii::error($ex->getTraceAsString());
             $transaction->rollback();
         }
     }

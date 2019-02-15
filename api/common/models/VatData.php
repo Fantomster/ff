@@ -7,7 +7,7 @@ use Yii;
 class VatData
 {
 
-    public function getVatList(): array
+    public static function getVatList(): array
     {
         return [
             '1'    => Yii::t('message', 'frontend.views.order.all', ['ru' => 'Все']),

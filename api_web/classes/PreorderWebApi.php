@@ -825,8 +825,7 @@ class PreorderWebApi extends WebApi
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    public
-    function addProduct(array $post)
+    public function addProduct(array $post)
     {
         $this->validateRequest($post, ['id', 'products']);
         if (!is_array($post['products'])) {

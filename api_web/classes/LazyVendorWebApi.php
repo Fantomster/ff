@@ -598,4 +598,49 @@ class LazyVendorWebApi extends WebApi
 
         return $this->contactList(['id' => $vendor->id]);
     }
+
+    /**
+     * Удаление ленивого поставщика
+     *
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function delete($post)
+    {
+        $this->validateRequest($post, ['vendor_id']);
+        $restId = $this->user->organization_id;
+        if (!is_int($post['vendor_id'])) {
+            throw new BadRequestHttpException('lazy_vendor.wrong_value');
+        }
+        $vendId = $post['vendor_id'];
+        $this->getVendor($vendId);
+        /**@var $link RelationSuppRest */
+        $link = RelationSuppRest::find()
+            ->where(['rest_org_id' => $restId, 'supp_org_id' => $vendId, 'deleted' => 0])->one();
+        if (empty($link)) {
+            throw new BadRequestHttpException('lazy_vendor.not_is_my_vendor');
+        }
+        $catId = (int)$this->user->organization->getCatalogs($vendId);
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            if ($catId > 0) {
+                $cat = Catalog::find()->where(['id' => $catId])->one();
+                /**@var $cat Catalog */
+                $cat->status = 0;
+                if (!$cat->save()) {
+                    throw new ValidationException($cat->getFirstErrors());
+                }
+            }
+            $link->deleted = 1;
+            if (!$link->save()) {
+                throw new ValidationException($link->getFirstErrors());
+            }
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+        return ['result' => true];
+    }
 }

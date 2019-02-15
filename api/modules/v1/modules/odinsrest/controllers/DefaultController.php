@@ -252,7 +252,7 @@ class DefaultController extends Controller
             }
             $i++;
             $returnArray[$i]['cid']        = $oneSPosition->cid;
-            $returnArray[$i]['updated_at'] = date('Y-m-d h:i:s');
+            $returnArray[$i]['updated_at'] = \gmdate('Y-m-d H:i:s');;
         }
         $modelName::updateAll(['is_active' => 0], [
             'and',

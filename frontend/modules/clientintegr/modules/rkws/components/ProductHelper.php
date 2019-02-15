@@ -289,7 +289,7 @@ class ProductHelper extends AuthHelper
                 $amodel->is_active  = 1;
 
                 //    $amodel->agent_type = $a['type'];
-                $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+                $amodel->updated_at = \gmdate('Y-m-d H:i:s');;
 
                 if (!$amodel->save()) {
                     $er = $amodel->getErrors();
@@ -298,6 +298,7 @@ class ProductHelper extends AuthHelper
                 $scount++;
             } else {
                 $checks->is_active = 1;
+                $checks->updated_at = \gmdate('Y-m-d H:i:s');
                 if (!$checks->save()) {
                     $er = $checks->getErrors();
                     $this->log('ERROR:: Product ' . $checks->rid . 'cannot be saved - ' . $er);
@@ -340,7 +341,7 @@ class ProductHelper extends AuthHelper
 
         $fcount = RkProduct::find()->andWhere('acc= :org_id', [':org_id' => $acc])->andWhere('is_active = 1')->count('*');
 
-        $rmodel->updated_at   = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        $rmodel->updated_at   = \gmdate('Y-m-d H:i:s');;
         $rmodel->dicstatus_id = 6;
         $rmodel->obj_count    = isset($fcount) ? $fcount : 0;
 

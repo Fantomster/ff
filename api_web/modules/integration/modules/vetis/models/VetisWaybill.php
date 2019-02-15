@@ -849,8 +849,8 @@ class VetisWaybill extends WebApi
                 'country'         => $model->producer_country,
                 'balance'         => $model->amount,
                 'unit'            => $model->unit,
-                'created_at'      => WebApiHelper::asDatetime($model->create_date),
-                'production_date' => WebApiHelper::asDatetime($model->production_date),
+                'created_at'      => $model->create_date,
+                'production_date' => $model->production_date,
                 'expiry_date'     => $model->expiry_date,
             ];
         }
@@ -875,7 +875,7 @@ class VetisWaybill extends WebApi
     {
         $query = MercStockEntry::find()->select(['producer_name', 'producer_guid'])->distinct()
             ->where(['owner_guid' => $this->helper->getEnterpriseGuid($this->user->organization_id)])
-            ->andWhere(['not', ['producer_guid' => null]]);
+            ->andWhere(['not', ['producer_guid' => null]])->orderBy('producer_name');
 
         return $query->all();
     }
@@ -904,6 +904,9 @@ class VetisWaybill extends WebApi
     {
         $this->validateRequest($request, ['uuid']);
         $model = MercStockEntry::findOne(['uuid' => $request['uuid']]);
+        if (!$model) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+        }
         $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
         $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\Products();
         $attributes = unserialize($model->raw_data);
@@ -917,6 +920,64 @@ class VetisWaybill extends WebApi
             'batch_id'     => $model->batch_id,
             'packing'      => $attributes->batch->packageList->package->packingType->name ?? null,
 
+        ];
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getProductionJournalFullInfo($request)
+    {
+        $this->validateRequest($request, ['uuid']);
+        $model = MercStockEntry::findOne(['uuid' => $request['uuid']]);
+        if (!$model) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+        }
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\Products();
+        $attributes = unserialize($model->raw_data);
+        if (isset($attributes->batch->subProduct->guid)) {
+            $productionForm = VetisSubproductByProduct::find()->select(['name'])
+                ->where(['guid' => $attributes->batch->subProduct->guid])->one();
+        }
+        if (isset($attributes->batch->product->guid)) {
+            $production2lvl = VetisProductByType::find()->select(['name'])
+                ->where(['guid' => $attributes->batch->product->guid])->one();
+        }
+        if (isset($attributes->vetEventList->laboratoryResearch)) {
+            $arResearch = [];
+            foreach ($attributes->vetEventList->laboratoryResearch as $research) {
+                $arResearch[] = [
+                    'issue_id'      => $research->referencedDocument->issueNumber,
+                    'expertise_id'  => $research->expertiseID,
+                    'laboratory'    => $research->operator->name,
+                    'method'        => $research->method->name,
+                    'indicator'     => $research->indicator->name,
+                    'result_date'   => $research->actualDateTime,
+                    'research_date' => $research->referencedDocument->issueDate,
+                    'result'        => $research->result,
+                    'conclusion'    => $research->conclusion,
+                ];
+            }
+        }
+
+        return [
+            'name'                 => $model->product_name,
+            'product_type'         => VetisHelper::$vetis_product_types[$model->product_type],
+            'production_type_lvl2' => $production2lvl['name'] ?? null,
+            'product_form'         => $productionForm->name ?? null,
+            'number'               => $model->entryNumber,
+            'create_date'          => $model->create_date,
+            'batch_id'             => $model->batch_id,
+            'balance'              => $model->amount,
+            'production_date'      => $model->production_date,
+            'expiry_date'          => $model->expiry_date,
+            'packing'              => $attributes->batch->packageList->package->packingType->name ?? null,
+            'enterprise'           => $attributes->batch->origin->producer->enterprise->name ?? null,
+            'country'              => $model->producer_country,
+            'research'             => $arResearch
         ];
     }
 }

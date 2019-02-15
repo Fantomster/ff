@@ -229,11 +229,11 @@ class LazyVendorController extends WebApiController
      *                                  "order_done": 0
      *                                  }
      *                  },
-    "pagination": {
-    "page": 1,
-    "page_size": 12
-    }
-    }
+     *   "pagination": {
+     *   "page": 1,
+     *   "page_size": 12
+     *    }
+     *    }
      *                      }
      *          ),
      *     ),
@@ -542,6 +542,87 @@ class LazyVendorController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/lazy-vendor/contact-update",
+     *     tags={"LazyVendor"},
+     *     summary="Редактирование уведомлений в контактах ленивого поставщика",
+     *     description="Редактирование уведомлений в контактах ленивого поставщика",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                       "vendor_id": 15,
+     *                       "notifications": {
+     *                           {
+     *                               "id": 1,
+     *                               "order_created": 1,
+     *                               "order_canceled": 1,
+     *                               "order_changed": 1,
+     *                               "order_done": 1,
+     *                           },
+     *                           {
+     *                               "id": 2,
+     *                               "order_created": 1,
+     *                               "order_canceled": 1,
+     *                               "order_changed": 1,
+     *                               "order_done": 1,
+     *                           }
+     *                       }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "id": 1,
+     *                      "order_created": 0,
+     *                      "order_canceled": 1,
+     *                      "order_changed": 1,
+     *                      "order_done": 0,
+     *                  },
+     *                  {
+     *                      "id": 2,
+     *                      "order_created": 1,
+     *                      "order_canceled": 1,
+     *                      "order_changed": 1,
+     *                      "order_done": 1,
+     *                  },
+     *                  {
+     *                      "id": 3,
+     *                      "order_created": 1,
+     *                      "order_canceled": 1,
+     *                      "order_changed": 1,
+     *                      "order_done": 1,
+     *                  }
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionContactUpdate()
+    {
+        $this->response = $this->classWebApi->contactUpdate($this->request);
+    }
+  
+     /**
      * @SWG\Post(path="/lazy-vendor/update",
      *     tags={"LazyVendor"},
      *     summary="Изменение информации о ленивом поставщике",

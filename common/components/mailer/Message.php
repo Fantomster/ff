@@ -245,7 +245,7 @@ class Message extends BaseMessage
     public function setBody($text, $html = null)
     {
         $this->messageText = $text;
-        $this->messageHtml = $html;
+        $this->messageHtml = $html ?? $text;
     }
 
     /**

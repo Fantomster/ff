@@ -19,7 +19,8 @@ return [
         '/market/categories',
         '/market/organizations',
         '/payment/currency-list',
-        '/system/datetime'
+        '/system/datetime',
+        '/promo/send',
     ],
     'allow_methods_without_license' => [
         '/user/login',

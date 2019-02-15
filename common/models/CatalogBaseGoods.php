@@ -40,7 +40,7 @@ use yii\web\BadRequestHttpException;
  * @property int              $mp_show_price        Показатель состояния необходимости показа цены на товар в Market
  *           Place
  * @property int              $rating               Рейтинг товара на Market Place
- * @property int              $barcode              Штрих-код товара на Market Place
+ * @property string           $barcode              Штрих-код товара на Market Place
  * @property string           $edi_supplier_article Артикул товара для EDI
  * @property string           $ssid                 Идентификатор SSID (не используется)
  *
@@ -134,7 +134,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
             [['units'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?(NULL)?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'min' => 0.00],
-            [['barcode'], 'integer'],
+            [['barcode'], 'string'],
             [['sub1', 'sub2'], 'required',
                 'when'       => function ($model) {
                     return $model->market_place == self::MARKETPLACE_ON;

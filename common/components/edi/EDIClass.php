@@ -210,7 +210,7 @@ class EDIClass extends Component
                     $contID = (int)$position->PRODUCT;
                 }
                 if (!$contID) continue;
-                $barcode = (int)$position->PRODUCT;
+                $barcode = $position->PRODUCT;
                 if (!in_array($contID, $orderContentArr) && !in_array($barcode, $barcodeArray)) {
                     $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
                     if (!$good) {
@@ -396,7 +396,9 @@ class EDIClass extends Component
         foreach ($goods as $good) {
             $barcode = (is_array($good->PRODUCT)) ? $good->PRODUCT[0] : $good->PRODUCT;
             $barcode = (String)$barcode;
-            if (!$barcode) continue;
+            if (!$barcode) {
+                continue;
+            }
             $barcodeArray[] = $barcode;
             $ed = (String)$good->UNIT ?? (String)$good->QUANTITYOFCUINTUUNIT;
             $ed = OuterUnit::getInnerName($ed, Registry::EDI_SERVICE_ID);
@@ -533,7 +535,7 @@ class EDIClass extends Component
             'PRICE'              => (float)$position->PRICE[0] ?? (float)$position->PRICE ?? 0,
             'PRICEWITHVAT'       => (isset($position->PRICEWITHVAT)) ? (float)$position->PRICEWITHVAT : 0.00,
             'TAXRATE'            => (isset($position->TAXRATE)) ? (int)$position->TAXRATE : 0,
-            'BARCODE'            => (int)$position->PRODUCT,
+            'BARCODE'            => $position->PRODUCT,
             'WAYBILLNUMBER'      => isset($position->WAYBILLNUMBER) ? $position->WAYBILLNUMBER : null,
             'WAYBILLDATE'        => isset($position->WAYBILLDATE) ? $position->WAYBILLDATE : null,
             'DELIVERYNOTENUMBER' => isset($position->DELIVERYNOTENUMBER) ? $position->DELIVERYNOTENUMBER : null,

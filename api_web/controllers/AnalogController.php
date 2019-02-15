@@ -428,8 +428,8 @@ class AnalogController extends WebApiController
      *                              "symbol": "RUB"
      *                          }
      *                       }
-     *                  }
-     *                  "items_delete":{15523, 156687}
+     *                  },
+     *                  "items_delete":{ 15523, 156687}
      *              }
      *         )
      *     ),

@@ -609,4 +609,56 @@ class LazyVendorWebApi extends WebApi
 
         return $this->contactList(['id' => $vendor->id]);
     }
+  
+  /**
+     * Изменение информации о поставщике
+     *
+     * @param $post
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
+    public function update($post)
+    {
+        $this->validateRequest($post, ['lazy-vendor']);
+        $request = $post['lazy-vendor'];
+        $this->validateRequest($request, ['id', 'name', 'address', 'email', 'phone', 'contact_name', 'inn', 'additional_params']);
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $addParams = $request['additional_params'];
+            /**
+             * @var $vendor Organization
+             */
+            $vendor = $this->getVendor($request['id']);
+            $vendor->name = $request['name'];
+            $vendor->address = $request['address'];
+            $vendor->email = $request['email'];
+            $vendor->phone = $request['phone'];
+            $vendor->contact_name = $request['contact_name'];
+            $vendor->inn = $request['inn'];
+            $vendor->type_id = Organization::TYPE_LAZY_VENDOR;
+            if (!$vendor->save()) {
+                throw new ValidationException($vendor->getFirstErrors());
+            }
+            $delivery = $vendor->delivery;
+            if (!empty($delivery)) {
+                $delivery->delivery_charge = $addParams['delivery_price'] ?? 0;
+                $delivery->delivery_discount_percent = $addParams['delivery_discount_percent'] ?? 0;
+                $delivery->min_order_price = $addParams['min_order_price'] ?? 0;
+                if (!empty($addParams['delivery_days'])) {
+                    foreach ($addParams['delivery_days'] as $key => $value) {
+                        $delivery->setAttribute($key, (int)$value);
+                    }
+                }
+                if (!($f = $delivery->save())) {
+                    throw new ValidationException($delivery->getFirstErrors());
+                }
+            }
+            $transaction->commit();
+            return WebApiHelper::prepareOrganization($vendor);
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+    }
 }

@@ -120,7 +120,7 @@ class OneSService extends \yii\db\ActiveRecord
 
                     if (!$model->save()) {
                         \Yii::error('Не удалось сохранить запись в таблице one_s_dic');
-                        \Yii::error(print_r($model->getErrors()));
+                        \Yii::error(print_r($model->getErrors(), true));
                     }
                 }
             }

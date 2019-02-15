@@ -10,13 +10,16 @@ use common\helpers\DBNameHelper;
 
 class iikoServiceSearch extends iikoService
 {
+
+    public $fd_range;
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['created_at', 'updated_at', 'is_deleted', 'user_id', 'org', 'fd', 'td', 'status_id', 'is_deleted', 'code', 'name', 'address', 'phone'], 'safe'],
+            [['created_at', 'updated_at', 'is_deleted', 'user_id', 'org', 'fd', 'td', 'status_id', 'is_deleted', 'code', 'name', 'address', 'phone', 'fd_range'], 'safe'],
         ];
     }
 
@@ -52,11 +55,20 @@ class iikoServiceSearch extends iikoService
             return $dataProvider;
         }
 
-        // grid filtering conditions
         $query->andFilterWhere(['status_id' => $this->status_id])
-            ->andFilterWhere(['like', 'fd', $this->fd])
-            ->andFilterWhere(['like', 'td', $this->td])
             ->andFilterWhere(['like', 'organization.name', $this->org]);
+
+        if (!empty($this->fd)) {
+            list($day, $month, $year) = explode('.', $this->fd);
+            $fd_normal = $year . '-' . $month . '-' . $day . ' 00:00:00';
+            $query->andFilterWhere(['>=', 'fd', $fd_normal]);
+        }
+
+        if (!empty($this->td)) {
+            list($day, $month, $year) = explode('.', $this->td);
+            $td_normal = $year . '-' . $month . '-' . $day . ' 23:59:59';
+            $query->andFilterWhere(['<=', 'td', $td_normal]);
+        }
 
         return $dataProvider;
     }

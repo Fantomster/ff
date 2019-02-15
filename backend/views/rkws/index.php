@@ -27,10 +27,36 @@ $gridColumns = [
         'attribute' => 'address',
         'label'     => 'Адрес',
     ],
-    'td',
     [
-        'attribute' => 'last_active',
-        'label'     => 'Посл. Активность',
+        'attribute'           => 'td',
+        'filterType'          => \kartik\grid\GridView::FILTER_DATE,
+        'filterWidgetOptions' => ([
+            'model'         => $searchModel,
+            'attribute'     => 'date',
+            'pluginOptions' => [
+                'autoclose' => true,
+                'format'    => 'dd.mm.yyyy',
+            ]
+        ]),
+        'value'               => function ($data) {
+            return date('d.m.Y', strtotime($data->td));
+        }
+    ],
+    [
+        'attribute'           => 'last_active',
+        'label'               => 'Посл. Активность',
+        'filterType'          => \kartik\grid\GridView::FILTER_DATE,
+        'filterWidgetOptions' => ([
+            'model'         => $searchModel,
+            'attribute'     => 'date',
+            'pluginOptions' => [
+                'autoclose' => true,
+                'format'    => 'dd.mm.yyyy',
+            ]
+        ]),
+        'value'               => function ($data) {
+            return date('d.m.Y', strtotime($data->last_active));
+        }
     ],
     [
         'attribute' => 'status_id',

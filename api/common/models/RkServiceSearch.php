@@ -50,19 +50,26 @@ class RkServiceSearch extends RkService
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 
-        // grid filtering conditions
         $query->andFilterWhere(['status_id' => $this->status_id])
-            ->andFilterWhere(['like', 'id', $this->id])
-            ->andFilterWhere(['like', 'code', $this->code])
+            ->andFilterWhere(['id' => $this->id])
+            ->andFilterWhere(['code' => $this->code])
             ->andFilterWhere(['like', 'address', $this->address])
-            ->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'td', $this->td])
-            ->andFilterWhere(['like', 'last_active', $this->last_active]);
+            ->andFilterWhere(['like', 'name', $this->name]);
+
+        if (!empty($this->td)) {
+            list($day, $month, $year) = explode('.', $this->td);
+            $td_normal = $year . '-' . $month . '-' . $day . ' 23:59:59';
+            $query->andFilterWhere(['<=', 'td', $td_normal]);
+        }
+
+        if (!empty($this->last_active)) {
+            list($day, $month, $year) = explode('.', $this->last_active);
+            $last_active_normal = $year . '-' . $month . '-' . $day . ' 23:59:59';
+            $query->andFilterWhere(['<=', 'last_active', $last_active_normal]);
+        }
 
         return $dataProvider;
     }

@@ -543,13 +543,7 @@ class LazyVendorWebApi extends WebApi
             /**
              * @var $vendor Organization
              */
-            $vendor = Organization::find()->where([
-                'id'      => (int)$request['id'],
-                'type_id' => Organization::TYPE_LAZY_VENDOR
-            ])->one();
-            if (!$vendor) {
-                throw new BadRequestHttpException('vendor.not_exists');
-            }
+            $vendor = $this->getVendor($request['id']);
             $vendor->name = $request['name'];
             $vendor->address = $request['address'];
             $vendor->email = $request['email'];

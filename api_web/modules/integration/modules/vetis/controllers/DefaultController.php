@@ -68,6 +68,7 @@ class DefaultController extends WebApiController
                         'production-journal-full-info',
                         'resolve-discrepancy',
                         'product-full-info',
+                        'resolve-discrepancy-partial',
                     ],
                     'roles'      => [
                         Registry::MANAGER_RESTAURANT,

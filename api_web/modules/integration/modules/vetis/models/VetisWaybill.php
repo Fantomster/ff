@@ -759,7 +759,7 @@ class VetisWaybill extends WebApi
                     $this->addIngredients($productItem->guid, $request['ingredients']);
                 }
             } catch (\Throwable $e) {
-                $this->helper->writeInJournal($e->getMessage(), $this->user->id, $this->user->organization_id, 'CreateVetisProductItem');
+                $this->helper->writeInJournal($e->getMessage(), $this->user->id, $this->user->organization_id, 'error', 'CreateVetisProductItem');
                 return ['result' => false];
             }
         } else {
@@ -1036,7 +1036,7 @@ class VetisWaybill extends WebApi
     }
 
     /**
-     * Метод полного списания все продукции по id,
+     * Метод полного списания все продукции по id
      *
      * @param array $request
      * @return array
@@ -1071,10 +1071,22 @@ class VetisWaybill extends WebApi
         return ['result' => true];
     }
 
+    /**
+     * Метод фактического списания продукции по id, устанавливает кол-во == amount в Меркурии
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \yii\base\InvalidArgumentException
+     */
     public function resolveDiscrepancyPartial($request)
     {
         $this->validateRequest($request, ['id', 'amount', 'reason']);
         $model = new rejectedForm();
+        $model->volume = $request['amount'];
+        $model->reason = $request['reason'];
+        $model->description = $request['description'];
         $data = MercStockEntry::findOne(['id' => $request['id']]);
         if (!$data) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
@@ -1089,7 +1101,7 @@ class VetisWaybill extends WebApi
                     throw new \Exception('vetis.error_resolve_discrepancy_partial');
                 }
             } catch (\Throwable $t) {
-                $this->helper->writeInJournal($t->getMessage(), $this->user->id, $this->user->organization_id, 'resolveDiscrepancyPartialOperation');
+                $this->helper->writeInJournal($t->getMessage(), $this->user->id, $this->user->organization_id, 'error', 'resolveDiscrepancyPartialOperation');
                 return ['result' => false];
             }
         } else {

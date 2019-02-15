@@ -35,15 +35,19 @@ use yii\helpers\ArrayHelper;
  * @property string                   $createDate
  * @property string                   $updateDate
  * @property object                   $productItem
- * @property string                   packagingType_guid
- * @property string                   packagingType_uuid
- * @property string                   unit_uuid
- * @property string                   unit_guid
- * @property int                      packagingQuantity
- * @property float                    packagingVolume
+ * @property string                   $packagingType_guid
+ * @property string                   $packagingType_uuid
+ * @property string                   $unit_uuid
+ * @property string                   $unit_guid
+ * @property int                      $packagingQuantity
+ * @property float                    $packagingVolume
+ * @property int                      $perishable
+ * @property string                   $expiration_date
  * @property VetisSubproductByProduct $subProduct
  * @property VetisUnit                $unit
  * @property VetisPackingType         $packingType
+ * @property VetisProductByType       $product
+ * @property VetisIngredients[]       $ingredients
  */
 class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterface
 {

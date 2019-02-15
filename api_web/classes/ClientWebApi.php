@@ -95,7 +95,7 @@ class ClientWebApi extends WebApi
                 !\Yii::$app->user->can(Registry::ADMINISTRATOR_RESTAURANT) &&
                 !isset($post['is_allowed_for_franchisee'])
             ) {
-                throw new ForbiddenHttpException('Access denied!');
+                throw new ForbiddenHttpException(\Yii::t('yii', 'You are not allowed to perform this action.'));
             }
 
             $this->helper->set($model, $post, ['about', 'contact_name', 'phone', 'email', 'name', 'gmt']);
@@ -268,7 +268,7 @@ class ClientWebApi extends WebApi
         }
 
         $additional_emails = $this->user->organization->additionalEmail;
-        if (!\Yii::$app->user->can(Registry::MANAGER_RESTAURANT)) {
+        if (!\Yii::$app->user->can(Registry::ADMINISTRATOR_RESTAURANT, ['user' => $this->user])) {
             $users = $this->user->id;
             $additional_emails = [];
         }
@@ -562,7 +562,7 @@ class ClientWebApi extends WebApi
             ],
         ];
 
-        if (!\Yii::$app->user->can(Registry::ADMINISTRATOR_RESTAURANT)) {
+        if (!\Yii::$app->user->can(Registry::ADMINISTRATOR_RESTAURANT, ['user' => $this->user])) {
             return ArrayHelper::merge($headers, [
                 'employees'  => [$this->prepareEmployee($this->user)],
                 'pagination' => [

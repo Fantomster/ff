@@ -26,7 +26,7 @@ use Yii;
  * @property string          $weight               Вес товарной упаковки товара
  * @property int             $mp_show_price        Показатель состояния необходимости показа цены на товар в Market
  *           Place
- * @property int             $barcode              Штрих-код товара на Market Place
+ * @property string          $barcode              Штрих-код товара на Market Place
  * @property string          $edi_supplier_article Артикул товара для EDI
  * @property string          $ssid                 Идентификатор SSID (не используется)
  *

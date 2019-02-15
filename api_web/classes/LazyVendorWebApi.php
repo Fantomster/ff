@@ -503,7 +503,8 @@ class LazyVendorWebApi extends WebApi
     {
         return (bool)RelationSuppRest::find()->where([
             'supp_org_id' => $vendor_id,
-            'rest_org_id' => $this->user->organization->id
+            'rest_org_id' => $this->user->organization->id,
+            'invite'      => RelationSuppRest::INVITE_ON
         ])->exists();
     }
 

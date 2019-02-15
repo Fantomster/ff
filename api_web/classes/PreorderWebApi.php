@@ -692,8 +692,6 @@ class PreorderWebApi extends WebApi
         foreach ($preOrder->preorderContents as $index => $preorderContent) {
             $preorderContentToProductId[$preorderContent->product_id] = $index + 1;
         }
-        $productIdInOrderToUpdate = [];
-        $newQuantityArray = [];
         $result = [];
         foreach ($products as $product) {
             $this->validateRequest($product, ['id', 'cat_id', 'vendor_id', 'quantity']);
@@ -709,21 +707,12 @@ class PreorderWebApi extends WebApi
             if (!in_array($product['cat_id'], $catArray)) {
                 throw new BadRequestHttpException('preorder.not_your_catalog');
             }
-            //Если такой продукт уже есть в предзаказе, то сохраняем
-            //его количество в массив
+            //Если такой продукт уже есть в предзаказе, то метод add-product возвращает ошибку
             if (!empty($preorderContentToProductId[$product['id']])) {
-                $productIdInOrderToUpdate[] = $product['id'];
-                $newQuantityArray[$product['id']] = $product['quantity'];
+                throw new BadRequestHttpException('preorder.product_is_in_preorder');
             } else {
                 //В противном случае записываем параметры продуктов в результирующий массив
                 $result[] = $product;
-            }
-        }
-        if (!empty($newQuantityArray)) {
-            $orders = Order::find()->where(['preorder_id' => $preOrder->id])
-                ->with('orderContent')->indexBy('id')->all();
-            foreach ($orders as $index => $order) {
-                $this->updateOrderContentQuantity($order, $productIdInOrderToUpdate, $newQuantityArray);
             }
         }
         return $result;
@@ -784,6 +773,49 @@ class PreorderWebApi extends WebApi
     }
 
     /**
+     * Проверка по статусу заказа о возможности добавить новый товар в предзаказ
+     *
+     * @param int  $orderStatus
+     * @param bool $isEDI
+     * @return bool
+     */
+    private function canAddProduct(int $orderStatus, bool $isEDI)
+    {
+        $result = false;
+        if ($isEDI) {
+            switch ($orderStatus) {
+                case Order::STATUS_PREORDER:
+                    $result = true;
+                    break;
+                case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                case Order::STATUS_REJECTED:
+                case Order::STATUS_CANCELLED:
+                case Order::STATUS_PROCESSING:
+                case Order::STATUS_EDI_SENT_BY_VENDOR:
+                case Order::STATUS_EDI_ACCEPTANCE_FINISHED:
+                case Order::STATUS_DONE:
+                    $result = false;
+                    break;
+            }
+        } else {
+            switch ($orderStatus) {
+                case Order::STATUS_PREORDER:
+                case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                case Order::STATUS_PROCESSING:
+                case Order::STATUS_DONE:
+                    $result = true;
+                    break;
+                case Order::STATUS_REJECTED:
+                case Order::STATUS_CANCELLED:
+                    $result = false;
+                    break;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Добавление продуктов в предзаказ
      *
      * @param array $post
@@ -793,7 +825,8 @@ class PreorderWebApi extends WebApi
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    public function addProduct(array $post)
+    public
+    function addProduct(array $post)
     {
         $this->validateRequest($post, ['id', 'products']);
         if (!is_array($post['products'])) {
@@ -807,17 +840,17 @@ class PreorderWebApi extends WebApi
         $vendors = $this->user->organization->getSuppliers('', false);
         //получаем продукты которых нет в заданном предзаказе и которые присутствуют в $post['products']
         $result = $this->getNewProducts($post['products'], $preOrder, $catArray, $vendors);
-        if (empty($result)) {
-            //Если массив пустой, то в массиве $post['products'] были только продукты из предзаказа и работу метода
-            //можно завершать
-            $preOrder->refresh();
-            return $this->prepareModel($preOrder, true);
-        }
         //Массив id продуктов
         $productIds = ArrayHelper::map($result, 'id', 'id');;
         $productCount = count($result);
         //Массив id поставщиков
         $vendorNeeded = ArrayHelper::map($result, 'vendor_id', 'vendor_id');
+        $vendorsInPreorder = Organization::find()->where(['id' => $vendorNeeded])->all();
+        $vendorIsEDI = [];
+        foreach ($vendorsInPreorder as $index => $item) {
+            /**@var $item Organization */
+            $vendorIsEDI[$item->id] = $item->isEDI();
+        }
         //Массив id каталогов
         $catalogNeeded = ArrayHelper::map($result, 'cat_id', 'cat_id');
         if ($productCount > count(array_unique($productIds))) {
@@ -844,10 +877,17 @@ class PreorderWebApi extends WebApi
                 throw new BadRequestHttpException('preorder.not_supp_product');
             }
         }
-        //Добавляем новое содержимое в предзаказ
-        $this->createPreorderContent($result, $preOrder->id);
         //Получаем все заказы в данном предзаказе
         $orders = $this->getOrders($preOrder);
+        $canAdd = [];
+        foreach ($orders as $index => $order) {
+            $canAdd[] = $this->canAddProduct($order['status'], $vendorIsEDI[$order['vendor_id']]);
+        }
+        if (in_array(false, $canAdd)) {
+            throw new BadRequestHttpException('preorder.cannot_add_product_to_some_order');
+        }
+        //Добавляем новое содержимое в предзаказ
+        $this->createPreorderContent($result, $preOrder->id);
         $productSorted = $result;
         ArrayHelper::multisort($productSorted, ['vendor_id'], [SORT_ASC]);
         $productSorted1 = $productSorted2 = ArrayHelper::index($productSorted, 'id');

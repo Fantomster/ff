@@ -738,7 +738,47 @@ class PreorderController extends WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *            default={
-     *                 "result": true
+     *                          "id": 1,
+     *                          "is_active": true,
+     *                          "organization": {
+     *                              "id": 1,
+     *                              "name": "Ресторан 1"
+     *                          },
+     *                          "user": {
+     *                              "id": 1,
+     *                              "name": "Иванов Иван"
+     *                          },
+     *                          "count": {
+     *                              "produtcs": 18,
+     *                              "orders": 4
+     *                          },
+     *                          "summ": "250000,50",
+     *                          "currency": {
+     *                              "id": 1,
+     *                              "symbol": "RUB"
+     *                          },
+     *                          "products": {
+     *                          {
+     *                             "id": 1,
+     *                             "name": "Колбаса сушенная горная",
+     *                             "article": "БС-1-200 VM",
+     *                             "plan_quantity": 10,
+     *                             "quantity": 17,
+     *                             "sum": "611,66",
+     *                             "isset_analog": false
+     *                          },
+     *                          {
+     *                             "id": 2,
+     *                             "name": "Колбаса вареная",
+     *                             "article": "KVM",
+     *                             "plan_quantity": 10,
+     *                             "quantity": 13,
+     *                             "sum": "811,66",
+     *                             "isset_analog": false
+     *                          }
+     *                          },
+     *                          "created_at": "2019-02-05T23:00:00+03:00",
+     *                          "upated_at": "2019-02-05T23:00:00+03:00"
      *              }
      *         )
      *     ),

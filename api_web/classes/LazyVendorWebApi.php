@@ -580,6 +580,16 @@ class LazyVendorWebApi extends WebApi
         $result = $this->validateNotifications($post['notifications']);
 
         $vendor = $this->getVendor($post['vendor_id']);
+
+        $checkIds = OrganizationContact::find()->where(['organization_id' => $vendor->id])
+            ->indexBy('id')->asArray()->all();
+
+        foreach ($result['notificationIds'] as $key => $value) {
+            if (empty($checkIds[$key])) {
+                throw new BadRequestHttpException('lazy_vendor.wrong_contact_id');
+            }
+        }
+
         $n = $vendor->getOrganizationContact()->andWhere([
             'id' => $result['notificationIds']
         ])->all();

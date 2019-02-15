@@ -306,14 +306,11 @@ class ProductHelper extends AuthHelper
             $icount++;
         }
 
-        $where = (new \yii\db\Query())
-                ->where(['acc' => $acc])
-                ->andWhere([
-            '<',
-            RkProduct::tableName() . ".updated_at",
-            \gmdate('Y-m-d H:i:s', strtotime("-1 hour"))
+        RkProduct::updateAll(['is_active' => 0], [
+            'and',
+            ['acc' => $acc],
+            ['<', RkProduct::tableName() . ".updated_at", \gmdate('Y-m-d H:i:s', strtotime("-1 hour"))],
         ]);
-        RkProduct::updateAll(['is_active' => 0], $where);
 
         $this->log('SUCCESS:: Products saved: ' . $scount);
 

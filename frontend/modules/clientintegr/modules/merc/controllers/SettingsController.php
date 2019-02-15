@@ -19,12 +19,12 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 // We will override the default rule config with the new AccessRule class
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'rules' => [
+                'rules'      => [
                     [
                         'allow' => false,
                         // Allow restaurant managers
@@ -35,7 +35,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
                         ],
                     ],
                     [
-                        'allow' => TRUE,
+                        'allow' => true,
                         'roles' => ['@'],
                     ],
 
@@ -51,19 +51,19 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
     {
         $searchModel = new mercDicconstSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $lic = mercService::getLicense();
+        $lic = mercService::getLicense(Yii::$app->user->identity->organization_id);
         $vi = $lic ? 'index' : '/default/_nolic';
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
-                'searchModel' => $searchModel,
+                'searchModel'  => $searchModel,
                 'dataProvider' => $dataProvider,
-                'lic' => $lic,
+                'lic'          => $lic,
             ]);
         } else {
             return $this->render($vi, [
-                'searchModel' => $searchModel,
+                'searchModel'  => $searchModel,
                 'dataProvider' => $dataProvider,
-                'lic' => $lic,
+                'lic'          => $lic,
             ]);
         }
     }
@@ -87,8 +87,8 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             }
         }
 
-        $lic = mercService::getLicense();
-        if(Yii::$app->request->isAjax)
+        $lic = mercService::getLicense(Yii::$app->user->identity->organization_id);
+        if (Yii::$app->request->isAjax)
             $vi = $lic ? '_ajaxForm' : '/default/_nolic';
         else
             $vi = $lic ? 'update' : '/default/_nolic';
@@ -98,14 +98,14 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
                 var_dump($pConst->getErrors());
                 exit;
             }
-            if(Yii::$app->request->isAjax)
+            if (Yii::$app->request->isAjax)
                 return true;
             return $this->redirect(['index']);
         } else {
             $dicConst = mercDicconst::findOne(['id' => $pConst->const_id]);
 
             $org = [];
-            if ($dicConst->denom == 'enterprise_guid')  {
+            if ($dicConst->denom == 'enterprise_guid') {
                 $list = cerberApi::getInstance()->getActivityLocationList();
                 foreach ($list as $item) {
                     $org[] = [
@@ -113,18 +113,18 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
                         'label' => $item->name .
                             ' (' . $item->addressView . ')'];
                 }
-                if(count($org) == 0)
+                if (count($org) == 0)
                     Yii::$app->session->setFlash('error', 'Не удалось выгрузить связанные с данным ХС предприятия, проверьте наличие связей предприятия с ХС или добавьте GUD предприятия вручную');
             }
-            if(Yii::$app->request->isAjax)
+            if (Yii::$app->request->isAjax)
                 return $this->renderAjax($vi, [
-                    'model' => $pConst,
+                    'model'    => $pConst,
                     'dicConst' => $dicConst,
                     'org_list' => $org,
                 ]);
 
             return $this->render($vi, [
-                'model' => $pConst,
+                'model'    => $pConst,
                 'dicConst' => $dicConst,
                 'org_list' => $org,
             ]);

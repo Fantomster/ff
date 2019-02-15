@@ -5,7 +5,6 @@ namespace frontend\modules\clientintegr\modules\merc\controllers;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercPconst;
 use api\common\models\merc\mercService;
-use api\common\models\merc\MercVisits;
 use api\common\models\merc\MercVsd;
 use api\common\models\merc\search\mercVSDSearch;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
@@ -15,7 +14,6 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getVetDocumen
 use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
 use Yii;
 use common\components\AccessRule;
-use yii\base\Exception;
 use yii\filters\AccessControl;
 use common\models\Role;
 
@@ -56,7 +54,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function beforeAction($action)
     {
-        $lic = mercService::getLicense();
+        $lic = mercService::getLicense(Yii::$app->user->identity->organization_id);
 
         if (!isset($lic) && ($this->getRoute() != 'clientintegr/merc/default/nolic')) {
             $this->redirect(['nolic']);
@@ -74,7 +72,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionIndex()
     {
         Yii::$app->cache->flush();
-        $lic = mercService::getLicense();
+        $lic = mercService::getLicense(Yii::$app->user->identity->organization_id);
         $searchModel = new mercVSDSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $user = Yii::$app->getUser()->identity;
@@ -169,48 +167,48 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         }
 
         try {
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $api = mercuryApi::getInstance();
+            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+                $api = mercuryApi::getInstance();
 
-            if ($model->mode == rejectedForm::INPUT_MODE) {
-                $vsd = MercVsd::findOne(['uuid' => $uuid]);
-                $conditions = $api->getRegionalizationConditions($vsd->recipient_guid, $vsd->sender_guid, $vsd->sub_product_guid);
+                if ($model->mode == rejectedForm::INPUT_MODE) {
+                    $vsd = MercVsd::findOne(['uuid' => $uuid]);
+                    $conditions = $api->getRegionalizationConditions($vsd->recipient_guid, $vsd->sender_guid, $vsd->sub_product_guid);
 
-                if (isset($conditions)) {
-                    $model->conditionsDescription = json_encode($conditions);
-                    $model->mode = rejectedForm::CONFIRM_MODE;
-                    if (Yii::$app->request->isAjax) {
-                        return $this->renderAjax('rejected/_ajaxForm', [
+                    if (isset($conditions)) {
+                        $model->conditionsDescription = json_encode($conditions);
+                        $model->mode = rejectedForm::CONFIRM_MODE;
+                        if (Yii::$app->request->isAjax) {
+                            return $this->renderAjax('rejected/_ajaxForm', [
+                                'model'  => $model,
+                                'volume' => $model->volume,
+                            ]);
+                        }
+
+                        return $this->render('rejected/rejectedAct', [
                             'model'  => $model,
                             'volume' => $model->volume,
                         ]);
                     }
-
-                    return $this->render('rejected/rejectedAct', [
-                        'model'  => $model,
-                        'volume' => $model->volume,
-                    ]);
                 }
+
+                if (!$api->getVetDocumentDone($uuid, $model->attributes)) {
+                    throw new \Exception('Done error');
+                }
+
+                Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
+                if (Yii::$app->request->isAjax) {
+                    return true;
+                }
+                return $this->redirect(['view', 'uuid' => $uuid]);
             }
 
-            if (!$api->getVetDocumentDone($uuid, $model->attributes)) {
-                throw new \Exception('Done error');
-            }
-
-            Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
-            if (Yii::$app->request->isAjax) {
-                return true;
-            }
-            return $this->redirect(['view', 'uuid' => $uuid]);
+        } catch (\Error $e) {
+            Yii::$app->session->setFlash('error', $this->getErrorText($e));
+            return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
+        } catch (\Exception $e) {
+            Yii::$app->session->setFlash('error', $this->getErrorText($e));
+            return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
         }
-
-         } catch (\Error $e) {
-             Yii::$app->session->setFlash('error', $this->getErrorText($e));
-             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-         } catch (\Exception $e) {
-             Yii::$app->session->setFlash('error', $this->getErrorText($e));
-             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-         }
 
         try {
             $document = new getVetDocumentByUUID();

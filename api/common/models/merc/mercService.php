@@ -117,11 +117,11 @@ class mercService extends \yii\db\ActiveRecord
      *
      * @return iikoService|array|null|\yii\db\ActiveRecord
      */
-    public static function getLicense($org_id = null)
+    public static function getLicense($org_id)
     {
         return self::find()
             //->where(['status_id' => 2])
-            ->andWhere('org = :org', ['org' => ($org_id ?? (Yii::$app->user->identity)->organization_id)])
+            ->andWhere('org = :org', ['org' => $org_id])
             //->andOnCondition('td >= NOW()')
             //->andOnCondition('fd <= NOW()')
             ->one();

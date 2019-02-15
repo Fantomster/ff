@@ -138,11 +138,11 @@ class TillypadService extends \yii\db\ActiveRecord
      *
      * @return TillypadService|array|null|\yii\db\ActiveRecord
      */
-    public static function getLicense()
+    public static function getLicense($org_id)
     {
         return self::find()
             //->where(['status_id' => 2])
-            ->andWhere('org = :org', ['org' => Yii::$app->user->identity->organization_id])
+            ->andWhere('org = :org', ['org' => $org_id])
             //->where('org = :org', ['org' => Yii::$app->user->identity->organization_id])
             //->andOnCondition('td >= NOW()')
             //->andOnCondition('fd <= NOW()')

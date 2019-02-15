@@ -1863,11 +1863,11 @@ class Organization extends \yii\db\ActiveRecord
             }
         }
 
-        if (!empty(iikoService::getLicense())) {
+        if (!empty(iikoService::getLicense($this->id))) {
             $return['iiko'] = true;
         }
 
-        if (!empty(TillypadService::getLicense())) {
+        if (!empty(TillypadService::getLicense($this->id))) {
             $return['tillypad'] = true;
         }
 
@@ -1880,7 +1880,7 @@ class Organization extends \yii\db\ActiveRecord
     public function getLicenseList()
     {
         $result = [];
-        $lic = RkServicedata::getLicense();
+        $lic = RkServicedata::getLicense($this->id);
         if ($lic != null) {
             $result['rkws'] = $lic;
             $org = $lic['service_id'];
@@ -1888,22 +1888,22 @@ class Organization extends \yii\db\ActiveRecord
             $result['rkws_ucs'] = $lic_ucs;
         }
 
-        $lic = iikoService::getLicense();
+        $lic = iikoService::getLicense($this->id);
         if ($lic != null) {
             $result['iiko'] = $lic;
         }
 
-        $lic = TillypadService::getLicense();
+        $lic = TillypadService::getLicense($this->id);
         if ($lic != null) {
             $result['tillypad'] = $lic;
         }
 
-        $lic = mercService::getLicense();
+        $lic = mercService::getLicense($this->id);
         if ($lic != null) {
             $result['mercury'] = $lic;
         }
 
-        $lic = OneSService::getLicense();
+        $lic = OneSService::getLicense($this->id);
         if ($lic != null) {
             $result['odinsobsh'] = $lic;
         }
@@ -1916,7 +1916,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getVsdCount()
     {
-        $lic = mercService::getLicense();
+        $lic = mercService::getLicense($this->id);
         if ($lic == null) {
             return 0;
         }

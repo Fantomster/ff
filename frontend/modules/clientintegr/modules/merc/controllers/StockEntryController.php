@@ -5,16 +5,12 @@ namespace frontend\modules\clientintegr\modules\merc\controllers;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercStockEntry;
-use api\common\models\merc\MercVisits;
 use api\common\models\merc\search\mercStockEntrySearch;
 use console\modules\daemons\classes\MercStoreEntryList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getStockEntry;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\LoadStockEntryList;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
-use frontend\modules\clientintegr\modules\merc\models\dateForm;
 use frontend\modules\clientintegr\modules\merc\models\expiryDate;
 use frontend\modules\clientintegr\modules\merc\models\inputDate;
 use frontend\modules\clientintegr\modules\merc\models\productionDate;
@@ -60,7 +56,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
     public function beforeAction($action)
     {
-        $lic = mercService::getLicense();
+        $lic = mercService::getLicense(Yii::$app->user->identity->organization_id);
 
         if (!isset($lic) && ($this->getRoute() != 'clientintegr/merc/default/nolic')) {
             $this->redirect(['nolic']);
@@ -80,7 +76,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
     public function actionIndex()
     {
         Yii::$app->cache->flush();
-        $lic = mercService::getLicense();
+        $lic = mercService::getLicense(Yii::$app->user->identity->organization_id);
         $params = Yii::$app->request->getQueryParams();
         $searchModel = new mercStockEntrySearch();
         $session = Yii::$app->session;

@@ -53,9 +53,9 @@ class PaymentSearch extends Payment
             return $dataProvider;
         }
 
-        $query->andFilterWhere(['like', 'payment_id', $this->payment_id])
+        $query->andFilterWhere(['payment_id' => $this->payment_id])
             ->andFilterWhere(['like', 'receipt_number', $this->receipt_number])
-            ->andFilterWhere(['like', 'total', $this->total]);
+            ->andFilterWhere(['total' => $this->total]);
 
         if (isset($this->date) && !empty($this->date)) {
             $query->andFilterWhere(['date' => date('Y-m-d', strtotime($this->date))]);

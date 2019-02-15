@@ -429,6 +429,7 @@ class AnalogController extends WebApiController
      *                          }
      *                       }
      *                  }
+     *                  "items_delete":{15523, 156687}
      *              }
      *         )
      *     ),

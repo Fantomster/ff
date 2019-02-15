@@ -234,19 +234,26 @@ class AnalogWebApi extends WebApi
     {
         $t = \Yii::$app->db->beginTransaction();
         try {
+            $deleteItems = [];
             $firstProduct = current($request);
             $analogs = $this->findAnalogGroup($firstProduct['analog_group']);
             if (empty($analogs)) {
                 $this->createAnalogGroup($request);
             } else {
-                $this->updateAnalogGroup($request, $analogs, $firstProduct['analog_group']);
+                $deleteItems = $this->updateAnalogGroup($request, $analogs, $firstProduct['analog_group']);
             }
             $t->commit();
         } catch (\Exception $e) {
             $t->rollBack();
             throw $e;
         }
-        return $this->getProductAnalogList(['product_id' => $firstProduct['id']]);
+
+        $items = $this->getProductAnalogList(['product_id' => $firstProduct['id']])['items'];
+
+        return [
+            'items'        => $items,
+            'items_delete' => $deleteItems
+        ];
     }
 
     /**
@@ -293,16 +300,20 @@ class AnalogWebApi extends WebApi
      * @param $products
      * @param $analogs
      * @param $oldGroupId
+     * @return array
+     * @throws ValidationException
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
     private function updateAnalogGroup($products, $analogs, $oldGroupId)
     {
+        $deleteProducts = [];
         $productsIds = ArrayHelper::getColumn($products, 'id');
         ArrayHelper::multisort($products, 'sort_value');
         /** @var ProductAnalog $model */
         foreach ($analogs as $model) {
             if (!in_array($model->product_id, $productsIds)) {
+                $deleteProducts[] = $model->product_id;
                 $model->delete();
             }
         }
@@ -342,6 +353,8 @@ class AnalogWebApi extends WebApi
         if (!$parentModel->save()) {
             throw new ValidationException($parentModel->getFirstErrors());
         }
+
+        return $deleteProducts;
     }
 
     /**

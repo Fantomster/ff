@@ -421,7 +421,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                     $user_id = Yii::$app->user->id;
                                     $role_id = User::find()->select('role_id')->where(['id' => $user_id])->column();
                                     if ($role_id[0] != Role::ROLE_RESTAURANT_ORDER_INITIATOR) {
-                                        //echo $this->render("_checkout-position-button", compact("cart"));
+                                        echo $this->render("_checkout-position-button", compact("cart"));
                                     }
                                     ?>
                                     </span>

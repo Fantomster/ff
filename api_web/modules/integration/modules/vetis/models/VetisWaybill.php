@@ -950,15 +950,15 @@ class VetisWaybill extends WebApi
             $arResearch = [];
             foreach ($attributes->vetEventList->laboratoryResearch as $research) {
                 $arResearch[] = [
-                    'issue_id'      => $research->referencedDocument->issueNumber,
-                    'expertise_id'  => $research->expertiseID,
-                    'laboratory'    => $research->operator->name,
-                    'method'        => $research->method->name,
-                    'indicator'     => $research->indicator->name,
-                    'result_date'   => $research->actualDateTime,
-                    'research_date' => $research->referencedDocument->issueDate,
-                    'result'        => $research->result,
-                    'conclusion'    => $research->conclusion,
+                    'issue_id'      => $research->referencedDocument->issueNumber ?? null,
+                    'expertise_id'  => $research->expertiseID ?? null,
+                    'laboratory'    => $research->operator->name ?? null,
+                    'method'        => $research->method->name ?? null,
+                    'indicator'     => $research->indicator->name ?? null,
+                    'result_date'   => $research->actualDateTime ?? null,
+                    'research_date' => $research->referencedDocument->issueDate ?? null,
+                    'result'        => $research->result ?? null,
+                    'conclusion'    => $research->conclusion ?? null,
                 ];
             }
         }

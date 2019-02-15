@@ -39,7 +39,7 @@ class AuthHelper extends Object
         }
 
         if (isset($this->org)) {
-            $this->restr = RkServicedata::find()->andwhere('org = :org', [':org' => $this->org])->one();
+            $this->restr = RkServicedata::find()->where(['org' => $this->org, 'status_id' => 1])->one();
         }
     }
 

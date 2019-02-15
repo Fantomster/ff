@@ -167,7 +167,7 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
             $contID = (int)($position->PRODUCTIDBUYER ?? $position->PRODUCT);
             $quantity = (float)($position->DELIVEREDQUANTITY ?? $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY);
             $price = (float)($position->PRICEWITHVAT ?? $position->PRICE);
-            $barcode = (int)$position->PRODUCT;
+            $barcode = $position->PRODUCT;
             $taxRate = (float)($position->TAXRATE ?? null);
             $priceWithVat = (float)($position->PRICEWITHVAT ?? $taxRate ? $position->PRICE + ($position->PRICE *
                         ($taxRate / 100)) : $price);
@@ -327,7 +327,9 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
         $barcodeArray = [];
         foreach ($goods as $good) {
             $barcode = (String)$good->PRODUCT[0];
-            if (!$barcode) continue;
+            if (!$barcode) {
+                continue;
+            }
             $barcodeArray[] = $barcode;
             $goodsArray[$barcode]['name'] = (String)$good->PRODUCTNAME ?? '';
             $goodsArray[$barcode]['price'] = (float)$good->UNITPRICE ?? 0.0;

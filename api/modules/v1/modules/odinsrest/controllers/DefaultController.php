@@ -218,7 +218,7 @@ class DefaultController extends Controller
 
     private function handlePositions($positions, $modelName, $res, $type)
     {
-        $modelName::updateAll(['is_active' => 0], ['org_id' => $res]);
+        //$modelName::updateAll(['is_active' => 0], ['org_id' => $res]);
         $i = 0;
         $returnArray = [];
         foreach ($positions as $position) {
@@ -261,6 +261,14 @@ class DefaultController extends Controller
             $returnArray[$i]['cid'] = $oneSPosition->cid;
             $returnArray[$i]['updated_at'] = date('Y-m-d h:i:s');
         }
+        $where = (new Query())
+                ->where(['org_id' => $res])
+                ->andWhere([
+                    '<',
+                    $modelName::tableName().".updated_at",
+                    \gmdate('Y-m-d H:i:s', strtotime("-1 hour"))
+                ]);
+        $modelName::updateAll(['is_active' => 0], $where);
         $arr = [
             'updated_count' => $i,
             'data' => $returnArray

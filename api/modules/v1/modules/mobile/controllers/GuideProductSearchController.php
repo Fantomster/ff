@@ -154,9 +154,12 @@ class GuideProductSearchController extends ActiveController
             ->andFilterWhere(['LIKE', 'cbg.product', $params->searchString]);
 
         if (!empty($params->guide_list)) {
-            $guideList = implode(',', Json::decode($params->guide_list));
+            $guideList = Json::decode($params->guide_list);
             $query1->andWhere(['IN', 'gp.guide_id', $guideList]);
             $query2->andWhere(['IN', 'gp.guide_id', $guideList]);
+        } else {
+            $query1->andWhere(['gp.guide_id' => $params->guide_id]);
+            $query2->andWhere(['gp.guide_id' => $params->guide_id]);
         }
 
         $query = (new Query())

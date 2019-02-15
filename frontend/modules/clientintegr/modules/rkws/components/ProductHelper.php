@@ -306,7 +306,7 @@ class ProductHelper extends AuthHelper
             $icount++;
         }
 
-        $where = (new Query())
+        $where = (new \yii\db\Query())
                 ->where(['acc' => $acc])
                 ->andWhere([
             '<',

@@ -124,7 +124,7 @@ class TillypadService extends \yii\db\ActiveRecord
 
                     if (!$model->save()) {
                         \Yii::error('Не удалось сохранить запись в таблице iiko_dic');
-                        \Yii::error($model->getErrors());
+                        \Yii::error(print_r($model->getErrors()));
                     }
                 }
             }

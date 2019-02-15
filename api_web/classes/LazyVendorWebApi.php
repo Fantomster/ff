@@ -524,6 +524,13 @@ class LazyVendorWebApi extends WebApi
         return $model;
     }
 
+    /**
+     * Изменение информации о поставщике
+     * 
+     * @param $post
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
     public function update($post)
     {
         $this->validateRequest($post, ['lazy-vendor']);

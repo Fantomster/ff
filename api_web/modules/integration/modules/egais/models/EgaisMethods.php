@@ -12,9 +12,12 @@ use api_web\modules\integration\modules\egais\classes\EgaisXmlFiles;
 use common\models\egais\EgaisProductOnBalance;
 use common\models\egais\EgaisQueryRests;
 use common\models\egais\EgaisTypeWriteOff;
+use common\models\egais\EgaisWriteOffHistory;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
+use yii\data\ArrayDataProvider;
 use yii\db\Transaction;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -218,10 +221,8 @@ class EgaisMethods extends WebApi
     {
         $this->validateRequest($request, ['alc_code']);
 
-        $orgId = !empty($request['org_id']) ? $request['org_id'] : $this->user->organization_id;
-
         $product = EgaisProductOnBalance::findOne([
-            'org_id'   => $orgId,
+            'org_id'   => $this->user->organization_id,
             'alc_code' => $request['alc_code']
         ]);
 
@@ -230,5 +231,73 @@ class EgaisMethods extends WebApi
         }
 
         return $product;
+    }
+
+    /**
+     * @param array $request
+     * @return array
+     */
+    public function getWrittenOffProductList(array $request)
+    {
+        if (isset($request['date'])) {
+            $dateStart = isset($request['date']['start'])
+                ? $this->formattedDate("{$request['date']['start']} 00:00:00")
+                : '';
+
+            $dateEnd = isset($request['date']['end'])
+                ? $this->formattedDate("{$request['date']['end']} 23:59:59")
+                : '';
+        }
+
+        $writtenOffProductList = EgaisWriteOffHistory::find()
+            ->where([
+                'org_id' => $this->user->organization_id
+            ])
+            ->andFilterWhere([
+                'BETWEEN',
+                'created_at',
+                $dateStart ?? '',
+                $dateEnd ?? ''
+            ])
+            ->orderBy(['created_at' => SORT_DESC])
+            ->all();
+
+        $page = $request['pagination']['page'] ?? 1;
+        $pageSize = $request['pagination']['page_size'] ?? 12;
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels'  => ArrayHelper::getColumn($writtenOffProductList, function (EgaisWriteOffHistory $product) {
+                return $product->prepareProduct();
+            }),
+            'pagination' => [
+                'page'     => $page - 1,
+                'pageSize' => $pageSize,
+            ],
+        ]);
+
+        $totalPage = ceil($dataProvider->totalCount / $pageSize) ?? 0;
+
+        return [
+            'items'      => $dataProvider->models ?? [],
+            'pagination' => [
+                'page'       => $page,
+                'page_size'  => $pageSize,
+                'total_page' => $totalPage
+            ]
+        ];
+    }
+
+    /**
+     * @param string $date
+     * @return string
+     */
+    private function formattedDate(string $date): string
+    {
+        $formattedDate = \DateTime::createFromFormat('d.m.Y H:i:s', $date);
+        if ($formattedDate) {
+            return $formattedDate->format('Y-m-d H:i:s');
+        }
+
+        return '';
     }
 }

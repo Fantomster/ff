@@ -525,8 +525,83 @@ class LazyVendorWebApi extends WebApi
     }
 
     /**
+     * Проверка входа notificationUpdate
+     *
+     * @param $notifications
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    private function validateNotifications($notifications)
+    {
+        $vals = [0, 1];
+        $newNotifications = [];
+        $notificationIds = [];
+        $attributeRules = (new OrganizationContactNotification())->getRulesAttributes();
+        foreach ($notifications as $notification) {
+            if (!isset($notification['id'])) {
+                throw new BadRequestHttpException('lazy_vendor.no_required_param');
+            } elseif (!is_int($notification['id'])) {
+                throw new BadRequestHttpException('lazy_vendor.wrong_value');
+            }
+            $notificationIds[$notification['id']] = $notification['id'];
+            foreach ($attributeRules as $index => $attributeRule) {
+                if (!isset($notification[$index])) {
+                    throw new BadRequestHttpException('lazy_vendor.no_required_param');
+                } elseif (!is_int($notification[$index]) || !in_array($notification[$index], $vals)) {
+                    throw new BadRequestHttpException('lazy_vendor.wrong_value');
+                }
+                $newNotifications[$notification['id']][$index] = $notification[$index];
+            }
+        }
+        if (count($notificationIds) !== count($notifications)) {
+            throw new BadRequestHttpException('id не должны повторяться.');
+        }
+        return [
+            'notifications'   => $newNotifications,
+            'notificationIds' => $notificationIds,
+        ];
+    }
+
+    /**
+     * Обновление контактов ленивого поставщика
+     *
+     * @param $post
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws BadRequestHttpException
+     */
+    public function contactUpdate($post)
+    {
+        $this->validateRequest($post, ['vendor_id', 'notifications']);
+
+        if (!is_array($post['notifications'])) {
+            throw new BadRequestHttpException('lazy_vendor.wrong_value');
+        }
+
+        $result = $this->validateNotifications($post['notifications']);
+
+        $vendor = $this->getVendor($post['vendor_id']);
+        $n = $vendor->getOrganizationContact()->andWhere([
+            'id' => $result['notificationIds']
+        ])->all();
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            /** @var OrganizationContact $nModel */
+            foreach ($n as $nModel) {
+                $nModel->setNotifications($this->user->organization_id, $result['notifications'][$nModel->id]);
+            }
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+
+        return $this->contactList(['id' => $vendor->id]);
+    }
+  
+  /**
      * Изменение информации о поставщике
-     * 
+     *
      * @param $post
      * @return mixed
      * @throws BadRequestHttpException

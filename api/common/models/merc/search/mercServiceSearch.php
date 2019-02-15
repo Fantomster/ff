@@ -46,7 +46,8 @@ class mercServiceSearch extends mercService
         ]);
 
         $this->load($params);
-        $query->leftJoin($dbName . '.' . Organization::tableName(), 'organization.id = org');
+        $org_table_name = Organization::tableName();
+        $query->leftJoin($dbName . '.' . $org_table_name, $org_table_name . '.id = org');
 
         if (!$this->validate()) {
             return $dataProvider;
@@ -54,7 +55,7 @@ class mercServiceSearch extends mercService
 
         $query->andFilterWhere(['status_id' => $this->status_id])
             ->andFilterWhere(['code' => $this->code])
-            ->andFilterWhere(['like', 'organization.name', $this->org]);
+            ->andFilterWhere(['like', $org_table_name . '.name', $this->org]);
 
         if (!empty($this->fd)) {
             list($day, $month, $year) = explode('.', $this->fd);

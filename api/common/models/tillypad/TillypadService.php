@@ -13,20 +13,20 @@ use yii\db\Expression;
 /**
  * This is the model class for table "tillypad_service".
  *
- * @property integer $id
- * @property integer $org
- * @property string  $fd
- * @property string  $td
- * @property integer $status_id
- * @property integer $is_deleted
- * @property string  $object_id
- * @property integer $user_id
- * @property string  $created_at
- * @property string  $updated_at
- * @property string  $code
- * @property string  $name
- * @property string  $address
- * @property string  $phone
+ * @property integer      $id
+ * @property integer      $org
+ * @property string       $fd
+ * @property string       $td
+ * @property integer      $status_id
+ * @property integer      $is_deleted
+ * @property string       $object_id
+ * @property integer      $user_id
+ * @property string       $created_at
+ * @property string       $updated_at
+ * @property string       $code
+ * @property string       $name
+ * @property string       $address
+ * @property string       $phone
  * @property Organization $organization
  */
 class TillypadService extends \yii\db\ActiveRecord
@@ -123,8 +123,7 @@ class TillypadService extends \yii\db\ActiveRecord
                     $model->org_id = $this->org;
 
                     if (!$model->save()) {
-                        print_r($model->getErrors());
-                        die();
+                        \Yii::error('Не удалось сохранить запись в таблице iiko_dic');
                     }
                 }
             }

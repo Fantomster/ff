@@ -72,7 +72,7 @@ class RkServicedata extends \yii\db\ActiveRecord
     {
         return [
             RkAccess::STATUS_UNLOCKED => 'Активен',
-            RkAccess::STATUS_LOCKED   => 'Отключен',
+            RkAccess::STATUS_LOCKED   => 'Отключён',
         ];
     }
 
@@ -120,10 +120,6 @@ class RkServicedata extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
 
-
-        // if (!$insert && ($this->attributes['org'] != $changedAttributes['org'])) {
-        // if ($this->attributes['org'] != $changedAttributes['org']) {
-
         if (!$oldic = RkDic::find()->andWhere('org_id = :org', [':org' => $this->org])->all()) {
 
             $dics = RkDictype::find()->all();
@@ -136,16 +132,11 @@ class RkServicedata extends \yii\db\ActiveRecord
                 $model->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
                 $model->org_id = $this->org;
 
-                //var_dump($model);
-
                 if (!$model->save()) {
-                    print_r($model->getErrors());
-                    die();
+                    \Yii::error('Не удалось сохранить запись в таблице rk_dic');
                 }
             }
         }
-        //  }
-
         parent::afterSave($insert, $changedAttributes);
     }
 

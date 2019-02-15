@@ -619,7 +619,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getDelivery()
     {
-        if ($this->type_id !== Organization::TYPE_SUPPLIER) {
+        if (!in_array($this->type_id, [Organization::TYPE_SUPPLIER, Organization::TYPE_LAZY_VENDOR])) {
             return null;
         }
         return $this->hasOne(Delivery::class, ['vendor_id' => 'id']);

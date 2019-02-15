@@ -621,8 +621,8 @@ class LazyVendorController extends WebApiController
     {
         $this->response = $this->classWebApi->contactUpdate($this->request);
     }
-  
-     /**
+    
+    /**
      * @SWG\Post(path="/lazy-vendor/update",
      *     tags={"LazyVendor"},
      *     summary="Изменение информации о ленивом поставщике",
@@ -709,5 +709,50 @@ class LazyVendorController extends WebApiController
     public function actionUpdate()
     {
         $this->response = $this->classWebApi->update($this->request);
+    }
+  
+     /**
+     * @SWG\Post(path="/lazy-vendor/delete",
+     *     tags={"LazyVendor"},
+     *     summary="Удаление ленивого поставщика",
+     *     description="Удаление ленивого поставщика по его id. Статус индивидуального каталога в базе изменит значение с 1 на 0",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vendor_id": 15,
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                    "result": true
+     *                }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws
+     */
+    public function actionDelete()
+    {
+        $this->response = $this->classWebApi->delete($this->request);
     }
 }

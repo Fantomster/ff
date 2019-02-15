@@ -4,7 +4,6 @@ namespace backend\controllers;
 
 use api_web\classes\IntegrationWebApi;
 use api_web\components\Registry;
-use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use backend\models\TestVendorsSearch;
 use common\helpers\DBNameHelper;
@@ -19,7 +18,6 @@ use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
 use common\models\OuterCategory;
-use common\models\RelationSuppRest;
 use common\models\edi\EdiRoamingMap;
 use common\models\TestVendors;
 use common\models\User;
@@ -220,19 +218,6 @@ class OrganizationController extends Controller
             return $this->render('update', compact('model', 'franchiseeModel', 'franchiseeList'));
         }
     }
-
-//    /**
-//     * Deletes an existing Organization model.
-//     * If deletion is successful, the browser will be redirected to the 'index' page.
-//     * @param integer $id
-//     * @return mixed
-//     */
-//    public function actionDelete($id)
-//    {
-//        $this->findModel($id)->delete();
-//
-//        return $this->redirect(['index']);
-//    }
 
     /**
      * Finds the Organization model based on its primary key value.

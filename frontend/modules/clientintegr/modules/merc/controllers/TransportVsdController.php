@@ -6,9 +6,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
 use common\models\vetis\VetisBusinessEntity;
-use common\models\vetis\VetisForeignEnterprise;
 use common\models\vetis\VetisProductItem;
-use common\models\vetis\VetisRussianEnterprise;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\CreatePrepareOutgoingConsignmentRequest;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\CreateRegisterProductionRequest;
@@ -24,7 +22,6 @@ use frontend\modules\clientintegr\modules\merc\models\transportVsd\step3Form;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step4Form;
 use Yii;
 use yii\bootstrap\ActiveForm;
-use yii\helpers\ArrayHelper;
 use yii\web\Response;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
@@ -66,7 +63,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
     public function beforeAction($action)
     {
-        $lic = mercService::getLicense();
+        $lic = mercService::getLicense(Yii::$app->user->identity->organization_id);
 
         if (!isset($lic) && ($this->getRoute() != 'clientintegr/merc/default/nolic')) {
             $this->redirect(['nolic']);
@@ -115,7 +112,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             $selected = implode(",", $res);
         }
 
-        if(empty($selected)) {
+        if (empty($selected)) {
             return $this->redirect(['/clientintegr/merc/stock-entry']);
         }
 
@@ -215,26 +212,26 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             }
 
             $request->conditions = $post['conditions'] ?? null;
-              try {
-                  mercuryApi::getInstance()->prepareOutgoingConsignmentOperation($request);
-                  Yii::$app->session->setFlash('success', 'Транспортный ВСД успешно создан!');
-                  $session->remove('TrVsd_step1');
-                  $session->remove('TrVsd_step2');
-                  $session->remove('TrVsd_step3');
-                  $session->remove('TrVsd_step4');
-              } catch (\SoapFault $e) {
-                  Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                  $session->remove('TrVsd_step1');
-                  $session->remove('TrVsd_step2');
-                  $session->remove('TrVsd_step3');
-                  $session->remove('TrVsd_step4');
-              } catch (\Exception $e) {
-                  Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                  $session->remove('TrVsd_step1');
-                  $session->remove('TrVsd_step2');
-                  $session->remove('TrVsd_step3');
-                  $session->remove('TrVsd_step4');
-              }
+            try {
+                mercuryApi::getInstance()->prepareOutgoingConsignmentOperation($request);
+                Yii::$app->session->setFlash('success', 'Транспортный ВСД успешно создан!');
+                $session->remove('TrVsd_step1');
+                $session->remove('TrVsd_step2');
+                $session->remove('TrVsd_step3');
+                $session->remove('TrVsd_step4');
+            } catch (\SoapFault $e) {
+                Yii::$app->session->setFlash('error', $this->getErrorText($e));
+                $session->remove('TrVsd_step1');
+                $session->remove('TrVsd_step2');
+                $session->remove('TrVsd_step3');
+                $session->remove('TrVsd_step4');
+            } catch (\Exception $e) {
+                Yii::$app->session->setFlash('error', $this->getErrorText($e));
+                $session->remove('TrVsd_step1');
+                $session->remove('TrVsd_step2');
+                $session->remove('TrVsd_step3');
+                $session->remove('TrVsd_step4');
+            }
             return $this->redirect(['/clientintegr/merc/stock-entry']);
         }
         if ($model->mode == step4Form::INPUT_MODE) {
@@ -279,24 +276,22 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         try {
-            if(isset($recipient_guid)) {
+            if (isset($recipient_guid)) {
                 $recipient = cerberApi::getInstance()->getEnterpriseByGuid($recipient_guid);
-                if(isset ($recipient->owner->guid)) {
+                if (isset ($recipient->owner->guid)) {
                     $hc = cerberApi::getInstance()->getBusinessEntityByGuid($recipient->owner->guid);
                 }
             }
 
-            if(!isset($hc)) {
+            if (!isset($hc)) {
                 if (isset($inn) && $inn != 'null') {
                     $hc = VetisBusinessEntity::find()->where(['inn' => $inn, 'active' => true, 'last' => 1])->limit(1)->one();
                 }
             }
 
-            if(isset($hc)) {
+            if (isset($hc)) {
                 return (['result' => true, 'name' => $hc->name, 'inn' => $hc->inn ?? 'Не известно', 'guid' => $hc->guid]);
-            }
-            else
-            {
+            } else {
                 throw new \Exception('Error');
             }
 
@@ -334,7 +329,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             $selected = implode(",", $res);
         }
 
-        if(empty($selected)) {
+        if (empty($selected)) {
             return $this->redirect(['/clientintegr/merc/stock-entry']);
         }
 

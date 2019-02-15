@@ -61,11 +61,10 @@ class CurrencySearch extends Currency
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
-            'text'     => $this->text,
-            'num_code' => $this->num_code,
-            'iso_code' => $this->iso_code,
-        ]);
+        $query->andFilterWhere(['is_active' => $this->is_active])
+            ->andFilterWhere(['like', 'num_code', $this->num_code])
+            ->andFilterWhere(['like', 'text', $this->text])
+            ->andFilterWhere(['like', 'iso_code', $this->iso_code]);
 
         return $dataProvider;
     }

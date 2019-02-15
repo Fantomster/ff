@@ -13,6 +13,7 @@ use yii\web\NotFoundHttpException;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
 use common\models\Role;
+use Yii;
 
 class JournalController extends Controller
 {
@@ -21,12 +22,12 @@ class JournalController extends Controller
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 // We will override the default rule config with the new AccessRule class
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'rules' => [
+                'rules'      => [
                     [
                         'allow' => false,
                         // Allow restaurant managers
@@ -37,7 +38,7 @@ class JournalController extends Controller
                         ],
                     ],
                     [
-                        'allow' => TRUE,
+                        'allow' => true,
                         'roles' => ['@'],
                     ],
 
@@ -54,22 +55,23 @@ class JournalController extends Controller
         $searchModel->organizations = array_keys(\yii\helpers\ArrayHelper::map($user->getAllOrganization(null), 'id', 'name'));
         $searchModel->organization_id = (\Yii::$app->user->identity)->organization_id;
         $dataProvider = $searchModel->search(\Yii::$app->request->queryParams);
-        $lic = mercService::getLicense();
+        $lic = mercService::getLicense(Yii::$app->user->identity->organization_id);
 
         $sort = new Sort();
         $sort->defaultOrder = ['id' => SORT_DESC];
         $dataProvider->setSort($sort);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
-            'user' => $user,
-            'lic' => $lic,
+            'user'         => $user,
+            'lic'          => $lic,
         ]);
     }
 
     /**
      * Displays a single Journal model.
+     *
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -84,6 +86,7 @@ class JournalController extends Controller
     /**
      * Finds the Journal model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param integer $id
      * @return Journal the loaded model
      * @throws NotFoundHttpException if the model cannot be found

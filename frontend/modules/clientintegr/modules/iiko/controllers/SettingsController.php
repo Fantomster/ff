@@ -30,7 +30,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
     {
         $searchModel = new iikoDicconstSearch();
         $dataProvider = $searchModel->search([Yii::$app->request->queryParams]);
-        $lic = iikoService::getLicense();
+        $lic = iikoService::getLicense(Yii::$app->user->identity->organization_id);
         $vi = $lic ? 'index' : '/default/_nolic';
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
@@ -66,7 +66,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             }
         }
 
-        $lic = iikoService::getLicense();
+        $lic = iikoService::getLicense(Yii::$app->user->identity->organization_id);
         $vi = $lic ? 'update' : '/default/_nolic';
 
         $post = Yii::$app->request->post();

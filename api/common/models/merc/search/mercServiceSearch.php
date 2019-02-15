@@ -5,6 +5,8 @@ namespace api\common\models\merc\search;
 use api\common\models\merc\mercService;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use common\models\Organization;
+use common\helpers\DBNameHelper;
 
 class mercServiceSearch extends mercService
 {
@@ -14,7 +16,7 @@ class mercServiceSearch extends mercService
     public function rules()
     {
         return [
-            [['created_at','updated_at','is_deleted','user_id','org','fd','td','status_id','is_deleted','code','name','address','phone'], 'safe'],
+            [['created_at', 'updated_at', 'is_deleted', 'user_id', 'org', 'fd', 'td', 'status_id', 'is_deleted', 'code', 'name', 'address', 'phone'], 'safe'],
         ];
     }
 
@@ -30,12 +32,12 @@ class mercServiceSearch extends mercService
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
     {
         $query = mercService::find();
+        $dbName = DBNameHelper::getMainName();
 
         // add conditions that should always apply here
 
@@ -44,24 +46,28 @@ class mercServiceSearch extends mercService
         ]);
 
         $this->load($params);
+        $org_table_name = Organization::tableName();
+        $query->leftJoin($dbName . '.' . $org_table_name, $org_table_name . '.id = org');
 
         if (!$this->validate()) {
             return $dataProvider;
         }
 
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'name' => $this->name,
-            'org' => $this->org,
-            'fd' => $this->fd,
-            'td' => $this->td,
-            'code' => $this->code,
-            'status_id' => $this->status_id,
-        ]);
+        $query->andFilterWhere(['status_id' => $this->status_id])
+            ->andFilterWhere(['code' => $this->code])
+            ->andFilterWhere(['like', $org_table_name . '.name', $this->org]);
 
-        $query->andFilterWhere(['like', 'code', $this->code])
-            ->andFilterWhere(['like', 'name', $this->name]);
+        if (!empty($this->fd)) {
+            list($day, $month, $year) = explode('.', $this->fd);
+            $fd_normal = $year . '-' . $month . '-' . $day . ' 00:00:00';
+            $query->andFilterWhere(['>=', 'fd', $fd_normal]);
+        }
+
+        if (!empty($this->td)) {
+            list($day, $month, $year) = explode('.', $this->td);
+            $td_normal = $year . '-' . $month . '-' . $day . ' 23:59:59';
+            $query->andFilterWhere(['<=', 'td', $td_normal]);
+        }
 
         return $dataProvider;
     }

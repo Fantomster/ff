@@ -7,8 +7,6 @@ use yii\web\View;
 use yii\bootstrap\Modal;
 use common\assets\CroppieAsset;
 use yii\helpers\Url;
-use yii\helpers\ArrayHelper;
-use kartik\depdrop\DepDrop;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\CatalogBaseGoodsSearch */
@@ -106,7 +104,8 @@ $this->registerJs($customJs, View::POS_READY);
         Инструкция:
     <ul>
         <li>В админ-панели SERVICEDESK > Поля для amoCRM жмем кнопку Создать поле для amoCRM</li>
-        <li>В поле "Значение поля FIELDS[sitepage] из формы на лендинге(напр. franch)" вносим значение поля формы FIELDS[sitepage] на лендингах
+        <li>В поле "Значение поля FIELDS[sitepage] из формы на лендинге(напр. franch)" вносим значение поля формы
+            FIELDS[sitepage] на лендингах
             (если лендинга еще нет, то придумываем любое слово и сообщаем верстальщику, что value поля FIELDS[sitepage]
             должно быть этим словом)
         </li>
@@ -122,29 +121,29 @@ $this->registerJs($customJs, View::POS_READY);
     <?php Pjax::begin(); ?>    <?=
     GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'pjax' => true, // pjax is set to always true for this demo
+        'filterModel'  => $searchModel,
+        'pjax'         => true, // pjax is set to always true for this demo
         'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
-        'columns' => [
+        'columns'      => [
             [
-                'format' => 'raw',
+                'format'    => 'raw',
                 'attribute' => 'amo_field',
             ],
             [
-                'format' => 'raw',
+                'format'    => 'raw',
                 'attribute' => 'responsible_user_id',
             ],
             [
-                'format' => 'raw',
+                'format'    => 'raw',
                 'attribute' => 'pipeline_id',
             ],
             [
-                'class' => 'yii\grid\ActionColumn',
+                'class'    => 'yii\grid\ActionColumn',
                 'template' => '{edit}',
-                'buttons' => [
-                    'edit' => function ($url,$model) {
-                        $customurl=Yii::$app->getUrlManager()->createUrl(['amo/update','id'=>$model['id']]);
-                        return \yii\helpers\Html::a( '<span class="glyphicon glyphicon-pencil"></span>', $customurl,
+                'buttons'  => [
+                    'edit' => function ($url, $model) {
+                        $customurl = Yii::$app->getUrlManager()->createUrl(['amo/update', 'id' => $model['id']]);
+                        return \yii\helpers\Html::a('<span class="glyphicon glyphicon-pencil"></span>', $customurl,
                             ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
                     },
                 ],
@@ -155,9 +154,9 @@ $this->registerJs($customJs, View::POS_READY);
     <?php Pjax::end(); ?></div>
 <?php
 Modal::begin([
-    'id' => 'add-product-market-place',
+    'id'            => 'add-product-market-place',
     'clientOptions' => false,
-    'size' => 'modal-lg',
+    'size'          => 'modal-lg',
 ]);
 Modal::end();
 ?>

@@ -4,17 +4,9 @@ namespace frontend\modules\clientintegr\modules\tillypad\controllers;
 
 use api\common\models\iiko\iikoDicconst;
 use api\common\models\iiko\iikoPconst;
-use api\common\models\iiko\iikoSelectedProduct;
-use api\common\models\iiko\iikoSelectedStore;
 use api\common\models\iiko\search\iikoDicconstSearch;
 use api\common\models\tillypad\TillypadService;
-use api\common\models\tillypad\search\TillypadServiceSearch;
-use common\helpers\ModelsCollection;
-use common\models\Role;
-use common\models\User;
 use Yii;
-use yii\data\ArrayDataProvider;
-use yii\web\Response;
 
 class SettingsController extends \frontend\modules\clientintegr\modules\iiko\controllers\SettingsController
 {
@@ -30,7 +22,7 @@ class SettingsController extends \frontend\modules\clientintegr\modules\iiko\con
     {
         $searchModel = new iikoDicconstSearch();
         $dataProvider = $searchModel->searchTillypad(Yii::$app->request->queryParams);
-        $lic = TillypadService::getLicense();
+        $lic = TillypadService::getLicense(Yii::$app->user->identity->organization_id);
         $vi = $lic ? 'index' : '/default/_nolic';
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
@@ -66,7 +58,7 @@ class SettingsController extends \frontend\modules\clientintegr\modules\iiko\con
             }
         }
 
-        $lic = TillypadService::getLicense();
+        $lic = TillypadService::getLicense(Yii::$app->user->identity->organization_id);
         $vi = $lic ? 'update' : '/default/_nolic';
 
         $post = Yii::$app->request->post();
@@ -105,7 +97,7 @@ class SettingsController extends \frontend\modules\clientintegr\modules\iiko\con
         }
 
         if ($pConst->load($post) && $pConst->save() && $id != 7) {
-            
+
             /*if ($pConst->getErrors()) {
                 var_dump($pConst->getErrors());
                 exit;

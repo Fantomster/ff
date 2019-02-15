@@ -374,7 +374,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $agentModel = iikoAgent::findOne(['uuid' => $model->agent_uuid, 'org_id' => $model->org]);
         $storeModel = iikoStore::findOne(['id' => $model->store_id]);
 
-        $lic = iikoService::getLicense();
+        $lic = iikoService::getLicense(Yii::$app->user->identity->organization_id);
         $view = $lic ? 'indexmap' : '/default/_nolic';
         $vatFilter = [];
         $vatFilter["vat"] = 1;
@@ -580,7 +580,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionUpdate($id, $page)
     {
         $model = $this->findModel($id);
-        $lic = iikoService::getLicense();
+        $lic = iikoService::getLicense(Yii::$app->user->identity->organization_id);
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
 

@@ -1,5 +1,7 @@
 <?php
 
+use kartik\grid\GridView;
+
 $this->title = 'Доступы Tillypad';
 
 $this->params['breadcrumbs'][] = [
@@ -18,13 +20,41 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="box-header with-border">
         <div class="box-title pull-left">
             <?=
-            \yii\grid\GridView::widget([
+            \kartik\grid\GridView::widget([
                 'dataProvider' => $dataProvider,
                 'filterModel'  => $searchModel,
                 'summary'      => false,
                 'columns'      => [
-                    'fd',
-                    'td',
+                    [
+                        'attribute'           => 'fd',
+                        'filterType'          => \kartik\grid\GridView::FILTER_DATE,
+                        'filterWidgetOptions' => ([
+                            'model'         => $searchModel,
+                            'attribute'     => 'date',
+                            'pluginOptions' => [
+                                'autoclose' => true,
+                                'format'    => 'dd.mm.yyyy',
+                            ]
+                        ]),
+                        'value'               => function ($data) {
+                            return date('d.m.Y', strtotime($data->fd));
+                        }
+                    ],
+                    [
+                        'attribute'           => 'td',
+                        'filterType'          => \kartik\grid\GridView::FILTER_DATE,
+                        'filterWidgetOptions' => ([
+                            'model'         => $searchModel,
+                            'attribute'     => 'date',
+                            'pluginOptions' => [
+                                'autoclose' => true,
+                                'format'    => 'dd.mm.yyyy',
+                            ]
+                        ]),
+                        'value'               => function ($data) {
+                            return date('d.m.Y', strtotime($data->td));
+                        }
+                    ],
                     [
                         'attribute' => 'org',
                         'label'     => 'Организация MixCart',
@@ -36,6 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'attribute' => 'status_id',
+                        'filter'    => [0 => 'Не активно', 1 => 'Активно'],
                         'value'     => function ($model) {
                             if ($model) return ($model->status_id == 1) ? 'Активно' : 'Не активно';
                         },

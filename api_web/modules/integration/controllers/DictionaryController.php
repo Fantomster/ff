@@ -32,18 +32,19 @@ class DictionaryController extends \api_web\components\WebApiController
             'class' => AccessControl::class,
             'rules' => [
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'list',
                     ],
-                    'roles'   => [
+                    'roles'      => [
                         Registry::MANAGER_RESTAURANT,
                         Registry::BOOKER_RESTAURANT,
                     ],
+                    'roleParams' => ['user' => $this->user]
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'product-list',
                         'agent-list',
                         'agent-update',
@@ -61,9 +62,10 @@ class DictionaryController extends \api_web\components\WebApiController
                         'vetis-transport',
                         'vetis-product-item',
                     ],
-                    'roles'   => [
+                    'roles'      => [
                         Registry::OPERATOR
                     ],
+                    'roleParams' => ['user' => $this->user]
                 ],
             ],
         ];

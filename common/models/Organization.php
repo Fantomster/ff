@@ -9,6 +9,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
 use api\common\models\RkServicedata;
+use api_web\components\Registry;
 use common\models\edi\EdiOrganization;
 use common\models\licenses\LicenseOrganization;
 use common\models\vetis\VetisCountry;
@@ -615,11 +616,41 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param null $vendor_id
+     * @return array
+     */
+    public function getCatalogsLazyVendor($vendor_id = null)
+    {
+        $tblRSR = RelationSuppRest::tableName();
+        $tblCat = Catalog::tableName();
+
+        $query = RelationSuppRest::find()
+            ->select(["$tblRSR.cat_id as cat_id"])
+            ->leftJoin($tblCat, "$tblRSR.cat_id = $tblCat.id")
+            ->innerJoin(Organization::tableName() . ' as org', "org.id = $tblRSR.supp_org_id AND org.type_id = :type", [
+                ':type' => Organization::TYPE_LAZY_VENDOR
+            ])
+            ->where([
+                "$tblRSR.rest_org_id" => $this->id,
+                "$tblRSR.deleted"     => 0,
+                "$tblRSR.status"      => 1,
+                "$tblCat.status" => Catalog::STATUS_ON
+            ]);
+
+        if ($vendor_id) {
+            $query->andFilterWhere(["$tblRSR.supp_org_id" => $vendor_id]);
+        }
+
+        $catalogs = ArrayHelper::getColumn($query->asArray()->all(), 'cat_id');
+        return $catalogs;
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getDelivery()
     {
-        if ($this->type_id !== Organization::TYPE_SUPPLIER) {
+        if (!in_array($this->type_id, [Organization::TYPE_SUPPLIER, Organization::TYPE_LAZY_VENDOR])) {
             return null;
         }
         return $this->hasOne(Delivery::class, ['vendor_id' => 'id']);

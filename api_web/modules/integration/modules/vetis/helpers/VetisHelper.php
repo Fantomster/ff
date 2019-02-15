@@ -406,13 +406,13 @@ class VetisHelper extends BaseHelper
      * @param string $type
      * @throws ValidationException
      */
-    public function writeInJournal($message, int $userId, int $orgId = 0, $type = 'success'): void
+    public function writeInJournal($message, int $userId, int $orgId = 0, $type = 'success', $logGuid = 'Vetis'): void
     {
         $journal = new Journal();
         $journal->response = is_array($message) ? json_encode($message) : $message;
         $journal->service_id = Registry::MERC_SERVICE_ID;
         $journal->type = $type;
-        $journal->log_guide = 'CreateVetisProductItem';
+        $journal->log_guide = $logGuid;
         $journal->organization_id = $orgId;
         $journal->user_id = $userId;
         $journal->operation_code = '0';

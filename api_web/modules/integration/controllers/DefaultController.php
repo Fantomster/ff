@@ -33,6 +33,18 @@ class DefaultController extends \api_web\components\WebApiController
                     ],
                     'roles'      => [
                         Registry::MANAGER_RESTAURANT,
+                    ],
+                    'roleParams' => [
+                        'user' => $this->user
+                    ]
+                ],
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'map-list',
+                        'map-update',
+                    ],
+                    'roles'      => [
                         Registry::BOOKER_RESTAURANT,
                     ],
                     'roleParams' => [

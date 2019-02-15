@@ -10,7 +10,7 @@ namespace common\models;
  * @property string       $edi_supplier_article Артикул товара от поставщика
  * @property int          $doc_type             Тип документа (0 - заказ, 1 - уведомление об отгрузке DESADV, 2 -
  *           уведомление об отгрузке ALCDES)
- * @property int          $barcode              Штрих-код товара
+ * @property string       $barcode              Штрих-код товара
  * @property string       $pricewithvat         Цена с НДС
  * @property string       $taxrate              Ставка НДС
  * @property string       $uuid                 Универсальный идентификатор товара в системе ВЕТИС

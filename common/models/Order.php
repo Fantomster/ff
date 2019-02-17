@@ -1011,4 +1011,14 @@ class Order extends \yii\db\ActiveRecord
         return $result;
     }
 
+    /**
+     * @return array
+     */
+    public function getProducts() {
+        $result = [];
+        foreach ($this->orderContent as $orderContent) {
+            $result[] = $orderContent->product_id;
+        }
+        return $result;
+    }
 }

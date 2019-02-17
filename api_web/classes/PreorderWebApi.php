@@ -19,6 +19,7 @@ use common\models\{Order,
     Cart,
     Organization,
     PreorderContent,
+    ProductAnalog,
     Profile,
     OrderContent,
     Catalog,
@@ -298,8 +299,10 @@ class PreorderWebApi extends WebApi
         $products = [];
         $contents = $preOrder->getPreorderContents()->asArray()->all();
         $planQuantity = ArrayHelper::map($contents, 'product_id', 'plan_quantity');
+        /** @var Order $order */
         foreach ($orders as $order) {
             $orderContent = $order->orderContent;
+            $issetAnalog = $this->issetProductsAnalog($order->getProducts());
             foreach ($orderContent as $item) {
                 if (empty($planQuantity[$item->product_id])) {
                     throw new BadRequestHttpException('preorder.wrong_preorder');
@@ -311,11 +314,25 @@ class PreorderWebApi extends WebApi
                     'plan_quantity' => round($planQuantity[$item->product_id], 3),
                     'quantity'      => round($item->quantity, 3),
                     'sum'           => CurrencyHelper::asDecimal($item->quantity * $item->price),
-                    'isset_analog'  => false,
+                    'isset_analog'  => $issetAnalog[$item->product_id] ?? false,
                 ];
             }
         }
         return $products;
+    }
+
+    /**
+     * @param $product_ids
+     * @return array
+     */
+    private function issetProductsAnalog($product_ids)
+    {
+        return ProductAnalog::find()->where([
+            'client_id'  => $this->user->organization_id,
+            'product_id' => $product_ids
+        ])->indexBy('product_id')
+            ->asArray()
+            ->all();
     }
 
     /**
@@ -930,5 +947,29 @@ class PreorderWebApi extends WebApi
 
         $preOrder->refresh();
         return $this->prepareModel($preOrder, true);
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function updateProduct($request)
+    {
+        $this->validateRequest($request, ['id']);
+        $orderContent = OrderContent::findOne(['id' => $request['id']]);
+        if (!$orderContent) {
+            throw new BadRequestHttpException('order_content.not_found');
+        }
+
+        $orderContent->quantity = $request['quantity'];
+        if (!$orderContent->save()) {
+            throw new ValidationException($orderContent->getFirstErrors());
+        }
+
+        $orderContent->order->calculateTotalPrice();
+
+        return $this->get(['id' => $orderContent->order->preorder_id]);
     }
 }

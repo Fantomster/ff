@@ -797,4 +797,49 @@ class PreorderController extends WebApiController
     {
         $this->response=$this->classWebApi->addProduct($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/preorder/update-product",
+     *     tags={"Preorder"},
+     *     summary="Обновление кодичества в заказе предзаказа",
+     *     description="Обновление кодичества в заказе предзаказа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                      "id":1,
+     *                      "quantity": 6
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *            default={}
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     * @throws
+     */
+    public function actionUpdateProduct()
+    {
+        $this->response = $this->classWebApi->updateProduct($this->request);
+    }
 }

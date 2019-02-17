@@ -55,10 +55,12 @@ class AnalogWebApi extends WebApi
             ])
             ->leftJoin(Currency::tableName() . ' as cur', "cur.id = cat.currency_id")
             ->innerJoin(Organization::tableName() . ' as o', "cbg.supp_org_id = o.id")
+            ->andWhere("cg.price is not null")
             ->andWhere([
-                'cat.id' => explode(',', $this->user->organization->getCatalogs())
-            ]);
-
+                'cat.id'   => explode(',', $this->user->organization->getCatalogs()),
+                'cat.type' => Catalog::CATALOG
+            ])
+            ->groupBy('cbg.id');
 
         if (isset($request['search'])) {
             if (isset($request['search']['vendor']) && !empty($request['search']['vendor'])) {
@@ -146,7 +148,6 @@ class AnalogWebApi extends WebApi
 
         $query = new Query();
         $result = $query
-            ->distinct()
             ->select([
                 'product_id'   => 'cbg.id',
                 'product_name' => 'cbg.product',
@@ -169,6 +170,7 @@ class AnalogWebApi extends WebApi
             ->innerJoin(Organization::tableName() . ' as o', "cbg.supp_org_id = o.id")
             ->andWhere(['COALESCE(pa.parent_id, pa.id)' => $groupId])
             ->orderBy(['sort_value' => SORT_ASC])
+            ->groupBy('cbg.id')
             ->all();
 
         $items = [];

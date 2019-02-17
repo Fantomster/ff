@@ -972,4 +972,35 @@ class PreorderWebApi extends WebApi
 
         return $this->get(['id' => $orderContent->order->preorder_id]);
     }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    public function updateOrder($request)
+    {
+        $this->validateRequest($request, ['order_id']);
+        $order = Order::findOne(['id' => $request['order_id']]);
+        if (!$order) {
+            throw new BadRequestHttpException('order.not_found');
+        }
+
+        if (!empty($request['requested_delivery'])) {
+            $order->requested_delivery = $request['requested_delivery'];
+        }
+
+        if (!empty($request['comment'])) {
+            $order->comment = $request['comment'];
+        }
+
+        if (!$order->save()) {
+            throw new ValidationException($order->getFirstErrors());
+        }
+
+        return (new OrderWebApi())->getOrderInfo($order);
+    }
 }

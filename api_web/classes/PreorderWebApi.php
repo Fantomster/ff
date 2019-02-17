@@ -991,7 +991,10 @@ class PreorderWebApi extends WebApi
             $order->calculateTotalPrice();
         }
 
-        return (new OrderWebApi())->getOrderInfo($order);
+        return [
+            'preorder' => $this->get(['id' => $order->preorder_id]),
+            'order'    => (new OrderWebApi())->getOrderInfo($order)
+        ];
     }
 
     /**

@@ -36,6 +36,9 @@ class AnalogController extends WebApiController
      *                  property="request",
      *                  type="object",
      *                  default={
+     *                     "search": {
+     *                          "vendor":{1,2,3}
+     *                     },
      *                     "pagination": {
      *                         "page": 1,
      *                         "page_size": 12
@@ -133,6 +136,9 @@ class AnalogController extends WebApiController
      *                  property="request",
      *                  type="object",
      *                  default={
+     *                     "search": {
+     *                          "vendor":{1,2,3}
+     *                     },
      *                     "pagination": {
      *                         "page": 1,
      *                         "page_size": 12
@@ -213,7 +219,7 @@ class AnalogController extends WebApiController
      */
     public function actionGroupList()
     {
-        $this->response = $this->classWebApi->getProductAnalogListGroup($this->request);
+        $this->response = $this->classWebApi->getListGroup($this->request);
     }
 
     /**

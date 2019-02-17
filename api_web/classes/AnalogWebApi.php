@@ -59,6 +59,13 @@ class AnalogWebApi extends WebApi
                 'cat.id' => explode(',', $this->user->organization->getCatalogs())
             ]);
 
+
+        if (isset($request['search'])) {
+            if (isset($request['search']['vendor']) && !empty($request['search']['vendor'])) {
+                $query->andWhere(['o.id' => $request['search']['vendor']]);
+            }
+        }
+
         if ($sort && in_array(ltrim($sort, '-'), $this->arAvailableFields)) {
             $sortField = ltrim($sort, '-');
             $sortDirection = SORT_ASC;
@@ -183,10 +190,10 @@ class AnalogWebApi extends WebApi
      * @return array
      * @throws
      */
-    public function getProductAnalogListGroup($request)
+    public function getListGroup($request)
     {
         $query = new Query();
-        $result = $query->select([
+        $query->select([
             'product_id'   => 'cbg.id',
             'product_name' => 'cbg.product',
             'article'      => 'cbg.article',
@@ -211,8 +218,15 @@ class AnalogWebApi extends WebApi
             ->where(['pa.client_id' => $this->user->organization_id])
             ->andWhere('pa.parent_id is NULL')
             ->groupBy('pa.id')
-            ->orderBy(['product_name' => SORT_ASC])
-            ->all();
+            ->orderBy(['product_name' => SORT_ASC]);
+
+        if (isset($request['search'])) {
+            if (isset($request['search']['vendor']) && !empty($request['search']['vendor'])) {
+                $query->andWhere(['o.id' => $request['search']['vendor']]);
+            }
+        }
+
+        $result = $query->all();
 
         $items = [];
         $defaultCurrency = Currency::findOne(Registry::DEFAULT_CURRENCY_ID);

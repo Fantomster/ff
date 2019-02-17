@@ -7,19 +7,19 @@ module.exports = {
 	after: function (browser) {
 		console.log('Finishing test DEV-1629...');
 	},
-	'Test dev.mixcart.ronasit.com/login': function (browser) {
+	'Test /login validation': function (browser) {
 
-		browser.url('http://dev.mixcart.ronasit.com/login', () => {
-			console.log('Loading http://dev.mixcart.ronasit.com/login...');
+		browser.url(browser.globals.site_url + '/login', () => {
+			// console.log('Loading http://dev.mixcart.ronasit.com/login...');
 		});
 		browser.waitForElementVisible('#email', 3000, function () {
-			console.log('email input appeared...');
+			// console.log('email input appeared...');
 		});
 		browser.waitForElementVisible('#password', 3000, function () {
-			console.log('password input appeared...');
+			// console.log('password input appeared...');
 		});
 		browser.waitForElementVisible('.dropdown-trigger', 3000, function () {
-			console.log('drop-down trigger appeared appeared...');
+			// console.log('drop-down trigger appeared appeared...');
 		});
 		browser.click('.dropdown-trigger');
 		browser.click('.dropdown-content a:nth-child(1)');
@@ -32,16 +32,20 @@ module.exports = {
 			console.log('Clearing password input!!!');
 		});
 
-		browser.element('css selector', '#email', function () {
-			browser.Keys.ENTER;
-		});
+		browser.click('#email').moveTo(null, 0, -100).mouseButtonClick();
+		// browser.element('css selector', '#email', function () {
+		// 	browser.Keys.ENTER;
+		// });
 
-		browser.pause(2000);
+		browser.pause(3000);
 		browser.saveScreenshot('noemail.jpg');
 
-		browser.assert.elementPresent("div[class='form-error']", 'Error message as expected!!!');
+		browser.assert.elementPresent("div[class='form-error']", 'Email is required');
+		browser.saveScreenshot('noemail1.jpg');
 
 		browser.setValue('#email', 'bigle6732@');
+		browser.saveScreenshot('noemail2.jpg');
+
 		browser.element('css selector', '#email', function () {
 			browser.Keys.ENTER;
 		});

@@ -377,6 +377,9 @@ class PreorderWebApi extends WebApi
         if (!empty($orders)) {
             /** @var Order $order */
             foreach (WebApiHelper::generator($orders) as $order) {
+                if (empty($order->requested_delivery)) {
+                    throw new BadRequestHttpException('orders.requested_delivery_empty');
+                }
                 $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 if (!$order->save()) {
                     throw new ValidationException($model->getFirstErrors());
@@ -424,6 +427,10 @@ class PreorderWebApi extends WebApi
         $order = $model->getOrders()->andWhere(['order.id' => $request['order_id']])->one();
         if (empty($order)) {
             throw new BadRequestHttpException('order.not_found');
+        }
+
+        if (empty($order->requested_delivery)) {
+            throw new BadRequestHttpException('order.requested_delivery_empty');
         }
 
         $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
@@ -954,6 +961,10 @@ class PreorderWebApi extends WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
+     * @throws \Throwable
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\StaleObjectException
+     * @throws \yii\di\NotInstantiableException
      */
     public function updateProduct($request)
     {
@@ -963,14 +974,24 @@ class PreorderWebApi extends WebApi
             throw new BadRequestHttpException('order_content.not_found');
         }
 
+        $order = $orderContent->order;
+
         $orderContent->quantity = $request['quantity'];
-        if (!$orderContent->save()) {
-            throw new ValidationException($orderContent->getFirstErrors());
+        if ($orderContent->quantity === 0) {
+            $is = $this->issetProductsAnalog($orderContent->product_id);
+            if (isset($is[$orderContent->product_id])) {
+                $orderContent->delete();
+            }
         }
 
-        $orderContent->order->calculateTotalPrice();
+        if ($orderContent instanceof OrderContent) {
+            if (!$orderContent->save()) {
+                throw new ValidationException($orderContent->getFirstErrors());
+            }
+            $order->calculateTotalPrice();
+        }
 
-        return $this->get(['id' => $orderContent->order->preorder_id]);
+        return (new OrderWebApi())->getOrderInfo($order);
     }
 
     /**

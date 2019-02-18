@@ -17,16 +17,7 @@ class FrController extends \yii\rest\Controller {
             'corsFilter' => [
                 'class' => \yii\filters\Cors::className(),
                 'cors' => [
-                    'Origin' => [
-                        'https://mixcart.ru',
-                        'https://client.mixcart.ru',
-                        'https://fr.mixcart.ru',
-                        'https://franch.mixcart.ru',
-                        'https://2017.mixcart.ru',
-                        'https://gastreet2018.mixcart.ru',
-                        'https://mix-cart.com',
-                        'https://client.mix-cart.com',
-                    ],
+                    'Origin' => Yii::$app->params['cors'],
                     'Access-Control-Request-Method' => ['POST', 'GET', 'HEAD'],
                     'Access-Control-Allow-Credentials' => true,
                     'Access-Control-Max-Age' => 3600,

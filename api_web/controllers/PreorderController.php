@@ -932,4 +932,48 @@ class PreorderController extends WebApiController
     {
         $this->response = $this->classWebApi->orderClear($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/preorder/order-repeat",
+     *     tags={"Preorder"},
+     *     summary="Повторить заказ",
+     *     description="Повторить заказ",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                      "order_id":1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *            default={}
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     * @throws
+     */
+    public function actionOrderRepeat()
+    {
+        $this->response = $this->classWebApi->orderRepeat($this->request);
+    }
 }

@@ -125,6 +125,7 @@ class Preorder extends \yii\db\ActiveRecord
         /** @var Order[] $orders */
         $orders = $this->orders;
         if (!empty($orders)) {
+            /** @var Order $order */
             foreach (WebApiHelper::generator($orders) as $order) {
                 $sum = $sum + (float)$order->getTotalPrice();
             }

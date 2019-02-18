@@ -1016,4 +1016,75 @@ class PreorderWebApi extends WebApi
             'order'    => (new OrderWebApi())->getOrderInfo($order)
         ];
     }
+
+    /**
+     * Кнопка Повторить заказ
+     *
+     * @param $request
+     * @return array
+     * @throws \Exception
+     */
+    public function orderRepeat($request)
+    {
+        $this->validateRequest($request, ['order_id']);
+        $order = Order::find()
+            ->where([
+                'id'     => $request['order_id'],
+                'status' => Order::STATUS_CANCELLED
+            ])
+            ->andWhere('preorder_id is not null')
+            ->one();
+
+        if (!$order) {
+            throw new BadRequestHttpException('order.not_found');
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            $newOrder = new Order();
+            $newOrder->setAttributes($order->getAttributes([
+                'client_id',
+                'currency_id',
+                'service_id',
+                'vendor_id',
+                'comment'
+            ]));
+
+            $newOrder->created_by_id = $this->user->id;
+            $newOrder->status = Order::STATUS_PREORDER;
+            $newOrder->preorder_id = $order->preorder_id;
+
+            if (!$newOrder->save()) {
+                throw new ValidationException($newOrder->getFirstErrors());
+            }
+
+            foreach ($order->orderContent as $orderContent) {
+                $nOrderContent = new OrderContent();
+                $nOrderContent->setAttributes($orderContent->getAttributes([
+                    'article', 'initial_quantity', 'into_price',
+                    'into_price_sum', 'into_price_sum_vat', 'into_price_vat',
+                    'into_quantity', 'merc_uuid', 'plan_price',
+                    'plan_quantity', 'price', 'product_id',
+                    'product_name', 'quantity', 'units',
+                    'vat_product'
+                ]));
+
+                $nOrderContent->order_id = $newOrder->id;
+                if (!$nOrderContent->save()) {
+                    throw new ValidationException($nOrderContent->getFirstErrors());
+                }
+            }
+            $newOrder->calculateTotalPrice();
+            $t->commit();
+            $result = [
+                'preorder' => $this->get(['id' => $newOrder->preorder_id]),
+                'order'    => (new OrderWebApi())->getOrderInfo($newOrder)
+            ];
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+
+        return $result;
+    }
 }

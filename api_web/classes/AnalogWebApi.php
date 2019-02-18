@@ -458,7 +458,7 @@ class AnalogWebApi extends WebApi
                 'id'           => (int)$row['product_id'],
                 'name'         => $row['product_name'],
                 'ed'           => $row['ed'],
-                'units'        => $row['units'],
+                'units'        => round($row['units'] ?? 1, 3),
                 'price'        => CurrencyHelper::asDecimal($row['price']),
                 'article'      => $row['article'],
                 'coefficient'  => $row['coefficient'] ? round($row['coefficient'], 6) : null,

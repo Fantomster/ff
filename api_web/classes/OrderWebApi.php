@@ -521,22 +521,28 @@ class OrderWebApi extends WebApi
 
         $result['client'] = WebApiHelper::prepareOrganization($order->client);
         $result['vendor'] = WebApiHelper::prepareOrganization($order->vendor);
-
-        if (!is_null($order->status_updated_at) && $order->status_updated_at != '0000-00-00 00:00:00') {
-            $obUpdatedAt = WebApiHelper::asDatetime(trim($order->status_updated_at));
-        } else {
-            $obUpdatedAt = WebApiHelper::asDatetime();
-        }
-
-        if (!is_null($order->edi_doc_date) && $order->edi_doc_date != '0000-00-00 00:00:00') {
-            $ediDocDate = WebApiHelper::asDatetime(trim($order->edi_doc_date));
-        } else {
-            $ediDocDate = WebApiHelper::asDatetime();
-        }
-        $result['status_updated_at'] = $obUpdatedAt;
-        $result['edi_doc_date'] = $ediDocDate;
+        $result['status_updated_at'] = $this->asDate($order->status_updated_at);
+        $result['edi_doc_date'] = $this->asDate($order->edi_doc_date);
+        $result['requested_delivery'] = $this->asDate($order->requested_delivery, false);
 
         return $result;
+    }
+
+    /**
+     * @param      $field
+     * @param bool $default
+     * @return string
+     */
+    private function asDate($field, $default = true)
+    {
+        $r = null;
+        $field = trim($field);
+        if (!is_null($field) && $field != '0000-00-00 00:00:00') {
+            $r = WebApiHelper::asDatetime(trim($field));
+        } elseif ($default) {
+            $r = WebApiHelper::asDatetime();
+        }
+        return $r;
     }
 
     /**

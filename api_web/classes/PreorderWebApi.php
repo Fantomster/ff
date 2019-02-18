@@ -957,7 +957,7 @@ class PreorderWebApi extends WebApi
         }
 
         if (!empty($request['requested_delivery'])) {
-            $order->requested_delivery = $request['requested_delivery'];
+            $order->requested_delivery = date('Y-m-d', strtotime($request['requested_delivery']));
         }
 
         if (!empty($request['comment'])) {

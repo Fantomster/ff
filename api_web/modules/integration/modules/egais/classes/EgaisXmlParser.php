@@ -21,11 +21,11 @@ class EgaisXmlParser
             ->children($namespaces['awr']);
 
         return [
-            'identity' => (string)$data->Identity,
-            'ActNumber' => (string)$data->Header->ActNumber,
-            'ActDate' => (string)$data->Header->ActDate,
+            'identity'     => (string)$data->Identity,
+            'ActNumber'    => (string)$data->Header->ActNumber,
+            'ActDate'      => (string)$data->Header->ActDate,
             'TypeWriteOff' => (string)$data->Header->TypeWriteOff,
-            'Note' => (string)$data->Header->Note,
+            'Note'         => (string)$data->Header->Note,
         ];
     }
 
@@ -44,9 +44,9 @@ class EgaisXmlParser
             ->children($namespaces['ainp']);
 
         return [
-            'Number' => (string)$data->Header->Number,
-            'ActDate' => (string)$data->Header->ActDate,
-            'Note' => (string)$data->Header->Note,
+            'Number'       => (string)$data->Header->Number,
+            'ActDate'      => (string)$data->Header->ActDate,
+            'Note'         => (string)$data->Header->Note,
             'TypeChargeOn' => (string)$data->Header->TypeChargeOn
         ];
     }
@@ -65,17 +65,17 @@ class EgaisXmlParser
             $id = $url[count($url) - 1];
             $type = $url[count($url) - 2];
             array_push($result, [
-                'fileId' => empty($doc->attributes()->fileId) || ($doc->attributes()->fileId == 'NODOCID')
+                'fileId'    => empty($doc->attributes()->fileId) || ($doc->attributes()->fileId == 'NODOCID')
                     ? null
                     : (string)$doc->attributes()->fileId,
-                'replyId' => empty($doc->attributes()->replyId)
+                'replyId'   => empty($doc->attributes()->replyId)
                     ? null
                     : (string)$doc->attributes()->replyId,
                 'timestamp' => empty($doc->attributes()->timestamp)
                     ? null
                     : (string)$doc->attributes()->timestamp,
-                'type' => $type,
-                'id' => (int)$id
+                'type'      => $type,
+                'id'        => (int)$id
             ]);
         }
 
@@ -122,13 +122,13 @@ class EgaisXmlParser
             ->children($namespaces['aint']);
 
         return [
-            'ActRegId' => (string)$data->Header->ActRegId,
-            'Number' => (string)$data->Header->Number,
+            'ActRegId'  => (string)$data->Header->ActRegId,
+            'Number'    => (string)$data->Header->Number,
             'positions' => ArrayHelper::getColumn($data->Content->Position, function ($position) {
                 return [
-                    'Identity' => (string)$position->Identity,
+                    'Identity'      => (string)$position->Identity,
                     'InformF1RegId' => (string)$position->InformF1RegId,
-                    'InformF2' => (array)$position->InformF2->InformF2Item
+                    'InformF2'      => (array)$position->InformF2->InformF2Item
                 ];
             }, false),
         ];
@@ -146,7 +146,7 @@ class EgaisXmlParser
 
         $result = [
             'RestsDate' => (string)$data->RestsDate,
-            'Products' => [
+            'Products'  => [
                 "StockPosition" => []
             ]
         ];
@@ -156,16 +156,16 @@ class EgaisXmlParser
                 ->Product
                 ->children($namespaces['pref']);
             array_push($result['Products']['StockPosition'], [
-                'Quantity' => (string)$product->Quantity,
+                'Quantity'     => (string)$product->Quantity,
                 'InformARegId' => (string)$product->InformARegId,
                 'InformBRegId' => (string)$product->InformBRegId,
-                'Product' => [
-                    'FullName' => (string)$productFields->FullName,
-                    'AlcCode' => (string)$productFields->AlcCode,
-                    'Capacity' => (string)$productFields->Capacity,
-                    'AlcVolume' => (string)$productFields->AlcVolume,
+                'Product'      => [
+                    'FullName'     => (string)$productFields->FullName,
+                    'AlcCode'      => (string)$productFields->AlcCode,
+                    'Capacity'     => (string)$productFields->Capacity,
+                    'AlcVolume'    => (string)$productFields->AlcVolume,
                     'ProductVCode' => (string)$productFields->ProductVCode,
-                    'Producer' => $productFields
+                    'Producer'     => $productFields
                         ->Producer
                         ->children($namespaces['oref']),
                 ]
@@ -184,7 +184,7 @@ class EgaisXmlParser
     {
         $xml_parser = simplexml_load_string($xml);
 
-        return (string)$xml_parser->url ?: null;
+        return (string)$xml_parser->url ?? '';
     }
 
     /* Возвращает массив с id и type входящего документа */
@@ -202,7 +202,7 @@ class EgaisXmlParser
             $type = $url[count($url) - 2];
 
             array_push($arr, [
-                    'id' => $id,
+                    'id'   => $id,
                     'type' => $type
                 ]
             );
@@ -230,7 +230,7 @@ class EgaisXmlParser
         foreach ($complexTypes as $complexType) {
             $name = (string)$complexType->attributes()->name;
             $data = [
-                'name' => $name,
+                'name'          => $name,
                 'documentation' => (string)$complexType->annotation->documentation,
             ];
             switch ($name) {
@@ -251,10 +251,10 @@ class EgaisXmlParser
         $resultSimpleTypes = [];
         foreach ($simpleTypes as $simpleType) {
             array_push($resultSimpleTypes, [
-                'name' => (string)$simpleType->attributes()->name,
+                'name'          => (string)$simpleType->attributes()->name,
                 'documentation' => (string)$simpleType->annotation->documentation,
-                'restriction' => [
-                    'base' => (string)$simpleType->restriction->attributes()->base,
+                'restriction'   => [
+                    'base'        => (string)$simpleType->restriction->attributes()->base,
                     'enumeration' => [
                         'value' => ArrayHelper::getColumn($simpleType->restriction->enumeration, function ($enumeration) {
                             return (string)$enumeration->attributes()->value;
@@ -274,7 +274,7 @@ class EgaisXmlParser
             'sequence' => ArrayHelper::getColumn($data, function ($block) {
                 return ArrayHelper::getColumn($block->element, function ($element) {
                     $elements = [
-                        'name' => (string)$element->attributes()->name,
+                        'name'          => (string)$element->attributes()->name,
                         'documentation' => (string)$element->annotation->documentation ?: null,
                     ];
 
@@ -302,16 +302,16 @@ class EgaisXmlParser
                     $attr = $item->attributes();
 
                     return [
-                        'name' => (string)$attr->name,
+                        'name'          => (string)$attr->name,
                         'documentation' => (string)$item->annotation->documentation ?: null,
-                        'type' => (string)$attr->type ?: null,
-                        'default' => (string)$attr->default ?: null,
-                        'minOccurs' => (string)$attr->minOccurs ?: null,
-                        'maxOccurs' => (string)$attr->maxOccurs ?: null,
-                        'nillable' => (string)$attr->nillable ?: null,
-                        'simpleType' => !empty($item->simpleType->restriction)
+                        'type'          => (string)$attr->type ?: null,
+                        'default'       => (string)$attr->default ?: null,
+                        'minOccurs'     => (string)$attr->minOccurs ?: null,
+                        'maxOccurs'     => (string)$attr->maxOccurs ?: null,
+                        'nillable'      => (string)$attr->nillable ?: null,
+                        'simpleType'    => !empty($item->simpleType->restriction)
                             ? [
-                                'base' => (string)$item->simpleType->restriction->attributes()->base,
+                                'base'      => (string)$item->simpleType->restriction->attributes()->base,
                                 'maxLength' => (string)$item
                                     ->simpleType
                                     ->restriction
@@ -334,16 +334,16 @@ class EgaisXmlParser
 
         return [
             'complexType' => [
-                'name' => (string)$complexType->attributes()->name,
+                'name'          => (string)$complexType->attributes()->name,
                 'documentation' => (string)$complexType->annotation->documentation,
-                'type' => (string)$complexType->attributes()->type,
-                'minOccurs' => (string)$complexType->attributes()->minOccurs,
-                'maxOccurs' => (string)$complexType->attributes()->maxOccurs,
+                'type'          => (string)$complexType->attributes()->type,
+                'minOccurs'     => (string)$complexType->attributes()->minOccurs,
+                'maxOccurs'     => (string)$complexType->attributes()->maxOccurs,
             ],
-            'unique' => [
-                'name' => (string)$unique->attributes()->name,
+            'unique'      => [
+                'name'     => (string)$unique->attributes()->name,
                 'selector' => (string)$unique->selector->attributes()->xpath,
-                'field' => (string)$unique->field->attributes()->xpath
+                'field'    => (string)$unique->field->attributes()->xpath
             ]
         ];
     }

@@ -1029,7 +1029,7 @@ class PreorderWebApi extends WebApi
         $this->validateRequest($request, ['order_id']);
         $order = Order::find()
             ->where([
-                'id' => $request['order_id']
+                'id' => $request['order_id'],
             ])
             ->andWhere('preorder_id is not null')
             ->one();
@@ -1082,6 +1082,62 @@ class PreorderWebApi extends WebApi
             $result = [
                 'preorder' => $this->get(['id' => $newOrder->preorder_id]),
                 'order'    => (new OrderWebApi())->getOrderInfo($newOrder)
+            ];
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Кнопка Отменить заказ
+     *
+     * @param $request
+     * @return array
+     * @throws \Exception
+     */
+    public function orderCancel($request)
+    {
+        $this->validateRequest($request, ['order_id']);
+        $order = Order::find()
+            ->where([
+                'id' => $request['order_id']
+            ])
+            ->andWhere('preorder_id is not null')
+            ->one();
+
+        if (!$order) {
+            throw new BadRequestHttpException('order.not_found');
+        }
+
+        if (in_array($order->status, [Order::STATUS_CANCELLED, Order::STATUS_REJECTED])) {
+            throw new BadRequestHttpException('Заказ уже отменен');
+        }
+
+        if (!in_array($order->service_id, [Registry::MC_BACKEND, Registry::EDI_SERVICE_ID])) {
+            throw new BadRequestHttpException('Этот тип заказов тут не должен быть вообще!!!');
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            switch ($order->service_id) {
+                case Registry::EDI_SERVICE_ID:
+                    $class = EdiWebApi::class;
+                    $method = 'orderCancel';
+                    break;
+                default:
+                    $class = OrderWebApi::class;
+                    $method = 'cancel';
+            }
+
+            $webApi = new $class();
+            $webApi->{$method}(['order_id' => $order->id]);
+            $t->commit();
+            $result = [
+                'preorder' => $this->get(['id' => $order->preorder_id]),
+                'order'    => (new OrderWebApi())->getOrderInfo($order)
             ];
         } catch (\Exception $e) {
             $t->rollBack();

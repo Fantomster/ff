@@ -137,4 +137,50 @@ class LazyVendorPriceController extends WebApiController
     {
         $this->response = $this->classWebApi->deletePriceList($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/lazy-vendor/price/change-product-status",
+     *     tags={"LazyVendor/Price"},
+     *     summary="Изменение статуса товара",
+     *     description="Делает товар доступным/недоступным для заказа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vendor_id": 1,
+     *                      "product_id": 20
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "status": 1
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionChangeProductStatus()
+    {
+        $this->response = $this->classWebApi->changeProductStatus($this->request);
+    }
 }

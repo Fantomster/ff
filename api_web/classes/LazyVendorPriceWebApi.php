@@ -7,15 +7,9 @@
 
 namespace api_web\classes;
 
-use api_web\components\definitions\Organization;
 use api_web\helpers\CurrencyHelper;
 use api_web\helpers\WebApiHelper;
-use common\models\
-{
-    Catalog,
-    CatalogGoods,
-    RelationSuppRest
-};
+use common\models\{Catalog, CatalogBaseGoods, CatalogGoods, Organization, RelationSuppRest};
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
 use yii\web\BadRequestHttpException;
@@ -96,7 +90,8 @@ class LazyVendorPriceWebApi extends LazyVendorWebApi
     {
         $model = RelationSuppRest::findOne([
             'supp_org_id' => $vendor_id,
-            'rest_org_id' => $this->user->organization_id
+            'rest_org_id' => $this->user->organization_id,
+            'invite'      => RelationSuppRest::INVITE_ON,
         ]);
         if (empty($model)) {
             throw new BadRequestHttpException('catalog.not_found');
@@ -150,10 +145,10 @@ class LazyVendorPriceWebApi extends LazyVendorWebApi
         if (!is_int($post['vendor_id'])) {
             throw new BadRequestHttpException('catalog.wrong_value');
         }
-        $org = \common\models\Organization::find()
+        $org = Organization::find()
             ->where([
                 'id'      => $post['vendor_id'],
-                'type_id' => \common\models\Organization::TYPE_LAZY_VENDOR
+                'type_id' => Organization::TYPE_LAZY_VENDOR
             ])->one();
         if (!empty($org)) {
             throw new BadRequestHttpException('catalog.not_lazy_vendor');
@@ -184,5 +179,37 @@ class LazyVendorPriceWebApi extends LazyVendorWebApi
             throw $e;
         }
         return ['result' => true];
+    }
+
+    /**
+     * Изменяет статус продукта
+     *
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function changeProductStatus($post)
+    {
+        $this->validateRequest($post, ['vendor_id', 'product_id']);
+        if (!is_int($post['vendor_id']) || !is_int($post['product_id'])) {
+            throw new BadRequestHttpException('catalog.wrong_value');
+        }
+        $catalog = $this->getCatalog($post['vendor_id']);
+        $catId = $catalog->id;
+        $product = CatalogGoods::findOne(['cat_id' => $catId, 'base_goods_id' => $post['product_id']]);
+        if (empty($product)) {
+            throw new BadRequestHttpException('catalog.no_such_product');
+        }
+        $productBase = CatalogBaseGoods::findOne(['id' => $post['product_id']]);
+        $productBase->status = $productBase->status ? 0 : 1;
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $productBase->save();
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+        return ['status' => $productBase->status];
     }
 }

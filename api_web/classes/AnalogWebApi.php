@@ -303,7 +303,7 @@ class AnalogWebApi extends WebApi
             $model->product_id = (int)$product['id'];
             $model->client_id = $this->user->organization_id;
             $model->sort_value = (int)$product['sort_value'];
-            $model->coefficient = $product['coefficient'];
+            $model->coefficient = $product['coefficient'] ?? 1;
             $model->parent_id = $parent_id;
 
             if ($model->save()) {
@@ -348,7 +348,7 @@ class AnalogWebApi extends WebApi
             }
 
             $model->sort_value = (int)$product['sort_value'];
-            $model->coefficient = $product['coefficient'];
+            $model->coefficient = $product['coefficient'] ?? 1;
             $model->parent_id = $oldGroupId;
 
             if (!$model->save()) {

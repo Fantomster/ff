@@ -537,7 +537,7 @@ class OrderWebApi extends WebApi
     {
         $r = null;
         $field = trim($field);
-        if (!is_null($field) && $field != '0000-00-00 00:00:00') {
+        if (!is_null($field) && $field != '0000-00-00 00:00:00' && !empty($field)) {
             $r = WebApiHelper::asDatetime(trim($field));
         } elseif ($default) {
             $r = WebApiHelper::asDatetime();

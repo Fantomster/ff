@@ -92,4 +92,49 @@ class LazyVendorPriceController extends WebApiController
     {
         $this->response = $this->classWebApi->get($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/lazy-vendor/price/delete",
+     *     tags={"LazyVendor/Price"},
+     *     summary="Удаление индивидуального каталога",
+     *     description="Удаление индивидуального каталога",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vendor_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionDelete()
+    {
+        $this->response = $this->classWebApi->deletePriceList($this->request);
+    }
 }

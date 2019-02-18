@@ -209,7 +209,7 @@ class EgaisMethods extends WebApi
             throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
 
-        return (new EgaisHelper())->getOneIncomingDoc($settings['egais_url'], $request);
+        return (new EgaisCronHelper())->getOneIncomingDoc($settings['egais_url'], $request);
     }
 
     /**

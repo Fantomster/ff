@@ -5,6 +5,7 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
+use api_web\modules\integration\modules\vetis\api\mercury\CreatePrepareOutgoingConsignmentRequest;
 use api_web\modules\integration\modules\vetis\api\mercury\Mercury;
 use common\models\search\MercStockEntrySearch;
 use api_web\components\Registry;
@@ -23,6 +24,7 @@ use common\models\vetis\VetisIngredients;
 use common\models\vetis\VetisPackingType;
 use common\models\vetis\VetisProductByType;
 use common\models\vetis\VetisProductItem;
+use common\models\vetis\VetisPurpose;
 use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
@@ -30,6 +32,7 @@ use common\models\vetis\VetisTransport;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use frontend\modules\clientintegr\modules\merc\models\productForm;
 use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
+use frontend\modules\clientintegr\modules\merc\models\transportVsd\step4Form;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
@@ -1106,6 +1109,82 @@ class VetisWaybill extends WebApi
             }
         } else {
             throw new ValidationException($model->errors);
+        }
+
+        return ['result' => true];
+    }
+
+    /**
+     * @param array $request
+     * @return VetisPurpose[]
+     */
+    public function getPurposeList($request)
+    {
+        $models = VetisPurpose::find()->where(['active' => 1, 'last' => 1]);
+        if (isset($request['name']) && !empty($request['name'])) {
+            $models->andWhere(['like', 'name', $request['name']]);
+        }
+        $arModels = [];
+        foreach ($models->all() as $model) {
+            $arModels[] = [
+                'name' => $model->name,
+                'guid' => $model->guid,
+                'uuid' => $model->uuid,
+            ];
+        }
+
+        return $arModels;
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException|\Exception
+     * @throws ValidationException
+     */
+    public function createTransportVsd($request)
+    {
+        $this->validateRequest($request, ['hc_guid', 'recipient', 'products', 'purpose_guid']);
+        $params = [
+            'type'               => 1,
+            'type_name'          => $request['type_name'] ?? 'Автомобильный',
+            'car_number'         => $request['car_number'] ?? '',
+            'trailer_number'     => $request['trailer_number'] ?? '',
+            'container_number'   => $request['container_number'] ?? '',
+            'storage_type'       => array_key_exists($request['storage_type'], VetisHelper::$transport_storage_types)
+                ? $request['storage_type'] : null,
+            'mode'               => 1,
+            'org_id'             => $this->user->organization_id,
+            'recipient'          => $request['recipient'], //guid
+            'hc_guid'            => $request['hc_guid'], //guid
+            'inn'                => $request['recipient_inn'] ?? '',
+            'products'           => $request['products'], // ['select_amount','product_name', 'id']
+            'purpose'            => $request['purpose_guid'], // purpose guid
+            'cargoExpertized'    => $request['cargoExpertized'],
+            'locationProsperity' => $request['locationProsperity'],
+            'isTTN'              => $request['isTTN'] ?? false,
+            'seriesTTN'          => $request['seriesTTN'] ?? null,
+            'numberTTN'          => $request['numberTTN'] ?? null,
+            'dateTTN'            => $request['dateTTN'] ?? null,
+            'typeTTN'            => $request['typeTTN'] ?? null,
+
+        ];
+        $mercRequest = new CreatePrepareOutgoingConsignmentRequest();
+        $mercRequest->params = $params;
+        $mercRequest->checkShipmentRegionalizationOperation();
+        $mercRequest->conditions = $request['conditions'] ?? null;
+        if (isset($mercRequest->conditionsDescription) && is_null($mercRequest->conditions)) {
+            return ['result' => 'need_confirm_regionalization', 'conditions' => $mercRequest->conditionsDescription];
+        }
+
+        try {
+            $result = mercuryApi::getInstance()->prepareOutgoingConsignmentOperation($mercRequest);
+            if (!isset($result)) {
+                throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.error_create_transport_vsd'));
+            }
+        } catch (\Throwable $t) {
+            $this->helper->writeInJournal($t->getMessage() . PHP_EOL . $t->getTraceAsString(), $this->user->id, $this->user->organization_id, 'error', 'createTransportVsd');
+            return ['result' => false];
         }
 
         return ['result' => true];

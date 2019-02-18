@@ -36,7 +36,7 @@ class VetisHelper extends BaseHelper
     /**@var int organization id */
     private $orgId;
     /**@var array $expertizeList расшифровки статусов экспертиз */
-    public static $expertizeList = [
+    public static $expertiseList = [
         'UNKNOWN'     => 'the_result_is_unknown', //Результат неизвестен
         'UNDEFINED'   => 'the_result_can_not_be_determined', //Результат невозможно определить (не нормируется)
         'POSITIVE'    => 'positive_result', //Положительный результат
@@ -45,6 +45,7 @@ class VetisHelper extends BaseHelper
         'VSERAW'      => 'VSE_subjected_the_raw_materials_from_which_the_products_were_manufactured', // ВСЭ подвергнуто сырьё, из которого произведена продукция
         'VSEFULL'     => 'the_products_are_fully', // Продукция подвергнута ВСЭ в полном объеме
     ];
+
     /**@var array $ordersStatuses статусы для заказов */
     public static $ordersStatuses = [
         'WITHDRAWN' => 'vsd_status_withdrawn', //'Сертификаты аннулированы',
@@ -75,10 +76,34 @@ class VetisHelper extends BaseHelper
      * @var array
      */
     static $transport_storage_types = [
-        1 => 'замороженные',
-        2 => 'охлажденные',
-        3 => 'охлаждаемые',
-        4 => 'вентилируемые',
+        'FROZEN'     => 'Замороженный',
+        'CHILLED'    => 'Охлажденный',
+        'COOLED'     => 'Охлаждаемый',
+        'VENTILATED' => 'Вентилируемый'
+    ];
+
+    /**
+     * Список типов благополучния региона
+     *
+     * @var array
+     */
+    static $well_being_of_the_area = [
+        'Благополучный регион',
+        'Неблагополучный регион',
+        'Регион с неопределенным статусом'
+    ];
+
+    /**
+     * Список типов ТТН
+     *
+     * @var array
+     */
+    static $ttn_types = [
+        1 => 'Товарно-транспортная накладная',
+        2 => 'Коносамент',
+        3 => 'CMR',
+        4 => 'Авианакладная',
+        5 => 'Транспортная накладная ',
     ];
 
     /**
@@ -117,7 +142,7 @@ class VetisHelper extends BaseHelper
         $this->vehicle_number = isset($transportInfo['transportNumber']['vehicleNumber']) ? $transportInfo['transportNumber']['vehicleNumber'] : null;
         $other = json_decode($this->vsdModel->other_info, true);
         if (isset($other['cargoExpertized'])) {
-            $this->cargo_expertized = \Yii::t('api_web', self::$expertizeList[$other['cargoExpertized']]);
+            $this->cargo_expertized = \Yii::t('api_web', self::$expertiseList[$other['cargoExpertized']]);
         }
         $this->location_prosperity = $other['locationProsperity'];
         $this->special_marks = $other['specialMarks'];
@@ -420,4 +445,5 @@ class VetisHelper extends BaseHelper
             throw new ValidationException($journal->getFirstErrors());
         }
     }
+
 }

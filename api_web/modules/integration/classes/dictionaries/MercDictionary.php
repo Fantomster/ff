@@ -159,6 +159,14 @@ class MercDictionary extends WebApi implements DictionaryInterface
 
         $query = VetisRussianEnterprise::find()->select(['uuid', 'guid', 'inn', 'addressView', 'active', 'name'])
             ->where(['active' => 1]);
+        if (isset($request['search']['name']) && !empty($request['search']['name'])) {
+            $mask = '/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/';
+            if (preg_match($mask, $request['search']['name'])) {
+                $query->andWhere(['name' => $request['search']['name']]);
+            } else {
+                $query->andWhere(['like', 'name', $request['search']['name']]);
+            }
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query
@@ -170,15 +178,17 @@ class MercDictionary extends WebApi implements DictionaryInterface
         $dataProvider->setPagination($pagination);
         $result = [];
 
-        /**@var VetisBusinessEntity $model */
+        /**@var VetisRussianEnterprise $model */
         foreach ($dataProvider->models as $model) {
             $result[] = [
-                'name'    => $model->name,
-                'uuid'    => $model->uuid,
-                'guid'    => $model->guid,
-                'inn'     => $model->inn,
-                'address' => $model->addressView,
-                'active'  => $model->active,
+                'name'                => $model->name,
+                'uuid'                => $model->uuid,
+                'guid'                => $model->guid,
+                'inn'                 => $model->inn,
+                'address'             => $model->addressView,
+                'active'              => $model->active,
+                'business_entity'     => $model->businessEntity->name,
+                'business_entity_inn' => $model->businessEntity->inn,
             ];
         }
 
@@ -257,6 +267,10 @@ class MercDictionary extends WebApi implements DictionaryInterface
         $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
 
         $query = VetisTransport::find()->where(['org_id' => $orgId]);
+        if (isset($request['search']['vehicle_number']) && !empty($request['search']['vehicle_number'])) {
+            $query->andWhere(['like', 'vehicle_number', $request['search']['vehicle_number']]);
+
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query

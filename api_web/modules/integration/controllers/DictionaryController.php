@@ -1060,6 +1060,9 @@ class DictionaryController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
+     *                      "search":{
+     *                          "name": "Ко"
+     *                      },
      *                      "pagination":{
      *                          "page": 1,
      *                          "page_size": 12
@@ -1200,6 +1203,9 @@ class DictionaryController extends \api_web\components\WebApiController
      *                  property="request",
      *                  default={
      *                      "org_id": 1,
+     *                      "search": {
+     *                          "vehicle_number": "т228гк"
+     *                      },
      *                      "pagination":{
      *                          "page": 1,
      *                          "page_size": 12

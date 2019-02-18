@@ -5,6 +5,7 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
+use api_web\modules\integration\modules\vetis\api\mercury\CreatePrepareOutgoingConsignmentRequest;
 use api_web\modules\integration\modules\vetis\api\mercury\Mercury;
 use common\models\search\MercStockEntrySearch;
 use api_web\components\Registry;
@@ -23,6 +24,7 @@ use common\models\vetis\VetisIngredients;
 use common\models\vetis\VetisPackingType;
 use common\models\vetis\VetisProductByType;
 use common\models\vetis\VetisProductItem;
+use common\models\vetis\VetisPurpose;
 use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
@@ -30,6 +32,7 @@ use common\models\vetis\VetisTransport;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use frontend\modules\clientintegr\modules\merc\models\productForm;
 use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
+use frontend\modules\clientintegr\modules\merc\models\transportVsd\step4Form;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
@@ -1109,5 +1112,96 @@ class VetisWaybill extends WebApi
         }
 
         return ['result' => true];
+    }
+
+    /**
+     * @param array $request
+     * @return VetisPurpose[]
+     */
+    public function getPurposeList($request)
+    {
+        $models = VetisPurpose::find()->where(['active' => 1, 'last' => 1]);
+        if (isset($request['name']) && !empty($request['name'])) {
+            $models->andWhere(['like', 'name', $request['name']]);
+        }
+        $arModels = [];
+        foreach ($models->all() as $model) {
+            $arModels[] = [
+                'name' => $model->name,
+                'guid' => $model->guid,
+                'uuid' => $model->uuid,
+            ];
+        }
+
+        return $arModels;
+    }
+
+    public function createTrasportVsd($request)
+    {
+//        ["step3"]=>
+//  array(9) {
+//        ["recipient"]=>
+//    string(36) "c2d0545f-4d8d-d1c4-325e-578b2374cc5f"
+//        ["hc"]=>
+//    string(0) ""
+//        ["hc_inn"]=>
+//    string(6) "211212"
+//        ["isTTN"]=>
+//    string(1) "0"
+//        ["seriesTTN"]=>
+//    string(0) ""
+//        ["numberTTN"]=>
+//    string(0) ""
+//        ["dateTTN"]=>
+//    string(0) ""
+//        ["typeTTN"]=>
+//    string(1) "3"
+//        ["hc_name"]=>
+//    string(70) "Не удалось загрузить Фирму-получателя"
+//  }
+
+//        $form4 = new step4Form();
+        $params = [
+            'type'               => 1,
+            'type_name'          => $request['type_name'] ?? 'Автомобильный',
+            'car_number'         => $request['car_number'] ?? '',
+            'trailer_number'     => $request['trailer_number'] ?? '',
+            'container_number'   => $request['container_number'] ?? '',
+            'storage_type'       => array_key_exists($request['storage_type'], VetisHelper::$transport_storage_types)
+                ? $request['storage_type'] : null,
+            'mode'               => 1,
+            'org_id'             => $this->user->organization_id,
+            'recipient'          => '', //guid
+            'hc'                 => '', //guid
+            'products'           => $request['products'], // ['select_amount','product_name']
+            'purpose'            => $request['purpose_guid'], // purpose guid
+            'cargoExpertized'    => $request['cargoExpertized'],
+            'locationProsperity' => $request['locationProsperity'],
+            'isTTN'              => $request['isTTN'],
+            'seriesTTN'          => $request['seriesTTN'],
+            'numberTTN'          => $request['numberTTN'],
+            'dateTTN'            => $request['dateTTN'],
+            'typeTTN'            => $request['typeTTN'],
+
+        ];
+
+        $request = new CreatePrepareOutgoingConsignmentRequest();
+        $request->params = $params;
+
+        if ($model->mode == step4Form::INPUT_MODE) {
+            $request->checkShipmentRegionalizationOperation();
+
+            if (isset($request->conditionsDescription)) {
+                $model->mode = step4Form::CONFIRM_MODE;
+                $model->conditionsDescription = $request->conditionsDescription;
+            }
+        }
+
+        $request->conditions = $post['conditions'] ?? null;
+        try {
+            mercuryApi::getInstance()->prepareOutgoingConsignmentOperation($request);
+        } catch (\Throwable $t) {
+
+        }
     }
 }

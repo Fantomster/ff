@@ -10,21 +10,22 @@ use Yii;
 /**
  * This is the model class for table "vetis_russian_enterprise".
  *
- * @property string $uuid
- * @property string $guid
- * @property int    $last
- * @property int    $active
- * @property int    $type
- * @property string $next
- * @property string $previous
- * @property string $name
- * @property string $inn
- * @property string $kpp
- * @property string $addressView
- * @property string $data
- * @property object $enterprise
- * @property string $owner_guid
- * @property string $owner_uuid
+ * @property string              $uuid
+ * @property string              $guid
+ * @property int                 $last
+ * @property int                 $active
+ * @property int                 $type
+ * @property string              $next
+ * @property string              $previous
+ * @property string              $name
+ * @property string              $inn
+ * @property string              $kpp
+ * @property string              $addressView
+ * @property string              $data
+ * @property object              $enterprise
+ * @property string              $owner_guid
+ * @property string              $owner_uuid
+ * @property VetisBusinessEntity $businessEntity
  */
 class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
@@ -142,6 +143,14 @@ class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
             \Yii::error($e->getMessage());
             echo $e->getMessage() . PHP_EOL;
         }
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getBusinessEntity()
+    {
+        return $this->hasOne(VetisBusinessEntity::class, ['guid' => 'owner_guid']);
     }
 
 }

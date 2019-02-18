@@ -160,7 +160,7 @@ class LazyVendorPriceWebApi extends LazyVendorWebApi
         }
         $catId = $this->user->organization->getCatalogs($post['vendor_id']);
         if ($catId < 0) {
-            throw new BadRequestHttpException('catalog.no_such_vendor');
+            throw new BadRequestHttpException('catalog.not_exist');
         }
         /**@var $catalog Catalog */
         $catalog = Catalog::find()

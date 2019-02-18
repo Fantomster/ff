@@ -76,7 +76,9 @@ class GuideProductSearchController extends ActiveController
     public function prepareDataProvider()
     {
         $params = new GuideProductSearch();
-        $params->setAttributes(Yii::$app->request->queryParams);
+        if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
+            throw new NotFoundHttpException;
+        }
 
         /** @var User $user */
         $user = Yii::$app->user->getIdentity();

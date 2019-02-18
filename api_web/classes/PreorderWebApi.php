@@ -970,4 +970,50 @@ class PreorderWebApi extends WebApi
 
         return (new OrderWebApi())->getOrderInfo($order);
     }
+
+    /**
+     * Кнопка Очистить
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Throwable
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    public function orderClear($request)
+    {
+        $this->validateRequest($request, ['order_id']);
+        $order = Order::findOne(['id' => $request['order_id'], 'status' => Order::STATUS_PREORDER]);
+        if (!$order) {
+            throw new BadRequestHttpException('order.not_found');
+        }
+
+        $orderContents = $order->orderContent;
+        $productsId = ArrayHelper::getColumn($orderContents, 'product_id');
+        $issetAnalog = $this->issetProductsAnalog($productsId);
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            foreach ($orderContents as $orderContent) {
+                if (isset($issetAnalog[$orderContent->product_id])) {
+                    $orderContent->delete();
+                } else {
+                    $orderContent->quantity = 0;
+                    if (!$orderContent->save()) {
+                        throw new ValidationException($orderContent->getFirstErrors());
+                    }
+                }
+            }
+            $order->calculateTotalPrice();
+            $t->commit();
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+
+        return [
+            'preorder' => $this->get(['id' => $order->preorder_id]),
+            'order'    => (new OrderWebApi())->getOrderInfo($order)
+        ];
+    }
 }

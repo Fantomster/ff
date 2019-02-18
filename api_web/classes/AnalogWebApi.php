@@ -196,7 +196,7 @@ class AnalogWebApi extends WebApi
             foreach (WebApiHelper::generator($result) as $row) {
                 $r = $this->prepareRow($row, $defaultCurrency);
                 if (isset($preOrder)) {
-                    $r['quantity'] = $preOrder->getQuantityWithCoefficient($row['product_id']);
+                    $r['product']['quantity'] = $preOrder->getQuantityWithCoefficient($row['product_id']);
                 }
                 $items[] = $r;
             }

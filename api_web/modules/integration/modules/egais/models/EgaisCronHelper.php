@@ -158,10 +158,13 @@ class EgaisCronHelper
                 $act->save();
             } catch (\Exception $e) {
                 $this->writeInJournal([
-                    "message" => "Not saved Ticket or Act",
+                    "message" => print_r($egaisRequestResponse->getFirstErrors(), true)
+                        . PHP_EOL
+                        . print_r($act->getFirstErrors(), true),
                     "code"    => EgaisHelper::SAVE_TICKET_AND_ACT,
                     "org_id"  => $act->org_id
                 ]);
+
                 throw new BadRequestHttpException("dictionary.save_ticket_and_act_error_egais");
             }
         }
@@ -172,7 +175,6 @@ class EgaisCronHelper
      *
      * @param EgaisActWriteOn $act
      * @param array           $doc
-     * @throws BadRequestHttpException
      * @throws ValidationException
      */
     private function saveInventory(EgaisActWriteOn $act, array $doc)
@@ -194,7 +196,7 @@ class EgaisCronHelper
             if (!$detail->save()) {
                 $isSave = false;
                 $this->writeInJournal([
-                    "message" => "Not saved Inventory",
+                    "message" => $detail->getFirstErrors(),
                     "code"    => EgaisHelper::SAVE_INVENTORY,
                     "org_id"  => $act->org_id
                 ]);
@@ -426,7 +428,7 @@ class EgaisCronHelper
         ]);
 
         if (!$journal->save()) {
-            throw new ValidationException($journal->getFirstErrors());
+            throw new ValidationException([], print_r($journal->getFirstErrors(), true));
         }
     }
 }

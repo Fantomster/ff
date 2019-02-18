@@ -62,7 +62,8 @@ class SmsSendSearch extends SmsSend
         ]);
 
         if (isset($this->created_at) && !empty($this->created_at)) {
-            $query->andFilterWhere(['created_at' => date('Y-m-d', strtotime($this->created_at))]);
+            $query->andFilterWhere(['>=', 'created_at', date('Y-m-d', strtotime($this->created_at)) . ' 00:00:00'])
+                ->andFilterWhere(['<=', 'created_at', date('Y-m-d', strtotime($this->created_at)) . ' 23:59:59']);
         }
 
         $query->andFilterWhere(['like', 'sms_id', $this->sms_id])

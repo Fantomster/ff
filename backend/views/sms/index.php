@@ -9,19 +9,29 @@ use yii\grid\GridView;
 
 $this->title = Yii::t('app', 'СМС сообщения');
 $this->params['breadcrumbs'][] = $this->title;
+$model = new \common\models\SmsSend();
 ?>
 <div class="sms-send-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?= GridView::widget([
+    <?= \kartik\grid\GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
+        'filterModel'  => $searchModel,
+        'columns'      => [
             ['class' => 'yii\grid\SerialColumn'],
             [
-                'attribute' => 'created_at',
-                'value' => function ($data) {
-                    return Yii::$app->formatter->asTime($data->created_at, "php:j M Y, H:i:s");
+                'attribute'           => 'created_at',
+                'filterType'          => \kartik\grid\GridView::FILTER_DATE,
+                'filterWidgetOptions' => ([
+                    'model'         => $model,
+                    'attribute'     => 'date',
+                    'pluginOptions' => [
+                        'autoclose' => true,
+                        'format'    => 'dd-mm-yyyy',
+                    ]
+                ]),
+                'value'               => function ($data) {
+                    return date('d.m.Y', strtotime($data->created_at));
                 }
             ],
             'target',
@@ -29,8 +39,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'status.text',
             [
                 'attribute' => 'updated_at',
-                'value' => function ($data) {
-                    if($data->created_at === $data->updated_at) {
+                'value'     => function ($data) {
+                    if ($data->created_at === $data->updated_at) {
                         return null;
                     } else {
                         return Yii::$app->formatter->asTime($data->updated_at, "php:j M Y, H:i:s");

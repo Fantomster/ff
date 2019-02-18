@@ -2,10 +2,8 @@
 
 namespace common\models;
 
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\SmsSend;
 
 /**
  * SmsSendSearch represents the model behind the search form about `common\models\SmsSend`.
@@ -36,7 +34,6 @@ class SmsSendSearch extends SmsSend
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
@@ -59,11 +56,14 @@ class SmsSendSearch extends SmsSend
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
-            'status_id' => $this->status_id,
-            'created_at' => $this->created_at,
+            'id'         => $this->id,
+            'status_id'  => $this->status_id,
             'updated_at' => $this->updated_at,
         ]);
+
+        if (isset($this->created_at) && !empty($this->created_at)) {
+            $query->andFilterWhere(['created_at' => date('Y-m-d', strtotime($this->created_at))]);
+        }
 
         $query->andFilterWhere(['like', 'sms_id', $this->sms_id])
             ->andFilterWhere(['like', 'text', $this->text])

@@ -58,9 +58,7 @@ class PaymentSearch extends Payment
             ->andFilterWhere(['total' => $this->total]);
 
         if (isset($this->date) && !empty($this->date)) {
-            list($day, $month, $year) = explode('.', $this->date);
-            $date_normal = $year . '-' . $month . '-' . $day . ' %';
-            $query->andFilterWhere(['like', 'date', $date_normal]);
+            $query->andFilterWhere(['date' => date('Y-m-d', strtotime($this->date))]);
         }
 
         if (isset($this->organization_id) && !empty($this->organization_id) && $this->organization_id != 0) {

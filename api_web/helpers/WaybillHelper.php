@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpWrongStringConcatenationInspection */
+
 /**
  * Created by PhpStorm.
  * User: Konstantin Silukov
@@ -80,7 +81,7 @@ class WaybillHelper
      * @param null  $supplierOrgId
      * @param array $arExcludedService
      * @return mixed
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException | \Exception
      * @throws ValidationException
      */
     public function createWaybill($order_id, $arOrderContentForCreate = null, $supplierOrgId = null, $arExcludedService = [])
@@ -90,7 +91,7 @@ class WaybillHelper
             throw new BadRequestHttpException('order_not_found');
         }
         $this->user = $order->createdBy;
-        if (!$this->user){
+        if (!$this->user) {
             throw new BadRequestHttpException('user_not_found');
         }
         if (is_null($arOrderContentForCreate)) {
@@ -235,17 +236,24 @@ class WaybillHelper
                 $ordCont = $mappedProduct['orderContent'];
                 $price = $ordCont->price;
                 $quantity = $ordCont->quantity;
-                $taxRate = in_array($ordCont->order->service_id, Registry::$edo_documents) &&
-                !is_null($ordCont->vat_product) ? $ordCont->vat_product : $mappedProduct['vat'];
+                $taxRate = $mappedProduct['vat'];
                 $priceWithVat = (float)($price + ($price * ($taxRate / 100)));
+                $sumWithVat = $quantity * $priceWithVat;
+                $sumWithoutVat = $quantity * $price;
+                if (in_array($ordCont->order->service_id, Registry::$edo_documents) && !is_null($ordCont->vat_product)) {
+                    $taxRate = $ordCont->vat_product ?? $taxRate;
+                    $sumWithVat = $ordCont['into_price_sum_vat'] ?? $sumWithVat;
+                    $sumWithoutVat = $ordCont['into_price_sum'] ?? $sumWithoutVat;
+                    $priceWithVat = $ordCont['into_price_vat'] ?? $priceWithVat;
+                }
                 $modelWaybillContent = new WaybillContent();
                 $modelWaybillContent->order_content_id = $ordCont->id;
                 $modelWaybillContent->waybill_id = $model->id;
                 $modelWaybillContent->outer_product_id = $mappedProduct['outer_product_id'];
                 $modelWaybillContent->quantity_waybill = $quantity;
                 $modelWaybillContent->vat_waybill = $taxRate;
-                $modelWaybillContent->sum_with_vat = $quantity * $priceWithVat;
-                $modelWaybillContent->sum_without_vat = $quantity * $price;
+                $modelWaybillContent->sum_with_vat = $sumWithVat;
+                $modelWaybillContent->sum_without_vat = $sumWithoutVat;
                 $modelWaybillContent->price_with_vat = $priceWithVat;
                 $modelWaybillContent->price_without_vat = $price;
                 $modelWaybillContent->koef = $mappedProduct['coefficient'];
@@ -617,12 +625,12 @@ class WaybillHelper
      */
     public function setAutoInvoiceSettings(): void
     {
-        $this->settings = (new Query())->select(['is.service_id', 'isv.value', 'is.name', 'isv.id'])
+        $this->settings = (new Query())->select(['iss.service_id', 'isv.value', 'iss.name', 'isv.id'])
             ->from(IntegrationSettingValue::tableName() . ' as isv')
-            ->leftJoin(IntegrationSetting::tableName() . ' as is', 'is.id = isv.setting_id')
+            ->leftJoin(IntegrationSetting::tableName() . ' as iss', 'iss.id = isv.setting_id')
             ->where([
                 'isv.org_id' => $this->orgId,
-                'is.name'    => 'auto_unload_invoice',
+                'iss.name'   => 'auto_unload_invoice',
             ])->all(\Yii::$app->db_api);
     }
 

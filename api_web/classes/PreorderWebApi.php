@@ -1135,6 +1135,7 @@ class PreorderWebApi extends WebApi
             $webApi = new $class();
             $webApi->{$method}(['order_id' => $order->id]);
             $t->commit();
+            $order->refresh();
             $result = [
                 'preorder' => $this->get(['id' => $order->preorder_id]),
                 'order'    => (new OrderWebApi())->getOrderInfo($order)

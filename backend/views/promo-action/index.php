@@ -30,7 +30,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'title',
             [
                 'attribute' => 'message',
-                'format' => 'raw'
+                'format' => 'raw',
+                'value' => function($data) {
+                             return strlen($data->message)< 200 ? $data->message : substr($data->message, 0, strpos($data->message, ' ', 200)).'...';
+                },
+                'contentOptions' => ['style' => 'word-wrap: break-word;white-space: pre-wrap;'],
             ],
             'created_at',
             'updated_at',

@@ -42,12 +42,12 @@ class EgaisHelper extends WebApi
 
     /* Типы входящих документов */
     static $type_document = [
-        'TICKET',
-        'REPLYRESTS',
-        'INVENTORYREGINFO',
-        //'WAYBILL_V2',
-        //'FORMF2REGINFO',
-        //'TTNHISTORYF2REG'
+        "TICKET",
+        "REPLYRESTS",
+        "INVENTORYREGINFO",
+        //"WAYBILL_V2",
+        //"FORMF2REGINFO",
+        //"TTNHISTORYF2REG"
     ];
 
     /* Статусы запросов в ЕГАИС */
@@ -57,10 +57,10 @@ class EgaisHelper extends WebApi
     const QUERY_ERROR = 4;
 
     static $status_query = [
-        self::QUERY_SENT          => 'sent',
-        self::QUERY_PROCESSED     => 'processed',
-        self::QUERY_NOT_PROCESSED => 'not processed',
-        self::QUERY_ERROR         => 'error'
+        self::QUERY_SENT          => "sent",
+        self::QUERY_PROCESSED     => "processed",
+        self::QUERY_NOT_PROCESSED => "not processed",
+        self::QUERY_ERROR         => "error"
     ];
 
     private $cronHelper;
@@ -86,34 +86,39 @@ class EgaisHelper extends WebApi
             "method"         => "POST",
             "url"            => "{$url}/opt/in/QueryRests",
             "file"           => [
-                'field_name' => 'xml_file',
-                'data'       => $data
+                "field_name" => "xml_file",
+                "data"       => $data
             ],
-            "operation_code" => self::REQUEST_QUERY_RESTS
+            "operation_code" => self::REQUEST_QUERY_RESTS,
+            "org_id"         => $orgId
         ]);
 
         /* reply_id идентификатор документа */
         $replyId = (new EgaisXmlParser())->getReplyId($requestResponse);
         if (empty($replyId)) {
             $this->cronHelper->writeInJournal([
-                'message' => 'Response parsing null',
-                'code'    => self::PARSE_REPLY_ID
+                "message" => "Response parsing null",
+                "code"    => self::PARSE_REPLY_ID,
+                "org_id"  => $orgId
             ]);
-            throw new BadRequestHttpException('dictionary.parse_error_egais');
+
+            throw new BadRequestHttpException("dictionary.parse_error_egais");
         }
 
         /* Запись акта в базу */
         $newAct = new EgaisQueryRests([
-            'org_id'   => $orgId,
-            'reply_id' => $replyId,
-            'status'   => EgaisHelper::QUERY_SENT
+            "org_id"   => $orgId,
+            "reply_id" => $replyId,
+            "status"   => EgaisHelper::QUERY_SENT
         ]);
         if (!$newAct->save()) {
             $this->cronHelper->writeInJournal([
-                'message' => 'Not saved',
-                'code'    => self::SAVE_QUERY_RESTS_IN_BD
+                "message" => "Not saved",
+                "code"    => self::SAVE_QUERY_RESTS_IN_BD,
+                "org_id"  => $orgId
             ]);
-            throw new BadRequestHttpException('dictionary.save_act_error_egais');
+
+            throw new BadRequestHttpException("dictionary.save_act_error_egais");
         }
     }
 
@@ -127,67 +132,76 @@ class EgaisHelper extends WebApi
     public function sendActWriteOn(array $settings, array $request)
     {
         /* Параметры orgId, number, date для xml документа */
+        $userId = $this->user->id;
         $orgId = $this->user->organization_id;
         $numberAct = EgaisActWriteOn::find()
-            ->select(['number'])
-            ->where((['org_id' => $orgId]))
-            ->orderBy(['number' => SORT_DESC])
+            ->select(["number"])
+            ->where((["org_id" => $orgId]))
+            ->orderBy(["number" => SORT_DESC])
             ->one();
-        $date = date('Y-m-d');
-        $request['date'] = $date;
-        $request['number'] = !empty($numberAct) ? ++$numberAct->number : 101;
+        $date = date("Y-m-d");
+        $request["date"] = $date;
+        $request["number"] = !empty($numberAct) ? ++$numberAct->number : 101;
 
         /* Заполненый xml документ */
-        $xmlFile = EgaisXmlFiles::actChargeOnV2($settings['fsrar_id'], $request);
+        $xmlFile = EgaisXmlFiles::actChargeOnV2($settings["fsrar_id"], $request);
 
         /* Запрос на постановку продуктов на баланс */
         $requestResponse = $this->cronHelper->sendRequest([
             "method"         => "POST",
-            "url"            => "{$settings['egais_url']}/opt/in/ActChargeOn_v2",
+            "url"            => "{$settings["egais_url"]}/opt/in/ActChargeOn_v2",
             "file"           => [
-                'field_name' => 'xml_file',
-                'data'       => $xmlFile
+                "field_name" => "xml_file",
+                "data"       => $xmlFile
             ],
-            "operation_code" => self::REQUEST_ACT_WRITE_ON
+            "operation_code" => self::REQUEST_ACT_WRITE_ON,
+            "user_id"        => $userId,
+            "org_id"         => $orgId,
         ]);
 
         /* reply_id идентификатор документа */
         $replyId = (new EgaisXmlParser())->getReplyId($requestResponse);
         if (empty($replyId)) {
             $this->cronHelper->writeInJournal([
-                'message' => 'Response parsing null',
-                'code'    => self::PARSE_REPLY_ID
+                "message" => "Response parsing null",
+                "code"    => self::PARSE_REPLY_ID,
+                "user_id" => $userId,
+                "org_id"  => $orgId,
             ]);
-            throw new BadRequestHttpException('dictionary.parse_error_egais');
+            throw new BadRequestHttpException("dictionary.parse_error_egais");
         }
 
         /* ID типа документа по названию */
-        $typeWriteOn = EgaisTypeChargeOn::findOne(['type' => $request['type']]);
+        $typeWriteOn = EgaisTypeChargeOn::findOne(["type" => $request["type"]]);
         if (empty($typeWriteOn)) {
             $this->cronHelper->writeInJournal([
-                'message' => 'Unknown ChargeOnType',
-                'code'    => self::UNKNOWN_CHARGE_ON_TYPE
+                "message" => "Unknown ChargeOnType",
+                "code"    => self::UNKNOWN_CHARGE_ON_TYPE,
+                "user_id" => $userId,
+                "org_id"  => $orgId,
             ]);
-            throw new BadRequestHttpException('dictionary.egais_type_document_error');
+            throw new BadRequestHttpException("dictionary.egais_type_document_error");
         }
 
         /* Запись акта в базу */
         $newAct = new EgaisActWriteOn([
-            'org_id'         => $orgId,
-            'number'         => $request['number'],
-            'act_date'       => $request['date'],
-            'type_charge_on' => $typeWriteOn->id,
-            'note'           => $request['note'],
-            'status'         => null,
-            'reply_id'       => $replyId
+            "org_id"         => $orgId,
+            "number"         => $request["number"],
+            "act_date"       => $request["date"],
+            "type_charge_on" => $typeWriteOn->id,
+            "note"           => $request["note"],
+            "status"         => null,
+            "reply_id"       => $replyId
         ]);
 
         if (!$newAct->save()) {
             $this->cronHelper->writeInJournal([
-                'message' => 'Not saved',
-                'code'    => self::SAVE_ACT_WRITE_ON_IN_BD
+                "message" => "Not saved",
+                "code"    => self::SAVE_ACT_WRITE_ON_IN_BD,
+                "user_id" => $userId,
+                "org_id"  => $orgId,
             ]);
-            throw new BadRequestHttpException('dictionary.save_act_error_egais');
+            throw new BadRequestHttpException("dictionary.save_act_error_egais");
         }
 
         return true;
@@ -205,49 +219,56 @@ class EgaisHelper extends WebApi
     public function sendActWriteOff(array $settings, array $request, string $queryType)
     {
         /* Параметры orgId, number, date для xml документа */
+        $userId = $this->user->id;
         $orgId = $this->user->organization_id;
         $numberAct = EgaisWriteOff::find()
-            ->select(['act_number'])
-            ->where((['org_id' => $orgId]))
-            ->orderBy(['act_number' => SORT_DESC])
+            ->select(["act_number"])
+            ->where((["org_id" => $orgId]))
+            ->orderBy(["act_number" => SORT_DESC])
             ->one();
-        $date = date('Y-m-d');
-        $request['date'] = $date;
-        $request['number'] = !empty($numberAct) ? ++$numberAct->act_number : 101;
+        $date = date("Y-m-d");
+        $settings["user_id"] = $userId;
+        $settings["org_id"] = $orgId;
+        $request["date"] = $date;
+        $request["number"] = !empty($numberAct) ? ++$numberAct->act_number : 101;
 
         /* ID типа документа по названию */
-        $typeWriteOff = EgaisTypeWriteOff::findOne(['type' => $request['type_write_off']]);
+        $typeWriteOff = EgaisTypeWriteOff::findOne(["type" => $request["type_write_off"]]);
         if (empty($typeWriteOff)) {
             $this->cronHelper->writeInJournal([
-                'message' => 'Unknown type WriteOff',
-                'code'    => self::UNKNOWN_TYPE_WRITE_OFF
+                "message" => "Unknown type WriteOff",
+                "code"    => self::UNKNOWN_TYPE_WRITE_OFF,
+                "user_id" => $userId,
+                "org_id"  => $orgId
             ]);
-            throw new BadRequestHttpException('dictionary.egais_type_document_error');
+            throw new BadRequestHttpException("dictionary.egais_type_document_error");
         }
 
         /* Запись акта в базу */
         $newAct = new EgaisWriteOff([
-            'org_id'         => $orgId,
-            'identity'       => $request['identity'],
-            'act_number'     => $request['number'],
-            'act_date'       => $request['date'],
-            'type_write_off' => $typeWriteOff->id,
-            'note'           => $request['note'],
-            'status'         => null,
+            "org_id"         => $orgId,
+            "identity"       => $request["identity"],
+            "act_number"     => $request["number"],
+            "act_date"       => $request["date"],
+            "type_write_off" => $typeWriteOff->id,
+            "note"           => $request["note"],
+            "status"         => null,
         ]);
 
         if (!$newAct->save()) {
             $this->cronHelper->writeInJournal([
-                'message' => 'Not saved',
-                'code'    => self::SAVE_ACT_WRITE_OFF_IN_BD
+                "message" => "Not saved",
+                "code"    => self::SAVE_ACT_WRITE_OFF_IN_BD,
+                "user_id" => $userId,
+                "org_id"  => $orgId
             ]);
-            throw new BadRequestHttpException('dictionary.save_act_error_egais');
+            throw new BadRequestHttpException("dictionary.save_act_error_egais");
         }
 
         /* Заполненый xml документ */
-        $xmlFile = EgaisXmlFiles::actWriteOffV3($settings['fsrar_id'], $request);
+        $xmlFile = EgaisXmlFiles::actWriteOffV3($settings["fsrar_id"], $request);
 
-        return $this->sendQueryByTypeDoc($settings['egais_url'], $xmlFile, $queryType);
+        return $this->sendQueryByTypeDoc($settings, $xmlFile, $queryType);
     }
 
     /**
@@ -260,17 +281,19 @@ class EgaisHelper extends WebApi
     public function getAllIncomingDoc($url, $request)
     {
         /* Пагинация */
-        $page = (isset($request['pagination']['page']) ? $request['pagination']['page'] : 1);
-        $pageSize = (isset($request['pagination']['page_size']) ? $request['pagination']['page_size'] : 12);
+        $page = (isset($request["pagination"]["page"]) ? $request["pagination"]["page"] : 1);
+        $pageSize = (isset($request["pagination"]["page_size"]) ? $request["pagination"]["page_size"] : 12);
 
         /* Тип документа */
-        $type = !empty($request["type"]) ? '/' . $request["type"] : null;
+        $type = !empty($request["type"]) ? "/" . $request["type"] : null;
 
         /* Запрос на получение всех входящих документов */
         $requestResponse = $this->cronHelper->sendRequest([
             "method"         => "GET",
             "url"            => "{$url}/opt/out{$type}",
-            "operation_code" => self::REQUEST_GET_ALL_INCOMING_DOC
+            "operation_code" => self::REQUEST_GET_ALL_INCOMING_DOC,
+            "user_id"        => $request["user_id"],
+            "org_id"         => $request["org_id"]
         ]);
 
         /* Парсинг входящих документов */
@@ -283,12 +306,12 @@ class EgaisHelper extends WebApi
 
         /* Фаорматирование данных */
         $dataProvider = new ArrayDataProvider([
-            'allModels'  => $docs,
-            'pagination' => $pagination,
-            'sort'       => [
-                'attributes'   => ['id'],
-                'defaultOrder' => [
-                    'id' => SORT_DESC
+            "allModels"  => $docs,
+            "pagination" => $pagination,
+            "sort"       => [
+                "attributes"   => ["id"],
+                "defaultOrder" => [
+                    "id" => SORT_DESC
                 ]
             ],
         ]);
@@ -299,44 +322,51 @@ class EgaisHelper extends WebApi
         }
 
         return [
-            'document'   => $result,
-            'pagination' => [
-                'page'       => ($dataProvider->pagination->page + 1),
-                'page_size'  => $dataProvider->pagination->pageSize,
-                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            "document"   => $result,
+            "pagination" => [
+                "page"       => ($dataProvider->pagination->page + 1),
+                "page_size"  => $dataProvider->pagination->pageSize,
+                "total_page" => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
     }
 
     /**
-     * @param $url
+     * @param $settings
      * @param $data
      * @param $queryType
      * @return bool|string
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    private function sendQueryByTypeDoc($url, $data, $queryType)
+    private function sendQueryByTypeDoc($settings, $data, $queryType)
     {
+        $url = $settings["egais_url"];
+        $userId = $settings["user_id"];
+        $orgId = $settings["org_id"];
         /* Запрос в УТМ в зависимости от типа документа */
         $requestResponse = $this->cronHelper->sendRequest([
             "method"         => "POST",
             "url"            => "{$url}/opt/in/{$queryType}",
             "file"           => [
-                'field_name' => 'xml_file',
-                'data'       => $data
+                "field_name" => "xml_file",
+                "data"       => $data
             ],
-            "operation_code" => self::REQUEST_QUERY_BY_TYPE_DOC
+            "operation_code" => self::REQUEST_QUERY_BY_TYPE_DOC,
+            "user_id"        => $userId,
+            "org_id"         => $orgId
         ]);
 
         /* reply_id идентификатор документа */
         $replyId = (new EgaisXmlParser())->getReplyId($requestResponse);
         if (empty($replyId)) {
             $this->cronHelper->writeInJournal([
-                'message' => 'Response parsing null',
-                'code'    => self::PARSE_REPLY_ID
+                "message" => "Response parsing null",
+                "code"    => self::PARSE_REPLY_ID,
+                "user_id" => $userId,
+                "org_id"  => $orgId
             ]);
-            throw new BadRequestHttpException('dictionary.parse_error_egais');
+            throw new BadRequestHttpException("dictionary.parse_error_egais");
         }
 
         sleep(3);
@@ -345,13 +375,15 @@ class EgaisHelper extends WebApi
         $requestResponse = $this->cronHelper->sendRequest([
             "method"         => "GET",
             "url"            => "{$url}/opt/out?replyId={$replyId}",
-            "operation_code" => self::REQUEST_GET_URL_DOC
+            "operation_code" => self::REQUEST_GET_URL_DOC,
+            "user_id"        => $userId,
+            "org_id"         => $orgId
         ]);
 
         /* Получение тикета о ошибке если он есть иначе все верно */
         $getDataDoc = (new EgaisXmlParser())->getUrlDoc($requestResponse);
         if (!empty($getDataDoc)) {
-            return $this->cronHelper->getOneIncomingDoc($url, $getDataDoc[0]);
+            return $this->cronHelper->getOneIncomingDoc($url, current($getDataDoc));
         }
 
         return true;

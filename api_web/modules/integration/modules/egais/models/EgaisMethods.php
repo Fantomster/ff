@@ -170,11 +170,10 @@ class EgaisMethods extends WebApi
      */
     public function getAllIncomingDoc($request)
     {
-        $orgId = empty($request) || empty($request['org_id'])
-            ? $this->user->organization_id
-            : $request['org_id'];
+        $request['user_id'] = $this->user->id;
+        $request['org_id'] = $request['org_id'] ?? $this->user->organization_id;
 
-        $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $orgId);
+        $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $request['org_id']);
 
         if (empty($settings)) {
             throw new BadRequestHttpException('dictionary.egais_get_setting_error');

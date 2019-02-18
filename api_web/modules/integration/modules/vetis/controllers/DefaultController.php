@@ -2770,7 +2770,24 @@ class DefaultController extends WebApiController
      *                      "trailer_number": "123123",
      *                      "container_number": "123123123",
      *                      "storage_type": "CHILLED",
-     *                      "purpose_guid": "5b92b5f3-e089-11e1-bcf3-b499babae7ea",
+     *                      "purpose_guid": "5b92cdea-e089-11e1-bcf3-b499babae7ea",
+     *                      "recipient": "9d0c5e1c-4530-42bd-9efe-526072da8716",
+     *                      "hc_guid": "917377e5-a2f5-4c05-872c-84a405544b3f",
+     *                      "recipient_inn": "c2d0545f-4d8d-d1c4-325e-578b2374cc5f",
+     *                      "products": {
+     *                          {
+     *                              "id": 1,
+     *                              "select_amount": 1,
+     *                              "product_name": "Горилла синяя"
+     *                          }
+     *                      },
+     *                      "cargoExpertized": "NEGATIVE",
+     *                      "locationProsperity": "Благополучный регион",
+     *                      "isTTN": true,
+     *                      "seriesTTN": "123",
+     *                      "numberTTN": "123",
+     *                      "dateTTN": "123",
+     *                      "typeTTN": 1
      *                  }
      *              )
      *         )
@@ -2780,22 +2797,7 @@ class DefaultController extends WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  {
-     *                      "id": 1,
-     *                      "name": "замороженные"
-     *                  },
-     *                  {
-     *                      "id": 2,
-     *                      "name": "охлаженные"
-     *                  },
-     *                  {
-     *                      "id": 3,
-     *                      "name": "охлаждаемые"
-     *                  },
-     *                  {
-     *                      "id": 4,
-     *                      "name": "вентилируемые"
-     *                  }
+     *                  "result": true
      *              }
      *          )
      *     ),
@@ -2808,6 +2810,7 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionCreateTransportVsd()
     {

@@ -9,9 +9,7 @@
 namespace api_web\modules\integration\modules\vetis\api\mercury;
 
 
-use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercStockEntry;
-use api_web\modules\integration\modules\vetis\api\cerber\cerberApi;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use yii\base\Component;
 
@@ -42,6 +40,8 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
      * @var
      */
     public $conditionsDescription;
+    /**@var VetisHelper $helper */
+    private $helper;
 
     /**
      * CreatePrepareOutgoingConsignmentRequest constructor.
@@ -75,7 +75,7 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
         $delivery->consignee->enterprise = new Enterprise();
         $delivery->consignee->enterprise->guid = $this->params['recipient'];
         $delivery->consignee->businessEntity = new BusinessEntity();
-        $delivery->consignee->businessEntity->guid = $this->params['hc'];
+        $delivery->consignee->businessEntity->guid = $this->params['hc_guid'];
 
         $consigments = [];
         $vetCertificates = [];
@@ -84,10 +84,10 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
             $this->conditions = json_decode($this->conditions, true);
         }
 
-        foreach ($this->params['products'] as $id => $product) {
+        foreach ($this->params['products'] as $product) {
             $consigment = new Consignment();
-            $consigment->id = 'con'.$id;
-            $stock = MercStockEntry::findOne(['id' => $id]);
+            $consigment->id = 'con' . $product['id'];
+            $stock = MercStockEntry::findOne(['id' => $product['id']]);
             $stock_raw = unserialize($stock->raw_data);
             $consigment->volume = $product['select_amount'];
             $consigment->unit = new Unit();
@@ -100,7 +100,7 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
             $consigments[] = $consigment;
 
             $vetCertificate = new VetDocument();
-            $vetCertificate->for = 'con'.$id;
+            $vetCertificate->for = 'con' . $product['id'];
             $authentication['purpose']['guid'] = $this->params['purpose'];
             $authentication['cargoExpertized'] = $this->params['cargoExpertized'];
             $authentication['locationProsperity'] = $this->params['locationProsperity'];
@@ -149,8 +149,6 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
 
         $request->delivery = $delivery;
 
-        /* echo "<pre>";
-         var_dump($request); die();*/
         return $request;
     }
 
@@ -159,11 +157,12 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
      */
     public function checkShipmentRegionalizationOperation()
     {
-        foreach ($this->params['products'] as $id => $product) {
-            $stock = MercStockEntry::findOne(['id' => $id]);
+        foreach ($this->params['products'] as $product) {
+            $stock = MercStockEntry::findOne(['id' => $product['id']]);
             $stock_raw = json_decode(json_encode(unserialize($stock->raw_data)), true);
 
-            $cond = mercuryApi::getInstance()->getRegionalizationConditions($this->params['recipient'], mercDicconst::getSetting('enterprise_guid'), $stock_raw["batch"]["subProduct"]['guid']);
+            $cond = mercuryApi::getInstance()->getRegionalizationConditions($this->params['recipient'],
+                $this->helper->getEnterpriseGuid($this->params['org_id']), $stock_raw["batch"]["subProduct"]['guid']);
             if (isset($cond)) {
                 $this->conditionsDescription[$product['product_name']] = $cond;
             }

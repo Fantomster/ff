@@ -1136,31 +1136,15 @@ class VetisWaybill extends WebApi
         return $arModels;
     }
 
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
     public function createTrasportVsd($request)
     {
-//        ["step3"]=>
-//  array(9) {
-//        ["recipient"]=>
-//    string(36) "c2d0545f-4d8d-d1c4-325e-578b2374cc5f"
-//        ["hc"]=>
-//    string(0) ""
-//        ["hc_inn"]=>
-//    string(6) "211212"
-//        ["isTTN"]=>
-//    string(1) "0"
-//        ["seriesTTN"]=>
-//    string(0) ""
-//        ["numberTTN"]=>
-//    string(0) ""
-//        ["dateTTN"]=>
-//    string(0) ""
-//        ["typeTTN"]=>
-//    string(1) "3"
-//        ["hc_name"]=>
-//    string(70) "Не удалось загрузить Фирму-получателя"
-//  }
-
-//        $form4 = new step4Form();
+        $this->validateRequest($request, ['hc_guid', 'recipient', 'products', 'purpose_guid']);
         $params = [
             'type'               => 1,
             'type_name'          => $request['type_name'] ?? 'Автомобильный',
@@ -1171,37 +1155,40 @@ class VetisWaybill extends WebApi
                 ? $request['storage_type'] : null,
             'mode'               => 1,
             'org_id'             => $this->user->organization_id,
-            'recipient'          => '', //guid
-            'hc'                 => '', //guid
-            'products'           => $request['products'], // ['select_amount','product_name']
+            'recipient'          => $request['recipient'], //guid
+            'hc_guid'            => $request['hc_guid'], //guid
+            'inn'                => $request['recipient_inn'] ?? '',
+            'products'           => $request['products'], // ['select_amount','product_name', 'id']
             'purpose'            => $request['purpose_guid'], // purpose guid
             'cargoExpertized'    => $request['cargoExpertized'],
             'locationProsperity' => $request['locationProsperity'],
-            'isTTN'              => $request['isTTN'],
-            'seriesTTN'          => $request['seriesTTN'],
-            'numberTTN'          => $request['numberTTN'],
-            'dateTTN'            => $request['dateTTN'],
-            'typeTTN'            => $request['typeTTN'],
+            'isTTN'              => $request['isTTN'] ?? false,
+            'seriesTTN'          => $request['seriesTTN'] ?? null,
+            'numberTTN'          => $request['numberTTN'] ?? null,
+            'dateTTN'            => $request['dateTTN'] ?? null,
+            'typeTTN'            => $request['typeTTN'] ?? null,
 
         ];
 
-        $request = new CreatePrepareOutgoingConsignmentRequest();
-        $request->params = $params;
+        $mercRequest = new CreatePrepareOutgoingConsignmentRequest();
+        $mercRequest->params = $params;
 
-        if ($model->mode == step4Form::INPUT_MODE) {
-            $request->checkShipmentRegionalizationOperation();
-
-            if (isset($request->conditionsDescription)) {
-                $model->mode = step4Form::CONFIRM_MODE;
-                $model->conditionsDescription = $request->conditionsDescription;
-            }
+        $mercRequest->checkShipmentRegionalizationOperation();
+        $mercRequest->conditions = $request['conditions'] ?? null;
+        if (isset($mercRequest->conditionsDescription) && is_null($mercRequest->conditions)) {
+            return ['result' => 'need_confirm_regionalization', 'conditions' => $mercRequest->conditionsDescription];
         }
 
-        $request->conditions = $post['conditions'] ?? null;
         try {
-            mercuryApi::getInstance()->prepareOutgoingConsignmentOperation($request);
+            $result = mercuryApi::getInstance()->prepareOutgoingConsignmentOperation($mercRequest);
+            if (!isset($result)) {
+                throw new \Exception('vetis.error_create_transport_vsd');
+            }
         } catch (\Throwable $t) {
-
+            $this->helper->writeInJournal($t->getMessage() . PHP_EOL . $t->getTraceAsString(), $this->user->id, $this->user->organization_id, 'error', 'createTransportVsd');
+            return ['result' => false];
         }
+
+        return ['result' => true];
     }
 }

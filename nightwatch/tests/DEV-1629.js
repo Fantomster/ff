@@ -26,10 +26,10 @@ module.exports = {
 		// browser.saveScreenshot('screenshotstest1.png');
 
 		browser.clearValue('#email', function () {
-			console.log('Clearing email input!!!');
+			// console.log('Clearing email input!!!');
 		});
 		browser.clearValue('#password', function () {
-			console.log('Clearing password input!!!');
+			// console.log('Clearing password input!!!');
 		});
 
 		browser.click('#email').moveTo(null, 0, -100).mouseButtonClick();
@@ -38,25 +38,25 @@ module.exports = {
 		// });
 
 		browser.pause(3000);
-		browser.saveScreenshot('noemail.jpg');
+		// browser.saveScreenshot('noemail.jpg');
 
 		browser.assert.elementPresent("div[class='form-error']", 'Email is required');
-		browser.saveScreenshot('noemail1.jpg');
+		// browser.saveScreenshot('noemail1.jpg');
 
 		browser.setValue('#email', 'bigle6732@');
-		browser.saveScreenshot('noemail2.jpg');
+		// browser.saveScreenshot('noemail2.jpg');
 
 		browser.element('css selector', '#email', function () {
 			browser.Keys.ENTER;
 		});
 		browser.pause(2000);
-		browser.saveScreenshot('wrongemail.jpg');
+		// browser.saveScreenshot('wrongemail.jpg');
 		browser.expect.element('#email').to.have.value.that.equals('bigle6732@', 'Typing wrong email address!!!');
 
 		browser.assert.elementPresent("div[class='form-error']", 'Error message appeared as email is wrong!!!');
 
 		browser.clearValue('#email', function () {
-			console.log('Clearing email input!!!');
+			// console.log('Clearing email input!!!');
 		});
 
 		browser.setValue('#email', 'bigle6732@gmail.com');
@@ -70,11 +70,11 @@ module.exports = {
 		browser.assert.elementNotPresent("div[class='form-error']", 'There is no error messages as expected!!!');
 
 		browser.clearValue('#password', function () {
-			console.log('Clearing password input!!!');
+			// console.log('Clearing password input!!!');
 		});
 
 		browser.pause(3000);
-		browser.saveScreenshot('screenshotstest2.png');
+		// browser.saveScreenshot('screenshotstest2.png');
 
 		browser.end();
 

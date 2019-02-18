@@ -291,30 +291,25 @@ class PreorderWebApi extends WebApi
     /**
      * @param Preorder $preOrder
      * @return array
-     * @throws BadRequestHttpException
      */
     private function productsInfo(Preorder $preOrder)
     {
-        $orders = $preOrder->orders;
         $products = [];
-        $contents = $preOrder->getPreorderContents()->asArray()->all();
-        $planQuantity = ArrayHelper::map($contents, 'product_id', 'plan_quantity');
-        /** @var Order $order */
-        foreach ($orders as $order) {
-            $orderContent = $order->orderContent;
-            $issetAnalog = $this->issetProductsAnalog($order->getProducts());
-            foreach ($orderContent as $item) {
-                if (empty($planQuantity[$item->product_id])) {
-                    throw new BadRequestHttpException('preorder.wrong_preorder');
-                }
+        /** @var PreorderContent[] $contents */
+        $contents = $preOrder->preorderContents;
+        if ($contents) {
+            $productIds = ArrayHelper::getColumn($contents, 'product_id');
+            $issetAnalog = $this->issetProductsAnalog($productIds);
+            /** @var PreorderContent $order */
+            foreach ($contents as $content) {
                 $products[] = [
-                    'id'            => $item->product_id,
-                    'name'          => $item->product_name,
-                    'article'       => $item->article,
-                    'plan_quantity' => round($planQuantity[$item->product_id], 3),
-                    'quantity'      => round($item->quantity, 3),
-                    'sum'           => CurrencyHelper::asDecimal($item->quantity * $item->price),
-                    'isset_analog'  => $issetAnalog[$item->product_id] ?? false,
+                    'id'            => $content->product_id,
+                    'name'          => $content->product->product,
+                    'article'       => $content->product->article,
+                    'plan_quantity' => round($content->plan_quantity, 3),
+                    'quantity'      => $content->getAllQuantity(),
+                    'sum'           => CurrencyHelper::asDecimal($content->getAllSum()),
+                    'isset_analog'  => $issetAnalog[$content->product_id] ?? false,
                 ];
             }
         }
@@ -960,10 +955,8 @@ class PreorderWebApi extends WebApi
      * @param $request
      * @return array
      * @throws BadRequestHttpException
-     * @throws ValidationException
      * @throws \Throwable
      * @throws \yii\base\InvalidConfigException
-     * @throws \yii\db\StaleObjectException
      * @throws \yii\di\NotInstantiableException
      */
     public function updateProduct($request)
@@ -973,22 +966,28 @@ class PreorderWebApi extends WebApi
         if (!$orderContent) {
             throw new BadRequestHttpException('order_content.not_found');
         }
-
         $order = $orderContent->order;
 
-        $orderContent->quantity = $request['quantity'];
-        if ($orderContent->quantity === 0) {
-            $is = $this->issetProductsAnalog($orderContent->product_id);
-            if (isset($is[$orderContent->product_id])) {
-                $orderContent->delete();
-            }
-        }
-
-        if ($orderContent instanceof OrderContent) {
-            if (!$orderContent->save()) {
-                throw new ValidationException($orderContent->getFirstErrors());
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            $orderContent->quantity = $request['quantity'];
+            if ($orderContent->quantity === 0) {
+                $is = $this->issetProductsAnalog($orderContent->product_id);
+                if (isset($is[$orderContent->product_id])) {
+                    if (!$orderContent->delete()) {
+                        throw new Exception('Delete false');
+                    }
+                }
+            } else {
+                if (!$orderContent->save()) {
+                    throw new ValidationException($orderContent->getFirstErrors());
+                }
             }
             $order->calculateTotalPrice();
+            $t->commit();
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
         }
 
         return [

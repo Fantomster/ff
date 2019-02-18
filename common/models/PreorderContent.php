@@ -76,7 +76,7 @@ class PreorderContent extends \yii\db\ActiveRecord
      */
     public function getProduct()
     {
-        return $this->hasOne(CatalogBaseGoods::className(), ['id' => 'product_id']);
+        return $this->hasOne(CatalogBaseGoods::class, ['id' => 'product_id']);
     }
 
     /**
@@ -84,6 +84,44 @@ class PreorderContent extends \yii\db\ActiveRecord
      */
     public function getPreorder()
     {
-        return $this->hasOne(Preorder::className(), ['id' => 'preorder_id']);
+        return $this->hasOne(Preorder::class, ['id' => 'preorder_id']);
+    }
+
+    /**
+     * @return float
+     */
+    public function getAllQuantity()
+    {
+        $quantity = 0;
+        $orders = $this->preorder->orders;
+        if ($orders) {
+            foreach ($orders as $order) {
+                /** @var OrderContent $orderContent */
+                $orderContent = $order->getOrderContent()->where(['product_id' => $this->product_id])->one();
+                if ($orderContent) {
+                    $quantity += round($orderContent->quantity, 3);
+                }
+            }
+        }
+        return round($quantity, 3);
+    }
+
+    /**
+     * @return float
+     */
+    public function getAllSum()
+    {
+        $sum = 0;
+        $orders = $this->preorder->orders;
+        if ($orders) {
+            foreach ($orders as $order) {
+                /** @var OrderContent $orderContent */
+                $orderContent = $order->getOrderContent()->where(['product_id' => $this->product_id])->one();
+                if ($orderContent) {
+                    $sum += round($orderContent->price * $orderContent->quantity, 3);
+                }
+            }
+        }
+        return round($sum, 3);
     }
 }

@@ -255,8 +255,7 @@ class Guide extends \yii\db\ActiveRecord
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
-            throw $e;
-            //\Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             return false;
         }
         return true;

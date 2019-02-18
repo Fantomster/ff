@@ -10,7 +10,13 @@ namespace api_web\classes;
 use api_web\components\{Registry, WebApi};
 use api_web\exceptions\ValidationException;
 use api_web\helpers\{CurrencyHelper, WebApiHelper};
-use common\models\{Catalog, CatalogBaseGoods, CatalogGoods, Currency, Organization, ProductAnalog};
+use common\models\{Catalog,
+    CatalogBaseGoods,
+    CatalogGoods,
+    Currency,
+    Organization,
+    Preorder,
+    ProductAnalog};
 use yii\data\{ActiveDataProvider, Pagination};
 use yii\db\{Expression, Query};
 use yii\helpers\ArrayHelper;
@@ -37,6 +43,7 @@ class AnalogWebApi extends WebApi
             'product_id'   => 'cbg.id',
             'product_name' => 'cbg.product',
             'article'      => 'cbg.article',
+            'units'        => 'cbg.units',
             'vendor_id'    => 'o.id',
             'vendor_name'  => 'o.name',
             'price'        => 'cg.price',
@@ -146,39 +153,52 @@ class AnalogWebApi extends WebApi
                 'product_id' => trim($request['product_id'])
             ]);
 
-        $query = new Query();
-        $result = $query
-            ->select([
-                'product_id'   => 'cbg.id',
-                'product_name' => 'cbg.product',
-                'article'      => 'cbg.article',
-                'vendor_id'    => 'o.id',
-                'vendor_name'  => 'o.name',
-                'price'        => 'cg.price',
-                'coefficient'  => 'pa.coefficient',
-                'ed'           => 'cbg.ed',
-                'currency_id'  => 'cur.id',
-                'currency_sym' => 'cur.symbol',
-                'group_id'     => new Expression('COALESCE(pa.parent_id, pa.id)'),
-                'sort_value'   => 'pa.sort_value'
-            ])
+        $preorder_id = $request['preorder_id'] ?? null;
+
+        $query = (new Query())->select([
+            'product_id'   => 'cbg.id',
+            'product_name' => 'cbg.product',
+            'article'      => 'cbg.article',
+            'units'        => 'cbg.units',
+            'vendor_id'    => 'o.id',
+            'vendor_name'  => 'o.name',
+            'price'        => 'cg.price',
+            'coefficient'  => 'pa.coefficient',
+            'ed'           => 'cbg.ed',
+            'currency_id'  => 'cur.id',
+            'currency_sym' => 'cur.symbol',
+            'group_id'     => new Expression('COALESCE(pa.parent_id, pa.id)'),
+            'sort_value'   => 'pa.sort_value'
+        ])
             ->from(ProductAnalog::tableName() . ' as pa')
             ->innerJoin(CatalogBaseGoods::tableName() . ' as cbg', "pa.product_id = cbg.id")
             ->innerJoin(CatalogGoods::tableName() . ' as cg', "cbg.id = cg.base_goods_id")
             ->innerJoin(Catalog::tableName() . ' as cat', "cat.id = cg.cat_id")
-            ->leftJoin(Currency::tableName() . ' as cur', "cur.id = cat.currency_id")
             ->innerJoin(Organization::tableName() . ' as o', "cbg.supp_org_id = o.id")
+            ->leftJoin(Currency::tableName() . ' as cur', "cur.id = cat.currency_id")
             ->andWhere(['COALESCE(pa.parent_id, pa.id)' => $groupId])
             ->orderBy(['sort_value' => SORT_ASC])
-            ->groupBy('cbg.id')
-            ->all();
+            ->groupBy('cbg.id');
 
+        if ($preorder_id) {
+            $query->andWhere(['!=', 'pa.product_id', $request['product_id']]);
+        }
+
+        $result = $query->all();
         $items = [];
         $defaultCurrency = Currency::findOne(Registry::DEFAULT_CURRENCY_ID);
 
         if ($result) {
+            if (!is_null($preorder_id)) {
+                $preOrder = Preorder::findOne($preorder_id);
+            }
+
             foreach (WebApiHelper::generator($result) as $row) {
-                $items[] = $this->prepareRow($row, $defaultCurrency);
+                $r = $this->prepareRow($row, $defaultCurrency);
+                if (isset($preOrder)) {
+                    $r['quantity'] = $preOrder->getQuantityWithCoefficient($row['product_id']);
+                }
+                $items[] = $r;
             }
         }
 
@@ -194,6 +214,10 @@ class AnalogWebApi extends WebApi
      */
     public function getListGroup($request)
     {
+        $page = $request['pagination']['page'] ?? 1;
+        $pageSize = $request['pagination']['page_size'] ?? 12;
+        $sort = $request['sort'] ?? null;
+
         $query = new Query();
         $query->select([
             'product_id'   => 'cbg.id',
@@ -220,7 +244,10 @@ class AnalogWebApi extends WebApi
             ->where(['pa.client_id' => $this->user->organization_id])
             ->andWhere('pa.parent_id is NULL')
             ->groupBy('pa.id')
-            ->orderBy(['product_name' => SORT_ASC]);
+            ->orderBy([
+                'product_name' => SORT_ASC,
+                'pa.id'        => SORT_ASC
+            ]);
 
         if (isset($request['search'])) {
             if (isset($request['search']['vendor']) && !empty($request['search']['vendor'])) {
@@ -228,8 +255,35 @@ class AnalogWebApi extends WebApi
             }
         }
 
-        $result = $query->all();
+        if ($sort && in_array(ltrim($sort, '-'), $this->arAvailableFields)) {
+            $sortField = ltrim($sort, '-');
+            $sortDirection = SORT_ASC;
+            if (strpos($sort, '-') !== false) {
+                $sortDirection = SORT_DESC;
+            }
 
+            if ($sortField == 'vendor_name') {
+                $query->orderBy([
+                    $sortField     => $sortDirection,
+                    'product_name' => SORT_ASC
+                ]);
+            } else {
+                $query->orderBy([$sortField => $sortDirection]);
+            }
+        } else {
+            $query->orderBy(['cbg.product' => SORT_ASC]);
+        }
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+
+        $result = $dataProvider->models;
         $items = [];
         $defaultCurrency = Currency::findOne(Registry::DEFAULT_CURRENCY_ID);
 
@@ -239,7 +293,14 @@ class AnalogWebApi extends WebApi
             }
         }
 
-        return ["items" => $items];
+        return [
+            "items"      => $items,
+            'pagination' => [
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
     }
 
     /**
@@ -397,11 +458,13 @@ class AnalogWebApi extends WebApi
                 'id'           => (int)$row['product_id'],
                 'name'         => $row['product_name'],
                 'ed'           => $row['ed'],
+                'units'        => $row['units'],
                 'price'        => CurrencyHelper::asDecimal($row['price']),
                 'article'      => $row['article'],
                 'coefficient'  => $row['coefficient'] ? round($row['coefficient'], 6) : null,
                 'analog_group' => $row['group_id'] ? (int)$row['group_id'] : null,
                 'sort_value'   => $row['sort_value'] ? (int)$row['sort_value'] : null,
+                'quantity'     => $row['quantity'] ?? 0,
             ];
         }
 

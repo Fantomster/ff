@@ -146,4 +146,22 @@ class Preorder extends \yii\db\ActiveRecord
         }
         return Currency::findOne(Registry::DEFAULT_CURRENCY_ID);
     }
+
+    /**
+     * @param $product_id
+     * @return int|mixed|string
+     */
+    public function getQuantityWithCoefficient($product_id)
+    {
+        $q = 0;
+        foreach ($this->orders as $order) {
+            $orderContents = $order->getOrderContent()->where(['product_id' => $product_id])->all();
+            if ($orderContents) {
+                foreach ($orderContents as $orderContent) {
+                    $q += $orderContent->quantity;
+                }
+            }
+        }
+        return $q;
+    }
 }

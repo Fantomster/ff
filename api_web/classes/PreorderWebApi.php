@@ -1029,14 +1029,17 @@ class PreorderWebApi extends WebApi
         $this->validateRequest($request, ['order_id']);
         $order = Order::find()
             ->where([
-                'id'     => $request['order_id'],
-                'status' => Order::STATUS_CANCELLED
+                'id' => $request['order_id']
             ])
             ->andWhere('preorder_id is not null')
             ->one();
 
         if (!$order) {
             throw new BadRequestHttpException('order.not_found');
+        }
+
+        if (!in_array($order->status, [Order::STATUS_CANCELLED, Order::STATUS_REJECTED])) {
+            throw new BadRequestHttpException('preorder.repeat_order_not_canceled');
         }
 
         $t = \Yii::$app->db->beginTransaction();

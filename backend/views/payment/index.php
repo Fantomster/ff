@@ -80,7 +80,7 @@ ksort($types);
                     'attribute'=>'date',
                     'pluginOptions'=>[
                         'autoclose'=>true,
-                        'format'=>'dd.mm.yyyy',
+                        'format'=>'dd-mm-yyyy',
                     ]
                 ]),
                 'value' => function($data) {

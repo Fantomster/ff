@@ -90,3 +90,4 @@ franchise/web/upload/temp/
 /nightwatch/reports/
 /nightwatch/dev/reports/
 /nightwatch/qas/reports/
+/nightwatch/package-lock.json

@@ -154,7 +154,8 @@ class LazyVendorWebApi extends WebApi
             ->innerJoin($tableNameRelation, "$tableNameRelation.supp_org_id = $tableName.id")
             ->where([
                 $tableName . '.type_id'             => Organization::TYPE_LAZY_VENDOR,
-                $tableNameRelation . '.rest_org_id' => $this->user->organization_id
+                $tableNameRelation . '.rest_org_id' => $this->user->organization_id,
+                $tableNameRelation . '.invite' => RelationSuppRest::INVITE_ON,
             ]);
 
         if (isset($request['search'])) {

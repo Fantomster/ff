@@ -62,7 +62,7 @@ class PreorderWebApi extends WebApi
         $preOrder->organization_id = $this->user->organization->id;
         $preOrder->user_id = $this->user->id;
         $preOrder->is_active = 1;
-        if (!$preOrder->save(true)) {
+        if (!$preOrder->save()) {
             throw new ValidationException($preOrder->getFirstErrors());
         }
         $cartWebApi = new CartWebApi();
@@ -79,7 +79,7 @@ class PreorderWebApi extends WebApi
                     $preOrderContent->preorder_id = $preOrderId;
                     $preOrderContent->product_id = $item->product_id;
                     $preOrderContent->plan_quantity = $item->quantity;
-                    if (!$preOrderContent->save(true)) {
+                    if (!$preOrderContent->save()) {
                         throw new ValidationException($preOrderContent->getFirstErrors());
                     }
                 }
@@ -737,23 +737,6 @@ class PreorderWebApi extends WebApi
     }
 
     /**
-     * Получение заказов с их содержимым по заданному id предзаказа
-     *
-     * @param Preorder $preOrder
-     * @return array|\yii\db\ActiveRecord[]
-     */
-    private function getOrders(Preorder $preOrder)
-    {
-        return Order::find()
-            ->where(['preorder_id' => $preOrder->id])
-            ->with('orderContent')
-            ->orderBy(['vendor_id' => SORT_ASC])
-            ->indexBy('vendor_id')
-            ->asArray()
-            ->all();
-    }
-
-    /**
      * Проверка по статусу заказа о возможности добавить новый товар в предзаказ
      *
      * @param int  $orderStatus
@@ -856,11 +839,11 @@ class PreorderWebApi extends WebApi
             }
         }
         //Получаем все заказы в данном предзаказе
-        $orders = $this->getOrders($preOrder);
+        $orders = $preOrder->orders;
         $canAdd = [];
         foreach ($orders as $index => $order) {
-            $isEdi = $vendorIsEDI[$order['vendor_id']] ?? false;
-            $canAdd[] = $this->canAddProduct($order['status'], $isEdi);
+            $isEdi = $vendorIsEDI[$order->vendor_id] ?? false;
+            $canAdd[] = $this->canAddProduct($order->status, $isEdi);
         }
         if (in_array(false, $canAdd)) {
             throw new BadRequestHttpException('preorder.cannot_add_product_to_some_order');

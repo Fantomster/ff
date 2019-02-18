@@ -2814,7 +2814,7 @@ class DefaultController extends WebApiController
      */
     public function actionCreateTransportVsd()
     {
-        $this->response = (new VetisWaybill())->createTrasportVsd($this->request);
+        $this->response = (new VetisWaybill())->createTransportVsd($this->request);
     }
 
 

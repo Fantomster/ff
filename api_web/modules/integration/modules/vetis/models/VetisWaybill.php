@@ -1139,10 +1139,10 @@ class VetisWaybill extends WebApi
     /**
      * @param $request
      * @return array
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|\Exception
      * @throws ValidationException
      */
-    public function createTrasportVsd($request)
+    public function createTransportVsd($request)
     {
         $this->validateRequest($request, ['hc_guid', 'recipient', 'products', 'purpose_guid']);
         $params = [
@@ -1169,10 +1169,8 @@ class VetisWaybill extends WebApi
             'typeTTN'            => $request['typeTTN'] ?? null,
 
         ];
-
         $mercRequest = new CreatePrepareOutgoingConsignmentRequest();
         $mercRequest->params = $params;
-
         $mercRequest->checkShipmentRegionalizationOperation();
         $mercRequest->conditions = $request['conditions'] ?? null;
         if (isset($mercRequest->conditionsDescription) && is_null($mercRequest->conditions)) {
@@ -1182,7 +1180,7 @@ class VetisWaybill extends WebApi
         try {
             $result = mercuryApi::getInstance()->prepareOutgoingConsignmentOperation($mercRequest);
             if (!isset($result)) {
-                throw new \Exception('vetis.error_create_transport_vsd');
+                throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.error_create_transport_vsd'));
             }
         } catch (\Throwable $t) {
             $this->helper->writeInJournal($t->getMessage() . PHP_EOL . $t->getTraceAsString(), $this->user->id, $this->user->organization_id, 'error', 'createTransportVsd');

@@ -28,7 +28,7 @@ use yii\data\{
     ArrayDataProvider,
     Pagination
 };
-use yii\db\conditions\ExistsCondition;
+
 use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 use yii\db\Expression;
@@ -154,7 +154,6 @@ class PreorderWebApi extends WebApi
      *
      * @param $request
      * @return array
-     * @throws BadRequestHttpException
      */
     public function list($request)
     {
@@ -452,7 +451,6 @@ class PreorderWebApi extends WebApi
      * @param Preorder $model
      * @param bool     $products
      * @return array
-     * @throws BadRequestHttpException
      */
     private function prepareModel(Preorder $model, bool $products = false)
     {
@@ -513,15 +511,6 @@ class PreorderWebApi extends WebApi
             throw new BadRequestHttpException('preorder.not_found');
         }
         return $model;
-    }
-
-    /**
-     * @param $id
-     * @return \yii\db\ActiveQuery
-     */
-    private function getPreorderContent($id)
-    {
-        return PreorderContent::find()->where(['id' => $id]);
     }
 
     /**
@@ -669,30 +658,6 @@ class PreorderWebApi extends WebApi
     }
 
     /**
-     * Обновление количества в содержимом заказа
-     *
-     * @param Order $order
-     * @param array $productIds
-     * @param array $newQuantity
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
-     */
-    private function updateOrderContentQuantity(Order $order, array $productIds, array $newQuantity)
-    {
-        $orderId = $order->id;
-        $orderContents = OrderContent::find()
-            ->where(['order_id' => $orderId, 'product_id' => $productIds])
-            ->indexBy('product_id')->all();
-        foreach ($orderContents as $productId => $orderContent) {
-            if (in_array($productId, $productIds)) {
-                $orderContent->quantity += $newQuantity[$productId];
-                $orderContent->update(true, ['quantity']);
-            }
-        }
-        $order->calculateTotalPrice();
-    }
-
-    /**
      * Метод возвращает продукты которых нет в предзаказе
      *
      * @param array    $products
@@ -701,8 +666,6 @@ class PreorderWebApi extends WebApi
      * @param array    $vendors
      * @return array
      * @throws BadRequestHttpException
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
      */
     private function getNewProducts(array $products, Preorder $preOrder, array $catArray, array $vendors)
     {
@@ -762,10 +725,9 @@ class PreorderWebApi extends WebApi
      * Получание каталогов заданных поставщиков по заданным id
      *
      * @param array $catalogNeeded
-     * @param array $vendorNeeded
      * @return array
      */
-    private function getCatalogs(array $catalogNeeded, array $vendorNeeded)
+    private function getCatalogs(array $catalogNeeded)
     {
         return Catalog::find()
             ->where(['id' => $catalogNeeded])
@@ -841,7 +803,6 @@ class PreorderWebApi extends WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
      */
     public function addProduct(array $post)
     {
@@ -929,7 +890,7 @@ class PreorderWebApi extends WebApi
                         }
                     }
                 }
-                $catalogs = $this->getCatalogs($catalogNeeded, $vendorNeeded);
+                $catalogs = $this->getCatalogs($catalogNeeded);
                 //Создаём заказы
                 foreach ($vendorNewOrders as $vendorId => $content) {
                     $this->createOrder(

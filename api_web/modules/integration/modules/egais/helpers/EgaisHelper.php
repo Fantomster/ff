@@ -39,6 +39,7 @@ class EgaisHelper extends WebApi
     const SAVE_INVENTORY = 16; // Сохранение Inventory в базу
     const UNKNOWN_CHARGE_ON_TYPE = 17; // Неизвестный тип ChargeOn
     const UNKNOWN_TYPE_WRITE_OFF = 18; // Неизвестный тип TypeWriteOff
+    const SAVE_SETTING_ERROR = 19; // Неизвестный тип TypeWriteOff
 
     /* Типы входящих документов */
     static $type_document = [
@@ -113,7 +114,7 @@ class EgaisHelper extends WebApi
         ]);
         if (!$newAct->save()) {
             $this->cronHelper->writeInJournal([
-                "message" => "Not saved",
+                "message" => print_r($newAct->getFirstErrors(), true),
                 "code"    => self::SAVE_QUERY_RESTS_IN_BD,
                 "org_id"  => $orgId
             ]);
@@ -196,7 +197,7 @@ class EgaisHelper extends WebApi
 
         if (!$newAct->save()) {
             $this->cronHelper->writeInJournal([
-                "message" => "Not saved",
+                "message" => print_r($newAct->getFirstErrors(), true),
                 "code"    => self::SAVE_ACT_WRITE_ON_IN_BD,
                 "user_id" => $userId,
                 "org_id"  => $orgId,
@@ -257,7 +258,7 @@ class EgaisHelper extends WebApi
 
         if (!$newAct->save()) {
             $this->cronHelper->writeInJournal([
-                "message" => "Not saved",
+                "message" => print_r($newAct->getFirstErrors(), true),
                 "code"    => self::SAVE_ACT_WRITE_OFF_IN_BD,
                 "user_id" => $userId,
                 "org_id"  => $orgId

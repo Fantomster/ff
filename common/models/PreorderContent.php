@@ -9,11 +9,12 @@ use yii\behaviors\TimestampBehavior;
  * This is the model class for table "{{%preorder_content}}".
  *
  * @property int              $id
- * @property int              $preorder_id   id предзаказа из таблицы preorder
- * @property int              $product_id    id предзаказа из таблицы preorder
- * @property string           $plan_quantity планируемое для заказа количество
- * @property string           $created_at    Дата и время создания записи в таблице
- * @property string           $updated_at    Дата и время последнего изменения записи в таблице
+ * @property int              $preorder_id          id предзаказа из таблицы preorder
+ * @property int              $product_id           id предзаказа из таблицы preorder
+ * @property int              $parent_product_id    id предзаказа из таблицы preorder
+ * @property string           $plan_quantity        планируемое для заказа количество
+ * @property string           $created_at           Дата и время создания записи в таблице
+ * @property string           $updated_at           Дата и время последнего изменения записи в таблице
  * @property CatalogBaseGoods $product
  * @property Preorder         $preorder
  */
@@ -106,9 +107,22 @@ class PreorderContent extends \yii\db\ActiveRecord
         if ($orders) {
             foreach ($orders as $order) {
                 /** @var OrderContent $orderContent */
-                $orderContent = $order->getOrderContent()->where(['product_id' => $this->product_id])->one();
+                $orderContent = $order->getOrderContent()->where([
+                    'product_id' => $this->product_id
+                ])->one();
                 if ($orderContent) {
                     $quantity += round($orderContent->quantity, 3);
+                }
+            }
+
+            $analogsPreorderContent = self::find()->where([
+                'preorder_id'       => $this->preorder_id,
+                'parent_product_id' => $this->product_id
+            ])->all();
+
+            if ($analogsPreorderContent) {
+                foreach ($analogsPreorderContent as $analog) {
+                    $quantity += $analog->getAllQuantity();
                 }
             }
         }
@@ -128,6 +142,17 @@ class PreorderContent extends \yii\db\ActiveRecord
                 $orderContent = $order->getOrderContent()->where(['product_id' => $this->product_id])->one();
                 if ($orderContent) {
                     $sum += round($orderContent->price * $orderContent->quantity, 3);
+                }
+            }
+
+            $analogsPreorderContent = self::find()->where([
+                'preorder_id'       => $this->preorder_id,
+                'parent_product_id' => $this->product_id
+            ])->all();
+
+            if ($analogsPreorderContent) {
+                foreach ($analogsPreorderContent as $analog) {
+                    $sum += $analog->getAllSum();
                 }
             }
         }

@@ -111,7 +111,7 @@ class Preorder extends \yii\db\ActiveRecord
      */
     public function getPreorderContents()
     {
-        return $this->hasMany(PreorderContent::class, ['preorder_id' => 'id']);
+        return $this->hasMany(PreorderContent::class, ['preorder_id' => 'id'])->andWhere('parent_product_id is null');
     }
 
     /**

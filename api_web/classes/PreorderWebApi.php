@@ -23,7 +23,8 @@ use common\models\{Order,
     Profile,
     OrderContent,
     Catalog,
-    CatalogGoods};
+    CatalogGoods,
+    RelationSuppRest};
 use yii\data\{
     ArrayDataProvider,
     Pagination
@@ -637,21 +638,24 @@ class PreorderWebApi extends WebApi
     private function createPreorderContent(array $preOrderContent, int $preorderId)
     {
         $newData = [];
+        $null = new Expression('NULL');
         foreach ($preOrderContent as $index => $product) {
             $newData[] = [
                 $preorderId,
                 $product['id'],
                 $product['quantity'],
                 \gmdate('Y-m-d H:i:s'),
-                \gmdate('Y-m-d H:i:s')
+                \gmdate('Y-m-d H:i:s'),
+                $product['parent_product_id'] ?? $null
             ];
         }
         try {
             \Yii::$app->db->createCommand()
-                ->batchInsert(PreorderContent::tableName(),
-                    ['preorder_id', 'product_id', 'plan_quantity', 'created_at', 'updated_at'],
-                    $newData)
-                ->execute();
+                ->batchInsert(
+                    PreorderContent::tableName(),
+                    ['preorder_id', 'product_id', 'plan_quantity', 'created_at', 'updated_at', 'parent_product_id'],
+                    $newData
+                )->execute();
         } catch (\Exception $e) {
             throw $e;
         }
@@ -928,6 +932,9 @@ class PreorderWebApi extends WebApi
                 }
             }
             $order->calculateTotalPrice();
+            if (empty($order->orderContent)) {
+                $order->delete();
+            }
             $t->commit();
         } catch (\Exception $e) {
             $t->rollBack();
@@ -1152,12 +1159,88 @@ class PreorderWebApi extends WebApi
      * Добавить аналог продукта
      *
      * @param $request
-     * @return mixed
+     * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
      */
     public function addAnalogProduct($request)
     {
-        $this->validateRequest($request, ['preorder_id', 'product_id', 'analog_id', 'quantity']);
-        return $request;
+        $this->validateRequest($request, ['preorder_id', 'product_id', 'analog_id', 'vendor_id']);
+
+        if (!isset($request['quantity'])) {
+            throw new BadRequestHttpException("empty_param|quantity");
+        }
+
+        $preOrder = $this->findPreorder($request['preorder_id']);
+        $relation = $this->findRelation($request['vendor_id']);
+
+        $analog = CatalogGoods::findOne([
+            'cat_id'        => $relation->cat_id,
+            'base_goods_id' => $request['analog_id']
+        ]);
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            if ($request['quantity'] == 0) {
+                $orders = $preOrder->getOrders()->andWhere([
+                    'vendor_id' => $relation->supp_org_id
+                ])->all();
+                foreach ($orders as $order) {
+                    $orderContent = $order->getOrderContent()->andWhere(['product_id' => $analog->base_goods_id])->one();
+                    if ($orderContent) {
+                        $this->updateProduct([
+                            'id'       => $orderContent->id,
+                            'quantity' => 0
+                        ]);
+                        PreorderContent::deleteAll([
+                            'preorder_id' => $preOrder->id,
+                            'product_id' => $analog->base_goods_id,
+                            'parent_product_id' => (int)$request['product_id']
+                        ]);
+                    }
+                }
+                $result = $this->get(['id' => $preOrder->id]);
+            } else {
+                $result = $this->addProduct([
+                    'id'       => $preOrder->id,
+                    'products' => [
+                        [
+                            'id'                => (int)$analog->base_goods_id,
+                            'cat_id'            => (int)$analog->cat_id,
+                            'vendor_id'         => (int)$relation->supp_org_id,
+                            'parent_product_id' => (int)$request['product_id'],
+                            'quantity'          => round($request['quantity'], 3)
+                        ]
+                    ]
+                ]);
+            }
+            $t->commit();
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+
+        return [
+            'preorder' => $result
+        ];;
+    }
+
+    /**
+     * @param $vendor_id
+     * @return RelationSuppRest|null
+     * @throws BadRequestHttpException
+     */
+    private function findRelation($vendor_id)
+    {
+        $relation = RelationSuppRest::findOne([
+            'rest_org_id' => $this->user->organization_id,
+            'supp_org_id' => $vendor_id
+        ]);
+
+        if (empty($relation)) {
+            throw new BadRequestHttpException('relation.not_found');
+        }
+
+        return $relation;
     }
 }

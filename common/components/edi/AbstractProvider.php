@@ -57,6 +57,7 @@ abstract class AbstractProvider
         try {
             $objectList = $this->getFilesListForInsertingInQueue();
         } catch (\Throwable $e) {
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             return false;
         }
         return $objectList;

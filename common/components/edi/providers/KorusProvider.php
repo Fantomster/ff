@@ -130,7 +130,7 @@ EOXML;
             $order->updateAttributes(['edi_order' => $order->id]);
             $transaction->commit();
         } catch (Exception $e) {
-            Yii::error($e);
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             $transaction->rollback();
         }
         return $result;
@@ -268,7 +268,7 @@ EOXML;
                 $content = $this->getDocContent($item['name'], $this->ediOrganization['login'], $this->ediOrganization['pass'], $this->ediOrganization['gln_code']);
             } catch (\Throwable $e) {
                 $this->updateQueue($this->ediFilesQueueID, self::STATUS_ERROR, $e->getMessage());
-                Yii::error($e->getMessage());
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
                 return false;
             }
 
@@ -277,7 +277,7 @@ EOXML;
                 return false;
             }
         } catch (\Exception $e) {
-            Yii::error($e);
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             $this->updateQueue($this->ediFilesQueueID, self::STATUS_ERROR, 'Error handling file 2');
             return false;
         }

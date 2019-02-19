@@ -74,7 +74,7 @@ class TestProvider extends AbstractProvider implements ProviderInterface
             } catch (\Throwable $e) {
                 $transaction->rollback();
                 var_dump($e->getMessage());
-                \Yii::error($e->getMessage());
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             }
         }
     }

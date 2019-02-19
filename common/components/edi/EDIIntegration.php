@@ -108,6 +108,9 @@ class EDIIntegration extends Component
         $items = $this->provider->getFilesList($this->orgId);
         foreach ($items as $item) {
             $content = $this->provider->getFile($item, $this->orgId);
+            if (empty($content)) {
+                \Yii::error("cannot read file {$item['name']} (org: {$this->orgId})");
+            }
             $this->provider->parseFile($content);
         }
     }

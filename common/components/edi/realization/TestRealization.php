@@ -79,6 +79,7 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
                 $doc->result->content = file_get_contents($dir . $fileName);
             } catch (\Throwable $e) {
                 $this->updateQueue(self::STATUS_ERROR, $e->getMessage());
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
                 return false;
             }
 
@@ -116,6 +117,7 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
         } catch (\Throwable $t) {
             $this->updateQueue(self::STATUS_ERROR, $t->getMessage() . PHP_EOL . $t->getLine() .
                 PHP_EOL . $t->getTraceAsString());
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             return false;
         }
         return true;

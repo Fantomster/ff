@@ -524,10 +524,9 @@ class PreorderWebApi extends WebApi
      * @param $productName
      * @param $units
      * @param $article
-     * @return bool
      * @throws ValidationException
      */
-    private function createOrderContent($orderId, $productId, $quantity, $price, $productName, $units, $article)
+    private function createOrderContent($orderId, $productId, $quantity, $price, $productName, $units, $article): void
     {
         $orderContent = new OrderContent();
         $orderContent->order_id = $orderId;
@@ -540,9 +539,7 @@ class PreorderWebApi extends WebApi
         $orderContent->product_name = $productName;
         $orderContent->units = $units;
         $orderContent->article = $article;
-        if ($orderContent->validate() && $orderContent->save()) {
-            return true;
-        } else {
+        if (!$orderContent->save()) {
             \Yii::error(\yii\helpers\Json::encode($orderContent->getErrors()));
             throw new ValidationException($orderContent->getFirstErrors());
         }
@@ -935,7 +932,7 @@ class PreorderWebApi extends WebApi
             //Добавляем содержимое в заказы
             $this->createOrderContents($productSorted1, $ordersToChange, $productSorted2, $catalogGoods, $productFlags, $catalogNeeded);
             if (!empty($resultEdi)) {
-                $catalogByVendors = $this->catalogByVendors($vendorNewEdiOrders,$catalogGoods);
+                $catalogByVendors = $this->catalogByVendors($vendorNewEdiOrders, $catalogGoods);
                 $catalogs = $this->getCatalogs($catalogsEdi);
                 //Создаём заказы
                 foreach ($vendorNewEdiOrders as $vendorId => $content) {
@@ -951,13 +948,13 @@ class PreorderWebApi extends WebApi
             if (!empty($productSorted2)) {
                 //Получаем массив продуктов распределённый по поставщикам
                 $vendorNewOrders = ArrayHelper::index($productSorted2, 'id', 'vendor_id');
-                $catalogByVendors = $this->catalogByVendors($vendorNewOrders,$catalogGoods);
+                $catalogByVendors = $this->catalogByVendors($vendorNewOrders, $catalogGoods);
                 $catalogs = $this->getCatalogs($catalogNeeded);
                 //Создаём заказы
                 foreach ($vendorNewOrders as $vendorId => $content) {
                     $this->createOrder(
                         $vendorId,
-                        $post['id'],
+                        $preOrder->id,
                         $catalogs[$vendorId],
                         $content,
                         $catalogByVendors[$vendorId]
@@ -972,6 +969,150 @@ class PreorderWebApi extends WebApi
 
         $preOrder->refresh();
         return $this->prepareModel($preOrder, true);
+    }
+
+    /**
+     * @param $post
+     * @return array
+     * @throws
+     */
+    public function addProduct2($post)
+    {
+        $this->validateRequest($post, ['id', 'products']);
+        if (!is_array($post['products'])) {
+            throw new BadRequestHttpException('preorder.wrong_value_type');
+        }
+        //получаем предзаказ данного пользователя
+        $preOrder = $this->findPreorder($post['id'], true);
+
+        $vendorIds = ArrayHelper::getColumn($post['products'], 'vendor_id');
+        $vendorProducts = [];
+        foreach ($post['products'] as $product) {
+            $vendorProducts[$product['vendor_id']][] = $product;
+        }
+
+        //Получаем массив поставщиков данной организации
+        $vendorsWork = $this->user->organization->getSuppliers('', false);
+        foreach ($vendorIds as $vendorId) {
+            if (!isset($vendorsWork[$vendorId])) {
+                throw new BadRequestHttpException('vendor.not_found');
+            }
+            $vendor = Organization::findOne($vendorId);
+            $products = $vendorProducts[$vendor->id];
+            if (!empty($products)) {
+                //Создаем записи о товарах в preorder_content
+                $this->createPreorderContent($products, $preOrder->id);
+
+                if ($vendor->isEdi()) {
+                    $this->handleEdiOrder($vendor, $products, $preOrder);
+                } else {
+                    $this->handleOrder($vendor, $products, $preOrder);
+                }
+            }
+        }
+
+        return $this->prepareModel($preOrder);
+    }
+
+    /**
+     * @param Organization $vendor
+     * @param array        $products
+     * @param Preorder     $preOrder
+     * @throws BadRequestHttpException
+     * @throws ValidationException]
+     */
+    public function handleOrder(Organization $vendor, array $products, Preorder $preOrder)
+    {
+        $order = $preOrder->getOrders()->andWhere(['vendor_id' => $vendor->id])->one();
+        if (!$order) {
+            $relation = $this->findRelation($vendor->id);
+            $order = $this->createOrderModel($vendor->id, $preOrder->id, $relation->catalog->currency_id ?? Registry::DEFAULT_CURRENCY_ID);
+        }
+        foreach ($products as $product) {
+            $productModel = CatalogGoods::findOne([
+                'base_goods_id' => $product['id'],
+                'cat_id'        => $product['cat_id']
+            ]);
+            $this->createOrderContentModel($order, $productModel, $product['quantity']);
+        }
+    }
+
+    /**
+     * @param int $vendorId
+     * @param int $preOrderId
+     * @param     $currency_id
+     * @return Order
+     * @throws ValidationException
+     */
+    private function createOrderModel(int $vendorId, int $preOrderId, $currency_id)
+    {
+        $client = $this->user->organization;
+        //Создаем заказ
+        $order = new Order();
+        $order->client_id = $client->id;
+        $order->created_by_id = $this->user->id;
+        $order->vendor_id = $vendorId;
+        $order->status = Order::STATUS_PREORDER;
+        $order->currency_id = $currency_id;
+        $order->service_id = Registry::MC_BACKEND;
+        $order->preorder_id = $preOrderId;
+        if (!$order->save()) {
+            \Yii::error(\yii\helpers\Json::encode($order->getErrors()));
+            throw new ValidationException($order->getFirstErrors());
+        }
+        return $order;
+    }
+
+    /**
+     * @param Order        $order
+     * @param CatalogGoods $product
+     * @param              $quantity
+     * @throws ValidationException
+     */
+    private function createOrderContentModel(Order $order, CatalogGoods $product, $quantity)
+    {
+        if ($order->isNewRecord) {
+            $orderContent = new OrderContent();
+        } else {
+            $orderContent = OrderContent::findOne([
+                'order_id'   => $order->id,
+                'product_id' => $product->base_goods_id
+            ]);
+            if (!$orderContent) {
+                $orderContent = new OrderContent();
+            }
+        }
+
+        if ($orderContent->isNewRecord) {
+            $orderContent->order_id = $order->id;
+            $orderContent->product_id = $product->base_goods_id;
+            $orderContent->plan_quantity = $quantity;
+            $orderContent->initial_quantity = $quantity;
+            $orderContent->price = $product->price;
+            $orderContent->plan_price = $product->price;
+            $orderContent->product_name = $product->baseProduct->product;
+            $orderContent->units = $product->baseProduct->units;
+            $orderContent->article = $product->baseProduct->article;
+        }
+
+        $orderContent->quantity = $quantity;
+
+        if (!$orderContent->save()) {
+            \Yii::error(\yii\helpers\Json::encode($orderContent->getErrors()));
+            throw new ValidationException($orderContent->getFirstErrors());
+        }
+    }
+
+    /**
+     * TODO
+     *
+     * @param Organization $vendor
+     * @param array        $products
+     * @param Preorder     $preOrder
+     */
+    public function handleEdiOrder(Organization $vendor, array $products, Preorder $preOrder)
+    {
+
     }
 
     /**
@@ -1272,6 +1413,7 @@ class PreorderWebApi extends WebApi
                 $orders = $preOrder->getOrders()->andWhere([
                     'vendor_id' => $relation->supp_org_id
                 ])->all();
+                /** @var Order $order */
                 foreach ($orders as $order) {
                     $orderContent = $order->getOrderContent()->andWhere(['product_id' => $analog->base_goods_id])->one();
                     if ($orderContent) {
@@ -1289,7 +1431,7 @@ class PreorderWebApi extends WebApi
                 }
                 $result = $this->get(['id' => $preOrder->id]);
             } else {
-                $result = $this->addProduct([
+                $result = $this->addProduct2([
                     'id'       => $preOrder->id,
                     'products' => [
                         [

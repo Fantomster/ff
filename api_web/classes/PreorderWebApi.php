@@ -737,7 +737,12 @@ class PreorderWebApi extends WebApi
         $orderInfo = null;
         $order = $orderContent->order;
 
-        if (in_array($order->status, self::DISABLED_EDIT_ORDER_STATUS[$order->service_id])) {
+        $status = self::DISABLED_EDIT_ORDER_STATUS[$order->service_id];
+        if ($order->service_id == Registry::EDI_SERVICE_ID) {
+            unset($status[Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]);
+        }
+
+        if (in_array($order->status, $status)) {
             throw new BadRequestHttpException('order.status_canceled');
         }
 

@@ -194,9 +194,9 @@ class VetisWaybill extends WebApi
         $types = MercVsd::$types;
         return [
             'result' => [
-                $inc => $types[$inc],
-                $out => $types[$out],
-                ''   => 'Все ВСД',
+                $inc  => $types[$inc],
+                $out  => $types[$out],
+                'all' => 'Все ВСД',
             ]
         ];
     }
@@ -208,7 +208,7 @@ class VetisWaybill extends WebApi
      * */
     public function getFilterStatus()
     {
-        return ['result' => array_merge(MercVsd::$statuses, ['' => 'Все'])];
+        return ['result' => array_merge(MercVsd::$statuses, ['all' => 'Все'])];
     }
 
     /**

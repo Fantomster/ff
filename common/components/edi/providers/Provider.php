@@ -82,7 +82,7 @@ class Provider extends AbstractProvider implements ProviderInterface
                 $transaction->commit();
             } catch (\Throwable $e) {
                 $transaction->rollback();
-                \Yii::error($e->getMessage());
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             }
         }
     }
@@ -127,6 +127,7 @@ class Provider extends AbstractProvider implements ProviderInterface
                 $doc = $client->getDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $fileName]);
             } catch (\Throwable $e) {
                 $this->updateQueue(self::STATUS_ERROR, $e->getMessage());
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
                 return false;
             }
 
@@ -164,6 +165,7 @@ class Provider extends AbstractProvider implements ProviderInterface
             }
         } catch (\Throwable $t) {
             $this->updateQueue(self::STATUS_ERROR, $t->getMessage());
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             return false;
         }
         return true;

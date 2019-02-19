@@ -641,21 +641,24 @@ class PreorderWebApi extends WebApi
         $null = new Expression('NULL');
         foreach ($preOrderContent as $index => $product) {
             $newData[] = [
-                $preorderId,
-                $product['id'],
-                $product['quantity'],
-                \gmdate('Y-m-d H:i:s'),
-                \gmdate('Y-m-d H:i:s'),
-                $product['parent_product_id'] ?? $null
+                'preorder_id'       => $preorderId,
+                'product_id'        => $product['id'],
+                'plan_quantity'     => $product['quantity'],
+                'parent_product_id' => $product['parent_product_id'] ?? $null
             ];
         }
         try {
-            \Yii::$app->db->createCommand()
-                ->batchInsert(
-                    PreorderContent::tableName(),
-                    ['preorder_id', 'product_id', 'plan_quantity', 'created_at', 'updated_at', 'parent_product_id'],
-                    $newData
-                )->execute();
+            foreach ($newData as $row) {
+                $findRow = $row;
+                unset($findRow['plan_quantity']);
+                $exists = PreorderContent::find()->where($findRow)->exists();
+                if (!$exists) {
+                    $model = new PreorderContent($row);
+                    if (!$model->save()) {
+                        throw new ValidationException($model->getFirstErrors());
+                    }
+                }
+            }
         } catch (\Exception $e) {
             throw $e;
         }

@@ -98,9 +98,10 @@ class PreorderContent extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param bool $r
      * @return float
      */
-    public function getAllQuantity()
+    public function getAllQuantity($r = true)
     {
         $quantity = 0;
         $orders = $this->preorder->orders;
@@ -114,15 +115,16 @@ class PreorderContent extends \yii\db\ActiveRecord
                     $quantity += round($orderContent->quantity, 3);
                 }
             }
+            if ($r) {
+                $analogsPreorderContent = self::find()->where([
+                    'preorder_id'       => $this->preorder_id,
+                    'parent_product_id' => $this->product_id
+                ])->all();
 
-            $analogsPreorderContent = self::find()->where([
-                'preorder_id'       => $this->preorder_id,
-                'parent_product_id' => $this->product_id
-            ])->all();
-
-            if ($analogsPreorderContent) {
-                foreach ($analogsPreorderContent as $analog) {
-                    $quantity += $analog->getAllQuantity();
+                if ($analogsPreorderContent) {
+                    foreach ($analogsPreorderContent as $analog) {
+                        $quantity += floatval($analog->getAllQuantity(false));
+                    }
                 }
             }
         }
@@ -130,9 +132,10 @@ class PreorderContent extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param bool $r
      * @return float
      */
-    public function getAllSum()
+    public function getAllSum($r = true)
     {
         $sum = 0;
         $orders = $this->preorder->orders;
@@ -145,14 +148,16 @@ class PreorderContent extends \yii\db\ActiveRecord
                 }
             }
 
-            $analogsPreorderContent = self::find()->where([
-                'preorder_id'       => $this->preorder_id,
-                'parent_product_id' => $this->product_id
-            ])->all();
+            if ($r) {
+                $analogsPreorderContent = self::find()->where([
+                    'preorder_id'       => $this->preorder_id,
+                    'parent_product_id' => $this->product_id
+                ])->all();
 
-            if ($analogsPreorderContent) {
-                foreach ($analogsPreorderContent as $analog) {
-                    $sum += $analog->getAllSum();
+                if ($analogsPreorderContent) {
+                    foreach ($analogsPreorderContent as $analog) {
+                        $sum += floatval($analog->getAllSum(false));
+                    }
                 }
             }
         }

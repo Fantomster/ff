@@ -795,7 +795,7 @@ class PreorderController extends WebApiController
      */
     public function actionAddProduct()
     {
-        $this->response = $this->classWebApi->addProduct2($this->request);
+        $this->response = $this->classWebApi->addProduct($this->request);
     }
 
     /**

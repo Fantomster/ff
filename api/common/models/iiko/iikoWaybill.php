@@ -299,7 +299,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         $stories = OrderContent::find()
             ->select("$allMapTableName.store_rid")
             ->leftJoin($allMapTableName, "$orderContentTableName.product_id = $allMapTableName.product_id and $allMapTableName.service_id = $service_id AND 
-            $allMapTableName.org_id = $client_id")
+            $allMapTableName.org_id in ($client_id)")
             ->where("$orderContentTableName.order_id = :order_id", [':order_id' => $order_id])
             ->groupBy('store_rid')
             ->asArray()->all();
@@ -374,14 +374,18 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         if ($mainOrg != $org_id) {
             $res = AllMaps::find()
-                    ->where([
-                        "service_id" => Registry::IIKO_SERVICE_ID,
-                        "org_id" => $client_id,
-                        "product_id" => $product_field,
-                    ])
-                ->exists();
+                ->select('product_id')
+                ->where("service_id = " . Registry::IIKO_SERVICE_ID . " and org_id = $client_id")
+                ->asArray()->all();
 
-            $client_id = $res ? $client_id : $mainOrg;
+            $maps = [];
+            foreach ($res as $key => $value) {
+                $maps[] = $value['product_id'];
+            }
+
+            $maps = implode(",", $maps);
+
+            $client_id = "IF($product_field in ($maps), $client_id, $mainOrg)";
         }
 
         return $client_id;
@@ -448,13 +452,13 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             if ($this->store_id === null) {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin($allmapTableName, OrderContent::tableName() . ".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id = $client_id")
+                    ->leftJoin($allmapTableName, OrderContent::tableName() . ".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ($client_id)")
                     ->andWhere($allmapTableName . '.store_rid is null')
                     ->all();
             } else {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin($allmapTableName, OrderContent::tableName() . ".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id = $client_id")
+                    ->leftJoin($allmapTableName, OrderContent::tableName() . ".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ($client_id)")
                     ->andWhere($allmapTableName . '.store_rid =' . $this->store_id)
                     ->all();
             }

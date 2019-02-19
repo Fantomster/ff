@@ -80,7 +80,7 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
             return false;
         }
         if ($object->result->errorCode != 0) {
-            \Yii::error("EcomProvider returned error: {$object->result->errorCode}");
+            \Yii::error("EcomProvider returned error: {$object->result->errorMessage} (org: {$this->orgID}, gln: {$this->glnCode})");
             return false;
         }
         $list = $object->result->list ?? null;

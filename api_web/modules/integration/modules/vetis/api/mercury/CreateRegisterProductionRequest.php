@@ -33,11 +33,13 @@ class CreateRegisterProductionRequest extends Component
     /**
      * @var
      */
-    public $step1;
+    public $params;
     /**
-     * @var
+     * Использовать ли ингредиенты при переработке
+     *
+     * @var bool
      */
-    public $step2;
+    public $flagForUseIngredients = false;
 
     /**
      * @return RegisterProductionOperationRequest
@@ -49,32 +51,50 @@ class CreateRegisterProductionRequest extends Component
         $request->localTransactionId = $this->localTransactionId;
         $request->initiator = $this->initiator;
         /**@var string Че реально это будет работать с консоли без orgID ??? */
+        /**@var boolean Нет, не будет */
         $enterprise = IntegrationSettingValue::getSettingsByServiceId(Registry::MERC_SERVICE_ID,
             null, ['enterprise_guid']);
         $request->enterprise['guid'] = $enterprise;
         $array = [];
 
-        foreach ($this->step1 as $id => $value) {
-            $stockEntry = MercStockEntry::findOne(['id' => $id]);
+        foreach ($this->params['products'] as $product) {
+            $stockEntry = MercStockEntry::findOne($product['id']);
             if ($stockEntry) {
                 $rawData = unserialize($stockEntry->raw_data);
-                $array['rawBatch'][] = [
-                    'sourceStockEntry' => [
-                        'guid' => $stockEntry->guid
-                    ],
-                    'volume'           => $value['select_amount'],
-                    'unit'             => [
-                        'uuid' => $rawData->batch->unit->uuid
-                    ],
-                ];
+                if ($this->flagForUseIngredients && !empty($stockEntry->ingredients)) {
+                    foreach ($stockEntry->ingredients as $ingredient) {
+                        $ingredients = $this->computeNeededAmount($ingredient->product_name, $product['select_amount']);
+                        foreach ($ingredients as $ingred) {
+                            $array['rawBatch'][] = [
+                                'sourceStockEntry' => [
+                                    'guid' => $ingred->name
+                                ],
+                                'volume'           => $ingred->amount,
+                                'unit'             => [
+                                    'uuid' => $rawData->batch->unit->uuid
+                                ],
+                            ];
+                        }
+                    }
+                } else {
+                    $array['rawBatch'][] = [
+                        'sourceStockEntry' => [
+                            'guid' => $stockEntry->guid
+                        ],
+                        'volume'           => $product['select_amount'],
+                        'unit'             => [
+                            'uuid' => $rawData->batch->unit->uuid
+                        ],
+                    ];
+                }
             }
         }
 
-        $product = VetisProductItem::findOne(['guid' => $this->step2['product_name']]);
+        $product = VetisProductItem::findOne(['guid' => $this->params['product_guid']]);
 
-        $productionDate = $this->step2['dateOfProduction'];
+        $productionDate = $this->params['dateOfProduction'];
 
-        $expiryDate = $this->step2['expiryDate'];
+        $expiryDate = $this->params['expiryDate'];
 
         $array['productiveBatch'] = [
             'product'          => [
@@ -84,17 +104,17 @@ class CreateRegisterProductionRequest extends Component
                 'guid' => $product->subproduct_guid,
             ],
             'productItem'      => [
-                'guid' => $this->step2['product_name']
+                'guid' => $this->params['product_guid']
             ],
-            'volume'           => $this->step2['volume'],
+            'volume'           => $this->params['volume'],
             'unit'             => [
-                'guid' => $this->step2['unit']
+                'guid' => $this->params['unit']
             ],
             'dateOfProduction' => json_decode(json_encode($this->convertDate($productionDate)), true),
 
             'expiryDate' => json_decode(json_encode($this->convertDate($expiryDate)), true),
 
-            'batchID'    => $this->step2['batchID'],
+            'batchID'    => $this->params['batchID'],
             'perishable' => 'perishable'
         ];
         $array['vetDocument']['authentication']['cargoExpertized'] = 'VSEFULL';
@@ -103,6 +123,7 @@ class CreateRegisterProductionRequest extends Component
                 'cargoExpertized' => 'VSEFULL'
             ]
         ];
+
         $request->productionOperation = $array;
 
         return $request;
@@ -123,7 +144,7 @@ class CreateRegisterProductionRequest extends Component
         $res->firstDate->day = date('d', $time);
         $res->firstDate->hour = date('h', $time);
 
-        if (isset($date->secondDate)) {
+        if (isset($date->second_date)) {
             $time = strtotime($date->second_date);
             $res->secondDate = new ComplexDate();
             $res->secondDate->year = date('Y', $time);
@@ -132,6 +153,33 @@ class CreateRegisterProductionRequest extends Component
             $res->secondDate->hour = date('h', $time);
         }
         return $res;
+    }
+
+    /**
+     * @param $name
+     * @param $needAmount
+     * @return array
+     */
+    private function computeNeededAmount($name, $needAmount)
+    {
+        $ingredients = MercStockEntry::find()->where(['product_name' => $name, 'active' => true, 'amount' > 0])->orderBy('expiry_date')->all();
+        $arReturn = [];
+        $amount = 0;
+        foreach ($ingredients as $ingredient) {
+            $amount += $ingredient->amount;
+            if ($amount == $needAmount) {
+                $arReturn[] = $ingredient;
+                break;
+            } elseif ($amount > $needAmount) {
+                $ingredient->amount -= $amount - $needAmount;
+                $arReturn[] = $ingredient;
+                break;
+            } else {
+                $arReturn[] = $ingredient;
+            }
+        }
+
+        return $arReturn;
     }
 
 }

@@ -3,6 +3,7 @@
 namespace api\common\models\merc;
 
 use api\common\models\RabbitQueues;
+use common\models\vetis\VetisIngredients;
 use console\modules\daemons\components\UpdateDictInterface;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
 use Yii;
@@ -10,35 +11,36 @@ use Yii;
 /**
  * This is the model class for table "merc_stock_entry".
  *
- * @property int $id
- * @property string $guid
- * @property string $uuid
- * @property string $owner_guid
- * @property int $active
- * @property int $last
- * @property int $status
- * @property string $create_date
- * @property string $update_date
- * @property string $previous
- * @property string $next
+ * @property int                $id
+ * @property string             $guid
+ * @property string             $uuid
+ * @property string             $owner_guid
+ * @property int                $active
+ * @property int                $last
+ * @property int                $status
+ * @property string             $create_date
+ * @property string             $update_date
+ * @property string             $previous
+ * @property string             $next
  * @property string $entryNumber
  * @property int $product_type
- * @property string $product_name
- * @property string $amount
- * @property string $unit
- * @property string $gtin
- * @property string $article
- * @property string $production_date
- * @property string $expiry_date
- * @property string $batch_id
- * @property int $perishable
- * @property string $producer_name
- * @property string $producer_guid
- * @property int $low_grade_cargo
- * @property string $vsd_uuid
- * @property string $raw_data
- * @property string $product_marks
- * @property string $producer_country
+ * @property string             $product_name
+ * @property string             $amount
+ * @property string             $unit
+ * @property string             $gtin
+ * @property string             $article
+ * @property string             $production_date
+ * @property string             $expiry_date
+ * @property string             $batch_id
+ * @property int                $perishable
+ * @property string             $producer_name
+ * @property string             $producer_guid
+ * @property int                $low_grade_cargo
+ * @property string             $vsd_uuid
+ * @property string             $raw_data
+ * @property string             $product_marks
+ * @property string             $producer_country
+ * @property VetisIngredients[] $ingredients
  */
 class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
@@ -252,5 +254,13 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
             Yii::error($e->getMessage());
             var_dump($e->getMessage());
         }
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getIngredients()
+    {
+        return $this->hasMany(VetisIngredients::class, ['guid' => 'guid']);
     }
 }

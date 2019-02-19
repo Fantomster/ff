@@ -6,6 +6,7 @@ use api\common\models\merc\mercLog;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
 use api_web\modules\integration\modules\vetis\api\mercury\CreatePrepareOutgoingConsignmentRequest;
+use api_web\modules\integration\modules\vetis\api\mercury\CreateRegisterProductionRequest;
 use api_web\modules\integration\modules\vetis\api\mercury\Mercury;
 use common\models\search\MercStockEntrySearch;
 use api_web\components\Registry;
@@ -30,7 +31,10 @@ use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
 use common\models\vetis\VetisTransport;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
+use frontend\modules\clientintegr\modules\merc\models\expiryDate;
+use frontend\modules\clientintegr\modules\merc\models\inputDate;
 use frontend\modules\clientintegr\modules\merc\models\productForm;
+use frontend\modules\clientintegr\modules\merc\models\productionDate;
 use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step4Form;
 use yii\data\ActiveDataProvider;
@@ -1184,6 +1188,51 @@ class VetisWaybill extends WebApi
             }
         } catch (\Throwable $t) {
             $this->helper->writeInJournal($t->getMessage() . PHP_EOL . $t->getTraceAsString(), $this->user->id, $this->user->organization_id, 'error', 'createTransportVsd');
+            return ['result' => false];
+        }
+
+        return ['result' => true];
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws ValidationException
+     */
+    public function conversion($request, $flagForUseIngredients = false)
+    {
+        $productionDate = new productionDate();
+        $productionDate->first_date = $request['production_first_date'];
+        $productionDate->second_date = $request['production_second_date'];
+        $expiryDate = new expiryDate();
+        $expiryDate->first_date = $request['expiry_first_date'];
+        $expiryDate->second_date = $request['expiry_second_date'];
+        $expiryDate->production_date = !empty($productionDate->second_date) ? $productionDate->second_date : $productionDate->first_date;
+
+        $params = [
+            'products'         => $request['products'], // ['id', 'select_amount']
+            'product_guid'     => $request['product_guid'],
+            'dateOfProduction' => $productionDate,
+            'expiryDate'       => $expiryDate,
+            'volume'           => $request['volume'],
+            'unit'             => $request['unit'],
+            'batchID'          => $request['batchID'],
+            'country'          => "1",
+            'producer'         => "1",
+            'vsd_issueNumber'  => "1",
+            'vsd_issueDate'    => $request['vsd_issueDate'],
+        ];
+        $request = new CreateRegisterProductionRequest();
+        $request->params = $params;
+        $request->flagForUseIngredients = $flagForUseIngredients;
+
+        try {
+            $result = mercuryApi::getInstance()->registerProductionOperation($request);
+            if (!isset($result)) {
+                throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.register_production_operation'));
+            }
+        } catch (\Throwable $t) {
+            $this->helper->writeInJournal($t->getMessage() . PHP_EOL . $t->getTraceAsString(), $this->user->id, $this->user->organization_id, 'error', 'registerProductionOperation');
             return ['result' => false];
         }
 

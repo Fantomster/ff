@@ -993,6 +993,8 @@ class PreorderWebApi extends WebApi
      */
     public function orderClear($request)
     {
+        $orderDelete = [];
+        $orderInfo = null;
         $this->validateRequest($request, ['order_id']);
         $order = Order::findOne(['id' => $request['order_id'], 'status' => Order::STATUS_PREORDER]);
         if (!$order) {
@@ -1014,7 +1016,13 @@ class PreorderWebApi extends WebApi
                     }
                 }
             }
-            $order->calculateTotalPrice();
+            if (empty($order->orderContent)) {
+                $orderDelete[] = $order->id;
+                $order->delete();
+            } else {
+                $order->calculateTotalPrice();
+                $orderInfo = (new OrderWebApi())->getOrderInfo($order);
+            }
             $t->commit();
         } catch (\Exception $e) {
             $t->rollBack();
@@ -1022,8 +1030,9 @@ class PreorderWebApi extends WebApi
         }
 
         return [
-            'preorder' => $this->get(['id' => $order->preorder_id]),
-            'order'    => (new OrderWebApi())->getOrderInfo($order)
+            'preorder'     => $this->get(['id' => $order->preorder_id]),
+            'order'        => $orderInfo,
+            'order_delete' => $orderDelete
         ];
     }
 

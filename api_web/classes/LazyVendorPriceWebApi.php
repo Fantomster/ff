@@ -10,6 +10,7 @@ namespace api_web\classes;
 use api_web\helpers\CurrencyHelper;
 use api_web\helpers\WebApiHelper;
 use common\models\{Catalog, CatalogBaseGoods, CatalogGoods, Organization, RelationSuppRest};
+use api_web\exceptions\ValidationException;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
 use yii\web\BadRequestHttpException;
@@ -211,5 +212,37 @@ class LazyVendorPriceWebApi extends LazyVendorWebApi
             throw $e;
         }
         return ['status' => $productBase->status];
+    }
+
+    public function addProduct($post)
+    {
+        $this->validateRequest($post, ['vendor_id', 'article', 'name', 'category_id', 'price', 'ed']);
+        if (!is_int($post['vendor_id'])) {
+            throw new BadRequestHttpException('catalog.wrong_value');
+        }
+        $catalog = $this->getCatalog($post['vendor_id']);
+//        print_r($catalog->id);
+//        die();
+        $baseProduct = new CatalogBaseGoods();
+        $product = new CatalogGoods();
+        $baseProduct->cat_id = $catalog->id;
+        $baseProduct->article = $post['article'];
+        $baseProduct->product = $post['name'];
+        $baseProduct->category_id = $post['category_id'];
+        $baseProduct->units = !empty($post['units']) && is_float($post['units']) ? $post['units'] : 1;
+        $baseProduct->ed = $post['ed'];
+        $baseProduct->price = $product->price = $post['price'];
+        $baseProduct->status = !empty($post['status']) && in_array($post['status'], [0, 1]) ? $post['status'] : 1;
+        $product->cat_id = $catalog->id;
+        if (!$baseProduct->save()) {
+            throw new ValidationException($baseProduct->getFirstErrors());
+        }
+        $productId = $baseProduct->id;
+        $product->base_goods_id = $productId;
+        if (!$product->save()) {
+            throw new ValidationException($product->getFirstErrors());
+        }
+        die();
+        return $post;
     }
 }

@@ -183,4 +183,57 @@ class LazyVendorPriceController extends WebApiController
     {
         $this->response = $this->classWebApi->changeProductStatus($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/lazy-vendor/price/add-product",
+     *     tags={"LazyVendor/Price"},
+     *     summary="Добавление товара в каталог",
+     *     description="Добавление товарной позиции в каталог",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vendor_id": 1,
+     *                      "article": "123456",
+     *                      "name": "tasty",
+     *                      "category": 1,
+     *                      "price": 99.99,
+     *                      "ed": "кг",
+     *                      "units": 0.666,
+     *                      "status": 1,
+     *                      "product_image": "data:image/png;base64,iVBORw0KGgoAA=="
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "status": true
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionAddProduct()
+    {
+        $this->response = $this->classWebApi->addProduct($this->request);
+    }
 }

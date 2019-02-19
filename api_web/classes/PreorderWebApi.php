@@ -787,6 +787,29 @@ class PreorderWebApi extends WebApi
     }
 
     /**
+     * Получаем массив продуктов, распределённых по поставщикам
+     *
+     * @param $vendorNewOrders
+     * @param $catalogGoods
+     * @return array
+     */
+    private function catalogByVendors($vendorNewOrders, $catalogGoods)
+    {
+        $catalogByVendors = [];
+        foreach ($vendorNewOrders as $vendorId => $vendorNewOrder) {
+            if (empty($catalogByVendors[$vendorId])) {
+                $catalogByVendors[$vendorId] = [];
+            }
+            foreach ($vendorNewOrder as $productId => $item) {
+                if (!empty($catalogGoods[$productId])) {
+                    $catalogByVendors[$vendorId][$productId] = $catalogGoods[$productId];
+                }
+            }
+        }
+        return $catalogByVendors;
+    }
+
+    /**
      * Добавление продуктов в предзаказ
      *
      * @param array $post
@@ -813,12 +836,14 @@ class PreorderWebApi extends WebApi
         $productCount = count($result);
         //Массив id поставщиков
         $vendorNeeded = ArrayHelper::map($result, 'vendor_id', 'vendor_id');
-        $vendorsInPreorder = Organization::find()->where(['id' => $vendorNeeded])->all();
-        $vendorIsEDI = [];
-        foreach ($vendorsInPreorder as $index => $item) {
-            /**@var $item Organization */
-            $vendorIsEDI[$item->id] = $item->isEDI();
+        //Получаем все заказы в данном предзаказе
+        $orders = $preOrder->orders;
+        $currentVendors = [];
+        //Получаем массив поставщиков, заказы которых есть в предзаказе
+        foreach ($orders as $index => $order) {
+            $currentVendors[(int)$order->vendor_id] = (int)$order->vendor_id;
         }
+        $vendorsInPreorder = Organization::find()->where(['id' => $currentVendors])->all();
         //Массив id каталогов
         $catalogNeeded = ArrayHelper::map($result, 'cat_id', 'cat_id');
         if ($productCount > count(array_unique($productIds))) {
@@ -831,6 +856,7 @@ class PreorderWebApi extends WebApi
             //Если продуктов по их id и id каталогов не найдено, то метод возвращает ошибку
             throw new BadRequestHttpException('preorder.product_not_found');
         }
+        $productFlags = [];
         foreach ($result as $index => $product) {
             //Проверяем, что полученные продукты из каталогов действительно
             //распределены по каталогам и поставщикам как на входе метода и все они
@@ -844,42 +870,88 @@ class PreorderWebApi extends WebApi
             if ((int)$catalogGoods[$product['id']]['baseProduct']['supp_org_id'] !== $product['vendor_id']) {
                 throw new BadRequestHttpException('preorder.not_supp_product');
             }
+            if (!empty($currentVendors[$product['vendor_id']])) {
+                $productFlags[$product['vendor_id']] = $product['vendor_id'];
+            }
         }
-        //Получаем все заказы в данном предзаказе
-        $orders = $preOrder->orders;
-        $canAdd = [];
+        $vendorIsEDI = [];
+        foreach ($vendorsInPreorder as $index => $item) {
+            /**@var $item Organization */
+            if (!empty($productFlags[(int)$item->id])) {
+                $vendorIsEDI[$item->id] = $item->isEDI();
+            }
+        }
+        $ordersToChange = [];
         foreach ($orders as $index => $order) {
-            $isEdi = $vendorIsEDI[$order->vendor_id] ?? false;
-            $canAdd[] = $this->canAddProduct($order->status, $isEdi);
+            if (!empty($productFlags[(int)$order->vendor_id])) {
+                $ordersToChange[(int)$order->vendor_id] = $order;
+            }
         }
-        if (in_array(false, $canAdd)) {
-            throw new BadRequestHttpException('preorder.cannot_add_product_to_some_order');
+        $canAdd = [];
+        foreach ($ordersToChange as $index => $order) {
+            if (!empty($productFlags[(int)$order->vendor_id])) {
+                $canAdd[(int)$order->vendor_id] = $this->canAddProduct($order->status, $vendorIsEDI[(int)$order->vendor_id]);
+            }
+        }
+
+        $newEdiOrders = [];
+        foreach ($canAdd as $index => $item) {
+            if (!$vendorIsEDI[$index] && !$item) {
+                throw new BadRequestHttpException('preorder.cannot_add_product_to_some_order');
+            } elseif ($vendorIsEDI[$index] && !$item) {
+                $newEdiOrders[$index] = $index;
+            }
+        }
+
+        $vendorNewOrderContent = [];
+        foreach ($productFlags as $index => $productFlag) {
+            if (empty($newEdiOrders[$index])) {
+                $vendorNewOrderContent[$index] = $index;
+            }
+        }
+
+        $resultEdi = [];
+        $catalogsEdi = [];
+        $vendorNewEdiOrders = [];
+        $productSorted = $result;
+        if (!empty($newEdiOrders)) {
+            $resultTemp = $result;
+            foreach ($resultTemp as $index => $product) {
+                if (!empty($newEdiOrders[$product['vendor_id']])) {
+                    $resultEdi[$product['id']] = $product;
+                    $catalogsEdi[$product['cat_id']] = $product['cat_id'];
+                    unset($productSorted[$index]);
+                }
+            }
+            $vendorNewEdiOrders = ArrayHelper::index($resultEdi, 'id', 'vendor_id');
         }
 
         $t = \Yii::$app->db->beginTransaction();
         try {
             //Добавляем новое содержимое в предзаказ
             $this->createPreorderContent($result, $preOrder->id);
-            $productSorted = $result;
             ArrayHelper::multisort($productSorted, ['vendor_id'], [SORT_ASC]);
             $productSorted1 = $productSorted2 = ArrayHelper::index($productSorted, 'id');
             //Добавляем содержимое в заказы
-            $this->createOrderContents($productSorted1, $orders, $productSorted2, $catalogGoods, $vendorNeeded, $catalogNeeded);
+            $this->createOrderContents($productSorted1, $ordersToChange, $productSorted2, $catalogGoods, $productFlags, $catalogNeeded);
+            if (!empty($resultEdi)) {
+                $catalogByVendors = $this->catalogByVendors($vendorNewEdiOrders,$catalogGoods);
+                $catalogs = $this->getCatalogs($catalogsEdi);
+                //Создаём заказы
+                foreach ($vendorNewEdiOrders as $vendorId => $content) {
+                    $this->createOrder(
+                        $vendorId,
+                        $post['id'],
+                        $catalogs[$vendorId],
+                        $content,
+                        $catalogByVendors[$vendorId]
+                    );
+                }
+            }
             if (!empty($productSorted2)) {
                 //Получаем массив продуктов распределённый по поставщикам
                 $vendorNewOrders = ArrayHelper::index($productSorted2, 'id', 'vendor_id');
-                $catalogByVendors = [];
-                //Получаем массив продуктов, распределённых по поставщикам
-                foreach ($vendorNewOrders as $vendorId => $vendorNewOrder) {
-                    if (empty($catalogByVendors[$vendorId])) {
-                        $catalogByVendors[$vendorId] = [];
-                    }
-                    foreach ($vendorNewOrder as $productId => $item) {
-                        if (!empty($catalogGoods[$productId])) {
-                            $catalogByVendors[$vendorId][$productId] = $catalogGoods[$productId];
-                        }
-                    }
-                }
+                $catalogByVendors = $this->catalogByVendors($vendorNewOrders,$catalogGoods);
                 $catalogs = $this->getCatalogs($catalogNeeded);
                 //Создаём заказы
                 foreach ($vendorNewOrders as $vendorId => $content) {

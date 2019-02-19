@@ -240,7 +240,7 @@ class Poster
             if (!$model) {
                 $outerProductTypeIngredient = OuterProductType::findOne(['value' => self::INGREDIENT_TYPE_VALUE]);
                 $model = new OuterProduct([
-                    'outer_uid'             => $ingredient['ingredient_id'],
+                    'outer_uid'             => (string)$ingredient['ingredient_id'],
                     'service_id'            => Registry::POSTER_SERVICE_ID,
                     'org_id'                => $this->orgId,
                     'name'                  => $ingredient['ingredient_name'],

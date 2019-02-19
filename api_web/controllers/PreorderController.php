@@ -1040,6 +1040,7 @@ class PreorderController extends WebApiController
      *                      "preorder_id":1,
      *                      "product_id":1,
      *                      "analog_id":1,
+     *                      "quantity": 1
      *                  }
      *              )
      *         )

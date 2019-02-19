@@ -1157,7 +1157,7 @@ class PreorderWebApi extends WebApi
      */
     public function addAnalogProduct($request)
     {
-        $this->validateRequest($request, ['preorder_id', 'product_id', 'analog_id']);
+        $this->validateRequest($request, ['preorder_id', 'product_id', 'analog_id', 'quantity']);
         return $request;
     }
 }

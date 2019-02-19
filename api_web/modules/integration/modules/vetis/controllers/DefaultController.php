@@ -2817,5 +2817,68 @@ class DefaultController extends WebApiController
         $this->response = (new VetisWaybill())->createTransportVsd($this->request);
     }
 
+    /**
+     * @SWG\Post(path="/integration/vetis/conversion",
+     *     tags={"Integration/vetis"},
+     *     summary="Создание ВСД на переработку",
+     *     description="Создание ВСД на переработку",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "production_first_date": "2018-08-30",
+     *                      "production_second_date": "2018-08-30",
+     *                      "expiry_first_date": "2018-09-30",
+     *                      "expiry_second_date": "2018-09-30",
+     *                      "products": {
+     *                          {
+     *                              "id":1,
+     *                              "select_amount":1
+     *                          },
+     *                          {
+     *                              "id":2,
+     *                              "select_amount":2
+     *                          },
+     *                      },
+     *                      "product_guid": "5b92cdea-e089-11e1-bcf3-b499babae7ea",
+     *                      "volume": 1,
+     *                      "unit": "9d0c5e1c-4530-42bd-9efe-526072da8716",
+     *                      "batchID": 123,
+     *                      "vsd_issueDate": "2018-08-31",
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionConversion()
+    {
+        $this->response = (new VetisWaybill())->conversion($this->request);
+    }
+
 
 }

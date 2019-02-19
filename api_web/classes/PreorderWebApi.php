@@ -1048,15 +1048,21 @@ class PreorderWebApi extends WebApi
             ->andWhere(['vendor_id' => $vendor->id])
             ->andWhere(['not in', 'status', self::ALLOW_EDIT_ORDER_STATUS[$service_id]])
             ->one();
+
+        $relation = $this->findRelation($vendor->id);
+        if (!$relation) {
+            throw new BadRequestHttpException('relation.not_found');
+        }
+
         if (!$order) {
-            $relation = $this->findRelation($vendor->id);
             $currency_id = $relation->catalog->currency_id ?? Registry::DEFAULT_CURRENCY_ID;
             $order = $this->createOrderModel($vendor->id, $preOrder->id, $currency_id);
         }
+
         foreach ($products as $product) {
             $productModel = CatalogGoods::findOne([
                 'base_goods_id' => $product['id'],
-                'cat_id'        => $product['cat_id']
+                'cat_id'        => $relation->cat_id
             ]);
             if (!$productModel) {
                 throw new BadRequestHttpException('product.not_found');

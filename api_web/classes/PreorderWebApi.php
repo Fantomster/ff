@@ -988,8 +988,6 @@ class PreorderWebApi extends WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws \Throwable
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     public function orderClear($request)
     {
@@ -1016,6 +1014,7 @@ class PreorderWebApi extends WebApi
                     }
                 }
             }
+            $order->refresh();
             if (empty($order->orderContent)) {
                 $orderDelete[] = $order->id;
                 $order->delete();

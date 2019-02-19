@@ -422,7 +422,7 @@ class CronController extends Controller
     //handle EDI integration files
     public function actionHandleFiles()
     {
-        $ediOrganizations = EdiOrganization::find()->all();
+        $ediOrganizations = EdiOrganization::find()->where(['!=', 'login', ''])->all();
         if ($ediOrganizations) {
             foreach ($ediOrganizations as $org) {
                 $provider = EdiProvider::findOne(['id' => $org->provider_id]);

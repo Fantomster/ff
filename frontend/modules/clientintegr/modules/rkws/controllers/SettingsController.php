@@ -25,7 +25,8 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
 
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        $lic0 = Organization::getLicenseList();
+        $organization = Yii::$app->user->identity->orgazanition;
+        $lic0 = $organization->getLicenseList();
         //$lic = $this->checkLic();
         $lic = $lic0['rkws'];
         $licucs = $lic0['rkws_ucs'];

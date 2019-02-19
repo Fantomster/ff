@@ -2,7 +2,6 @@
 
 use yii\widgets\DetailView;
 use api\common\models\merc\mercService;
-use Yii;
 
 ?>
 <?php

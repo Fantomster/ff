@@ -2,7 +2,6 @@
 
 use yii\widgets\Breadcrumbs;
 use yii\widgets\DetailView;
-use Yii;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
 

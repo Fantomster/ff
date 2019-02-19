@@ -1,9 +1,7 @@
 <?php
-
 use yii\widgets\Breadcrumbs;
 use yii\widgets\DetailView;
 use api\common\models\merc\mercService;
-use Yii;
 ?>
 <?php
 $lic = mercService::getLicense(Yii::$app->user->identity->organization_id);

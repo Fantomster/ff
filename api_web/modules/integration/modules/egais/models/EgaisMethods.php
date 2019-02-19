@@ -16,6 +16,7 @@ use common\models\egais\EgaisWriteOffHistory;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
 use yii\data\ArrayDataProvider;
+use yii\db\Query;
 use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
@@ -41,6 +42,7 @@ class EgaisMethods extends WebApi
      * @throws BadRequestHttpException
      * @throws \api_web\exceptions\ValidationException
      * @throws \yii\db\Exception
+     * @throws \yii\base\InvalidConfigException
      */
     public function setEgaisSettings($request)
     {
@@ -48,11 +50,26 @@ class EgaisMethods extends WebApi
         $orgId = $this->user->organization_id;
         $userId = $this->user->id;
 
-        $defaultSettings = IntegrationSetting::findAll([
-            "service_id" => Registry::EGAIS_SERVICE_ID
-        ]);
+        $settingList = (new Query())
+            ->from(["iss" => IntegrationSetting::tableName()])
+            ->select([
+                "setting_id" => "iss.id",
+                "isv.id",
+                "iss.name",
+                "isv.org_id",
+                "isv.value"
+            ])
+            ->leftJoin([
+                "isv" => IntegrationSettingValue::tableName()
+            ], "isv.setting_id = iss.id AND isv.org_id = :org_id", [
+                ":org_id" => $orgId
+            ])
+            ->where([
+                "iss.service_id" => Registry::EGAIS_SERVICE_ID,
+            ])
+            ->all(\Yii::$app->db_api);
 
-        if (empty($defaultSettings)) {
+        if (empty($settingList)) {
             throw new BadRequestHttpException("dictionary.egais_get_setting_error");
         }
 
@@ -61,21 +78,30 @@ class EgaisMethods extends WebApi
         $isSave = true;
         $errorMessage = "";
 
-        foreach ($defaultSettings as $defaultSetting) {
-            $settingValue = IntegrationSettingValue::findOne([
-                "setting_id" => $defaultSetting->id,
-                "org_id"     => $orgId
-            ]);
-
-            if (empty($settingValue)) {
-                $settingValue = new IntegrationSettingValue();
-            }
-
-            $settingValue->setAttributes([
-                "setting_id" => $defaultSetting->id,
+        foreach ($settingList as $setting) {
+            $fieldList = [
+                "setting_id" => $setting["setting_id"],
                 "org_id"     => $orgId,
-                "value"      => $request[$defaultSetting->name],
-            ]);
+                "value"      => $request[$setting["name"]]
+            ];
+
+            if (is_null($setting["id"])) {
+                $settingValue = new IntegrationSettingValue($fieldList);
+                $settingValue->setAttributes($fieldList);
+            } else {
+                /** @var IntegrationSettingValue $settingValue */
+                $settingValue = \Yii::createObject([
+                    "class"      => IntegrationSettingValue::class,
+                    "id"         => $setting["id"],
+                    "org_id"     => $fieldList["org_id"],
+                    "value"      => $fieldList["value"],
+                    "setting_id" => $fieldList["setting_id"],
+                ]);
+
+                $settingValue->setOldAttributes([
+                    "id" => $setting["id"],
+                ]);
+            };
 
             if (!$settingValue->save()) {
                 $isSave = false;
@@ -83,6 +109,7 @@ class EgaisMethods extends WebApi
                 break;
             }
         }
+
         if ($isSave) {
             $transaction->commit();
         } else {

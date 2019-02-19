@@ -906,13 +906,14 @@ class PreorderWebApi extends WebApi
         $resultEdi = [];
         $catalogsEdi = [];
         $vendorNewEdiOrders = [];
+        $productSorted = $result;
         if (!empty($newEdiOrders)) {
             $resultTemp = $result;
             foreach ($resultTemp as $index => $product) {
                 if (!empty($newEdiOrders[$product['vendor_id']])) {
                     $resultEdi[$product['id']] = $product;
                     $catalogsEdi[$product['cat_id']] = $product['cat_id'];
-                    unset($result[$index]);
+                    unset($productSorted[$index]);
                 }
             }
             $vendorNewEdiOrders = ArrayHelper::index($resultEdi, 'id', 'vendor_id');
@@ -922,7 +923,6 @@ class PreorderWebApi extends WebApi
         try {
             //Добавляем новое содержимое в предзаказ
             $this->createPreorderContent($result, $preOrder->id);
-            $productSorted = $result;
             ArrayHelper::multisort($productSorted, ['vendor_id'], [SORT_ASC]);
             $productSorted1 = $productSorted2 = ArrayHelper::index($productSorted, 'id');
             //Добавляем содержимое в заказы

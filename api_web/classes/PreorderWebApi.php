@@ -931,9 +931,10 @@ class PreorderWebApi extends WebApi
                     throw new ValidationException($orderContent->getFirstErrors());
                 }
             }
-            $order->calculateTotalPrice();
             if (empty($order->orderContent)) {
                 $order->delete();
+            } else {
+                $order->calculateTotalPrice();
             }
             $t->commit();
         } catch (\Exception $e) {
@@ -1193,8 +1194,8 @@ class PreorderWebApi extends WebApi
                             'quantity' => 0
                         ]);
                         PreorderContent::deleteAll([
-                            'preorder_id' => $preOrder->id,
-                            'product_id' => $analog->base_goods_id,
+                            'preorder_id'       => $preOrder->id,
+                            'product_id'        => $analog->base_goods_id,
                             'parent_product_id' => (int)$request['product_id']
                         ]);
                     }

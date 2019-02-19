@@ -1018,7 +1018,7 @@ class PreorderWebApi extends WebApi
             }
         }
 
-        return $this->prepareModel($preOrder);
+        return $this->prepareModel($preOrder, true);
     }
 
     /**

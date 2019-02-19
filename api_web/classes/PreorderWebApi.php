@@ -1147,4 +1147,17 @@ class PreorderWebApi extends WebApi
 
         return $result;
     }
+
+    /**
+     * Добавить аналог продукта
+     *
+     * @param $request
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
+    public function addAnalogProduct($request)
+    {
+        $this->validateRequest($request, ['preorder_id', 'product_id', 'analog_id']);
+        return $request;
+    }
 }

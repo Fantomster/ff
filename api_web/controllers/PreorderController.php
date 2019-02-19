@@ -1020,4 +1020,50 @@ class PreorderController extends WebApiController
     {
         $this->response = $this->classWebApi->orderCancel($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/preorder/add-analog-product",
+     *     tags={"Preorder"},
+     *     summary="Добавить аналог продукта",
+     *     description="Добавить аналог продукта",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                      "preorder_id":1,
+     *                      "product_id":1,
+     *                      "analog_id":1,
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *            default={}
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     * @throws
+     */
+    public function actionAddAnalogProduct()
+    {
+        $this->response = $this->classWebApi->addAnalogProduct($this->request);
+    }
 }

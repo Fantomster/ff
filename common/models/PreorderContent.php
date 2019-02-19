@@ -48,7 +48,7 @@ class PreorderContent extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['preorder_id', 'product_id'], 'integer'],
+            [['preorder_id', 'product_id', 'parent_product_id'], 'integer'],
             [['plan_quantity'], 'number'],
             [['created_at', 'updated_at'], 'safe'],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::className(), 'targetAttribute' => ['product_id' => 'id']],
@@ -62,12 +62,13 @@ class PreorderContent extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id'            => 'ID',
-            'preorder_id'   => 'Preorder ID',
-            'product_id'    => 'Product ID',
-            'plan_quantity' => 'Plan Quantity',
-            'created_at'    => 'Created At',
-            'updated_at'    => 'Updated At',
+            'id'                => 'ID',
+            'preorder_id'       => 'Preorder ID',
+            'product_id'        => 'Product ID',
+            'parent_product_id' => 'Parent Product ID',
+            'plan_quantity'     => 'Plan Quantity',
+            'created_at'        => 'Created At',
+            'updated_at'        => 'Updated At',
         ];
     }
 
@@ -77,6 +78,14 @@ class PreorderContent extends \yii\db\ActiveRecord
     public function getProduct()
     {
         return $this->hasOne(CatalogBaseGoods::class, ['id' => 'product_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getParentProduct()
+    {
+        return $this->hasOne(CatalogBaseGoods::class, ['id' => 'parent_product_id']);
     }
 
     /**

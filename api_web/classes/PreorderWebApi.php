@@ -22,7 +22,6 @@ use common\models\{Order,
     ProductAnalog,
     Profile,
     OrderContent,
-    Catalog,
     CatalogGoods,
     RelationSuppRest};
 use yii\data\{
@@ -49,13 +48,18 @@ class PreorderWebApi extends WebApi
         'user',
     ];
 
-    const ALLOW_EDIT_ORDER_STATUS = [
+    const DISABLED_EDIT_ORDER_STATUS = [
         Registry::MC_BACKEND     => [
             Order::STATUS_CANCELLED,
             Order::STATUS_REJECTED
         ],
         Registry::EDI_SERVICE_ID => [
-            Order::STATUS_PREORDER
+            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            Order::STATUS_PROCESSING,
+            Order::STATUS_CANCELLED,
+            Order::STATUS_REJECTED,
+            Order::STATUS_EDI_SENT_BY_VENDOR,
+            Order::STATUS_EDI_ACCEPTANCE_FINISHED
         ]
     ];
 
@@ -626,7 +630,7 @@ class PreorderWebApi extends WebApi
     {
         $order = $preOrder->getOrders()
             ->andWhere(['vendor_id' => $vendor->id])
-            ->andWhere(['not in', 'status', self::ALLOW_EDIT_ORDER_STATUS[$service_id]])
+            ->andWhere(['not in', 'status', self::DISABLED_EDIT_ORDER_STATUS[$service_id]])
             ->one();
 
         $relation = $this->findRelation($vendor->id);
@@ -733,7 +737,7 @@ class PreorderWebApi extends WebApi
         $orderInfo = null;
         $order = $orderContent->order;
 
-        if (in_array($order->status, self::ALLOW_EDIT_ORDER_STATUS[$order->service_id])) {
+        if (in_array($order->status, self::DISABLED_EDIT_ORDER_STATUS[$order->service_id])) {
             throw new BadRequestHttpException('order.status_canceled');
         }
 

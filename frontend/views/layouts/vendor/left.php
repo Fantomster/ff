@@ -73,7 +73,8 @@ $menuItems = [
         ],*/
     ],
 ];
-if (in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()) || Yii::$app->user->can('manage')) {
+if (in_array($user->role_id, $roles) || Yii::$app->user->can('manage')) {
+
     $menuItems[] = [
         'label' => Yii::t('message', 'frontend.views.layouts.left.settings', ['ru' => 'Настройки']),
         'icon' => 'gears',

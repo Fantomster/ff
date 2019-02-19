@@ -233,7 +233,7 @@ class VetisWaybillSearch extends MercVsd
                 } elseif ($this->type == 'OUTGOING') {
                     $mercPconst = 'sender_guid';
                 }
-            } elseif ($key == 'status') {
+            } elseif ($key == 'status' && $this->status != 'all') {
                 $sql .= ' and a.status=:status';
                 $queryParams[':status'] = $this->status;
                 $arCount['status'] = $this->status;

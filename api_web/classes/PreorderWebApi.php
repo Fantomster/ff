@@ -914,7 +914,7 @@ class PreorderWebApi extends WebApi
         }
         $orderInfo = null;
         $order = $orderContent->order;
-
+        $orderDelete = [];
         $t = \Yii::$app->db->beginTransaction();
         try {
             $orderContent->quantity = $request['quantity'];
@@ -931,8 +931,8 @@ class PreorderWebApi extends WebApi
                 }
             }
             if (empty($order->orderContent)) {
+                $orderDelete[] = $order->id;
                 $order->delete();
-
             } else {
                 $order->calculateTotalPrice();
                 $orderInfo = (new OrderWebApi())->getOrderInfo($order);
@@ -944,8 +944,9 @@ class PreorderWebApi extends WebApi
         }
 
         return [
-            'preorder' => $this->get(['id' => $order->preorder_id]),
-            'order'    => $orderInfo
+            'preorder'     => $this->get(['id' => $order->preorder_id]),
+            'order'        => $orderInfo,
+            'order_delete' => $orderDelete
         ];
     }
 
@@ -1183,6 +1184,7 @@ class PreorderWebApi extends WebApi
 
         $t = \Yii::$app->db->beginTransaction();
         try {
+            $orderDelete = [];
             if ($request['quantity'] == 0) {
                 $orders = $preOrder->getOrders()->andWhere([
                     'vendor_id' => $relation->supp_org_id
@@ -1190,7 +1192,7 @@ class PreorderWebApi extends WebApi
                 foreach ($orders as $order) {
                     $orderContent = $order->getOrderContent()->andWhere(['product_id' => $analog->base_goods_id])->one();
                     if ($orderContent) {
-                        $this->updateProduct([
+                        $r = $this->updateProduct([
                             'id'       => $orderContent->id,
                             'quantity' => 0
                         ]);
@@ -1199,6 +1201,7 @@ class PreorderWebApi extends WebApi
                             'product_id'        => $analog->base_goods_id,
                             'parent_product_id' => (int)$request['product_id']
                         ]);
+                        $orderDelete = ArrayHelper::merge($orderDelete, $r['order_delete']);
                     }
                 }
                 $result = $this->get(['id' => $preOrder->id]);
@@ -1223,7 +1226,8 @@ class PreorderWebApi extends WebApi
         }
 
         return [
-            'preorder' => $result
+            'preorder'     => $result,
+            'order_delete' => $orderDelete
         ];;
     }
 

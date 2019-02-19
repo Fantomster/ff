@@ -4,7 +4,6 @@ use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
-use Yii;
 
 ?>
 <?php

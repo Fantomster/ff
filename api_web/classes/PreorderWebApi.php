@@ -49,6 +49,16 @@ class PreorderWebApi extends WebApi
         'user',
     ];
 
+    const ALLOW_EDIT_ORDER_STATUS = [
+        Registry::MC_BACKEND     => [
+            Order::STATUS_CANCELLED,
+            Order::STATUS_REJECTED
+        ],
+        Registry::EDI_SERVICE_ID => [
+            Order::STATUS_PREORDER
+        ]
+    ];
+
     /**
      * @param array $vendors
      * @param Cart  $cart
@@ -998,24 +1008,27 @@ class PreorderWebApi extends WebApi
             $vendorProducts[$product['vendor_id']][] = $product;
         }
 
-        //Получаем массив поставщиков данной организации
-        $vendorsWork = $this->user->organization->getSuppliers('', false);
-        foreach ($vendorIds as $vendorId) {
-            if (!isset($vendorsWork[$vendorId])) {
-                throw new BadRequestHttpException('vendor.not_found');
-            }
-            $vendor = Organization::findOne($vendorId);
-            $products = $vendorProducts[$vendor->id];
-            if (!empty($products)) {
-                //Создаем записи о товарах в preorder_content
-                $this->createPreorderContent($products, $preOrder->id);
-
-                if ($vendor->isEdi()) {
-                    $this->handleEdiOrder($vendor, $products, $preOrder);
-                } else {
-                    $this->handleOrder($vendor, $products, $preOrder);
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            //Получаем массив поставщиков данной организации
+            $vendorsWork = $this->user->organization->getSuppliers('', false);
+            foreach ($vendorIds as $vendorId) {
+                if (!isset($vendorsWork[$vendorId])) {
+                    throw new BadRequestHttpException('vendor.not_found');
+                }
+                $vendor = Organization::findOne($vendorId);
+                $products = $vendorProducts[$vendor->id];
+                if (!empty($products)) {
+                    //Создаем записи о товарах в preorder_content
+                    $this->createPreorderContent($products, $preOrder->id);
+                    $service_id = $vendor->isEdi() ? Registry::EDI_SERVICE_ID : Registry::MC_BACKEND;
+                    $this->handleOrder($vendor, $products, $preOrder, $service_id);
                 }
             }
+            $t->commit();
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
         }
 
         return $this->prepareModel($preOrder, true);
@@ -1025,27 +1038,29 @@ class PreorderWebApi extends WebApi
      * @param Organization $vendor
      * @param array        $products
      * @param Preorder     $preOrder
+     * @param              $service_id
      * @throws BadRequestHttpException
-     * @throws ValidationException]
+     * @throws ValidationException
      */
-    public function handleOrder(Organization $vendor, array $products, Preorder $preOrder)
+    public function handleOrder(Organization $vendor, array $products, Preorder $preOrder, $service_id)
     {
         $order = $preOrder->getOrders()
             ->andWhere(['vendor_id' => $vendor->id])
-            ->andWhere(['not in', 'status', [
-                Order::STATUS_REJECTED,
-                Order::STATUS_CANCELLED
-            ]])
+            ->andWhere(['not in', 'status', self::ALLOW_EDIT_ORDER_STATUS[$service_id]])
             ->one();
         if (!$order) {
             $relation = $this->findRelation($vendor->id);
-            $order = $this->createOrderModel($vendor->id, $preOrder->id, $relation->catalog->currency_id ?? Registry::DEFAULT_CURRENCY_ID);
+            $currency_id = $relation->catalog->currency_id ?? Registry::DEFAULT_CURRENCY_ID;
+            $order = $this->createOrderModel($vendor->id, $preOrder->id, $currency_id);
         }
         foreach ($products as $product) {
             $productModel = CatalogGoods::findOne([
                 'base_goods_id' => $product['id'],
                 'cat_id'        => $product['cat_id']
             ]);
+            if (!$productModel) {
+                throw new BadRequestHttpException('product.not_found');
+            }
             $this->createOrderContentModel($order, $productModel, $product['quantity']);
         }
     }
@@ -1101,8 +1116,8 @@ class PreorderWebApi extends WebApi
             $orderContent->product_id = $product->base_goods_id;
             $orderContent->plan_quantity = $quantity;
             $orderContent->initial_quantity = $quantity;
-            $orderContent->price = $product->price;
-            $orderContent->plan_price = $product->price;
+            $orderContent->price = $product->price ?? 0;
+            $orderContent->plan_price = $product->price ?? 0;
             $orderContent->product_name = $product->baseProduct->product;
             $orderContent->units = $product->baseProduct->units;
             $orderContent->article = $product->baseProduct->article;
@@ -1114,18 +1129,6 @@ class PreorderWebApi extends WebApi
             \Yii::error(\yii\helpers\Json::encode($orderContent->getErrors()));
             throw new ValidationException($orderContent->getFirstErrors());
         }
-    }
-
-    /**
-     * TODO
-     *
-     * @param Organization $vendor
-     * @param array        $products
-     * @param Preorder     $preOrder
-     */
-    public function handleEdiOrder(Organization $vendor, array $products, Preorder $preOrder)
-    {
-
     }
 
     /**
@@ -1144,7 +1147,7 @@ class PreorderWebApi extends WebApi
         $orderInfo = null;
         $order = $orderContent->order;
 
-        if (in_array($order->status, [Order::STATUS_REJECTED, Order::STATUS_CANCELLED])) {
+        if (in_array($order->status, self::ALLOW_EDIT_ORDER_STATUS[$order->service_id])) {
             throw new BadRequestHttpException('order.status_canceled');
         }
 

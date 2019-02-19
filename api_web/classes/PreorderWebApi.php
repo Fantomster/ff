@@ -904,8 +904,6 @@ class PreorderWebApi extends WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws \Throwable
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     public function updateProduct($request)
     {
@@ -914,6 +912,7 @@ class PreorderWebApi extends WebApi
         if (!$orderContent) {
             throw new BadRequestHttpException('order_content.not_found');
         }
+        $orderInfo = null;
         $order = $orderContent->order;
 
         $t = \Yii::$app->db->beginTransaction();
@@ -933,8 +932,10 @@ class PreorderWebApi extends WebApi
             }
             if (empty($order->orderContent)) {
                 $order->delete();
+
             } else {
                 $order->calculateTotalPrice();
+                $orderInfo = (new OrderWebApi())->getOrderInfo($order);
             }
             $t->commit();
         } catch (\Exception $e) {
@@ -944,7 +945,7 @@ class PreorderWebApi extends WebApi
 
         return [
             'preorder' => $this->get(['id' => $order->preorder_id]),
-            'order'    => (new OrderWebApi())->getOrderInfo($order)
+            'order'    => $orderInfo
         ];
     }
 

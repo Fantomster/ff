@@ -62,28 +62,25 @@ class EgaisMethods extends WebApi
         $errorMessage = "";
 
         foreach ($defaultSettings as $defaultSetting) {
-            if (array_key_exists($defaultSetting->name, $request)) {
+            $settingValue = IntegrationSettingValue::findOne([
+                "setting_id" => $defaultSetting->id,
+                "org_id"     => $orgId
+            ]);
 
-                $settingValue = IntegrationSettingValue::findOne([
-                    "setting_id" => $defaultSetting->id,
-                    "org_id"     => $orgId
-                ]);
+            if (empty($settingValue)) {
+                $settingValue = new IntegrationSettingValue();
+            }
 
-                if (empty($settingValue)) {
-                    $settingValue = new IntegrationSettingValue();
-                }
+            $settingValue->setAttributes([
+                "setting_id" => $defaultSetting->id,
+                "org_id"     => $orgId,
+                "value"      => $request[$defaultSetting->name],
+            ]);
 
-                $settingValue->setAttributes([
-                    "setting_id" => $defaultSetting->id,
-                    "org_id"     => $orgId,
-                    "value"      => $request[$defaultSetting->name],
-                ]);
-
-                if (!$settingValue->save()) {
-                    $isSave = false;
-                    $errorMessage = print_r($settingValue->getFirstErrors(), true);
-                    break;
-                }
+            if (!$settingValue->save()) {
+                $isSave = false;
+                $errorMessage = print_r($settingValue->getFirstErrors(), true);
+                break;
             }
         }
         if ($isSave) {

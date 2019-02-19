@@ -110,13 +110,15 @@ class PreorderContent extends \yii\db\ActiveRecord
         ]])->all();
 
         if ($orders) {
+            /** @var Order $order */
             foreach ($orders as $order) {
                 /** @var OrderContent $orderContent */
                 $orderContent = $order->getOrderContent()->where([
                     'product_id' => $this->product_id
                 ])->one();
                 if ($orderContent) {
-                    $quantity += round($orderContent->quantity, 3);
+                    $coefficient = $this->getCoefficients($order->client_id);
+                    $quantity += round($orderContent->quantity * ($coefficient['first_coefficient'] / $coefficient['my_coefficient']), 3);
                 }
             }
             if ($r) {
@@ -166,5 +168,33 @@ class PreorderContent extends \yii\db\ActiveRecord
             }
         }
         return round($sum, 3);
+    }
+
+    /**
+     * @param $client_id
+     * @return array
+     */
+    private function getCoefficients($client_id)
+    {
+        $result = ['my_coefficient' => 1, 'first_coefficient' => 1];
+
+        if ($this->parent_product_id) {
+            $analog = ProductAnalog::findOne([
+                'client_id'  => $client_id,
+                'product_id' => $this->parent_product_id
+            ]);
+            if ($analog) {
+                $result['my_coefficient'] = $analog->coefficient;
+            }
+        }
+
+        $analogFirst = ProductAnalog::find()->where([
+            'client_id'  => $client_id,
+            'product_id' => $this->product_id
+        ])->one();
+
+        $result['first_coefficient'] = $analogFirst->coefficient;
+
+        return $result;
     }
 }

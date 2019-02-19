@@ -51,7 +51,7 @@ class PreorderContent extends \yii\db\ActiveRecord
         return [
             [['preorder_id', 'product_id', 'parent_product_id'], 'integer'],
             [['plan_quantity'], 'number'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at', 'parent_product_id'], 'safe'],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::className(), 'targetAttribute' => ['product_id' => 'id']],
             [['preorder_id'], 'exist', 'skipOnError' => true, 'targetClass' => Preorder::className(), 'targetAttribute' => ['preorder_id' => 'id']],
         ];

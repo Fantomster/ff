@@ -635,13 +635,12 @@ class PreorderWebApi extends WebApi
     private function createPreorderContent(array $preOrderContent, int $preorderId)
     {
         $newData = [];
-        $null = new Expression('NULL');
         foreach ($preOrderContent as $index => $product) {
             $newData[] = [
                 'preorder_id'       => $preorderId,
                 'product_id'        => $product['id'],
                 'plan_quantity'     => $product['quantity'],
-                'parent_product_id' => $product['parent_product_id'] ?? $null
+                'parent_product_id' => $product['parent_product_id'] ?? null
             ];
         }
         try {
@@ -650,7 +649,15 @@ class PreorderWebApi extends WebApi
                 unset($findRow['plan_quantity']);
                 $exists = PreorderContent::find()->where($findRow)->exists();
                 if (!$exists) {
-                    $model = new PreorderContent($row);
+                    $model = new PreorderContent();
+                    $model->preorder_id = $preorderId;
+                    $model->product_id = $row['product_id'];
+                    $model->plan_quantity = $row['plan_quantity'];
+
+                    if (isset($row['parent_product_id'])) {
+                        $model->parent_product_id = (int)$row['parent_product_id'];
+                    }
+
                     if (!$model->save()) {
                         throw new ValidationException($model->getFirstErrors());
                     }

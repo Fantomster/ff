@@ -358,7 +358,7 @@ $this->registerCss($css);
             'options' => ['class' => 'breadcrumb',],
             'links'   => [
                 [
-                    'label' => Yii::t('app', 'frontend.clientintegr.index', ['ru' => 'Интеграция']),
+                    'label' => Yii::t('message', 'frontend.clientintegr.index', ['ru' => 'Интеграция']),
                     'url'   => '/clientintegr/default'
                 ],
                 Yii::t('message', 'frontend.clientintegr.rkws.default', ['ru' => 'Интеграция с R-keeper WS']),

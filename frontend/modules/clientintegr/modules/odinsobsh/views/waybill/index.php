@@ -352,7 +352,7 @@ $this->registerCss($css);
         'options' => ['class' => 'breadcrumb',],
         'links'   => [
             [
-                'label' => Yii::t('app', 'frontend.clientintegr.index', ['ru' => 'Интеграция']),
+                'label' => Yii::t('message', 'frontend.clientintegr.index', ['ru' => 'Интеграция']),
                 'url'   => '/clientintegr/default'
             ],
             Yii::t('message', 'frontend.clientintegr.ones.waybill', ['ru' => 'Интеграция с 1С Общепит']),

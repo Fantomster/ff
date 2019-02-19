@@ -104,7 +104,11 @@ class PreorderContent extends \yii\db\ActiveRecord
     public function getAllQuantity($r = true)
     {
         $quantity = 0;
-        $orders = $this->preorder->orders;
+        $orders = $this->preorder->getOrders()->andWhere(['not in', 'status', [
+            Order::STATUS_REJECTED,
+            Order::STATUS_CANCELLED
+        ]])->all();
+
         if ($orders) {
             foreach ($orders as $order) {
                 /** @var OrderContent $orderContent */

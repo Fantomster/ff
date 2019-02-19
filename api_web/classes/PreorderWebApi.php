@@ -1030,7 +1030,13 @@ class PreorderWebApi extends WebApi
      */
     public function handleOrder(Organization $vendor, array $products, Preorder $preOrder)
     {
-        $order = $preOrder->getOrders()->andWhere(['vendor_id' => $vendor->id])->one();
+        $order = $preOrder->getOrders()
+            ->andWhere(['vendor_id' => $vendor->id])
+            ->andWhere(['not in', 'status', [
+                Order::STATUS_REJECTED,
+                Order::STATUS_CANCELLED
+            ]])
+            ->one();
         if (!$order) {
             $relation = $this->findRelation($vendor->id);
             $order = $this->createOrderModel($vendor->id, $preOrder->id, $relation->catalog->currency_id ?? Registry::DEFAULT_CURRENCY_ID);
@@ -1137,6 +1143,11 @@ class PreorderWebApi extends WebApi
         }
         $orderInfo = null;
         $order = $orderContent->order;
+
+        if (in_array($order->status, [Order::STATUS_REJECTED, Order::STATUS_CANCELLED])) {
+            throw new BadRequestHttpException('order.status_canceled');
+        }
+
         $orderDelete = [];
         $t = \Yii::$app->db->beginTransaction();
         try {

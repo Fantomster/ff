@@ -155,7 +155,11 @@ class Preorder extends \yii\db\ActiveRecord
     public function getQuantityWithCoefficient($product_id)
     {
         $q = 0;
-        foreach ($this->orders as $order) {
+        $orders = $this->getOrders()->andWhere(['not in', 'status', [
+            Order::STATUS_REJECTED,
+            Order::STATUS_CANCELLED
+        ]])->all();
+        foreach ($orders as $order) {
             $orderContents = $order->getOrderContent()->where(['product_id' => $product_id])->all();
             if ($orderContents) {
                 foreach ($orderContents as $orderContent) {

@@ -132,6 +132,7 @@ abstract class AbstractRealization
             \Yii::$app->db->createCommand()->update('edi_files_queue', ['organization_id' => $orgId['organization_id']], 'id=' . $id)->execute();
         } catch (\Throwable $t) {
             \Yii::error($t->getMessage() . 'error on pdate id=' . $id . 'gln = ' . $glnCode, __METHOD__);
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
         return true;
     }

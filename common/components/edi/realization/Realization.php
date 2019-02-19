@@ -60,6 +60,7 @@ class Realization extends AbstractRealization implements RealizationInterface
                 $doc = $client->getDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $fileName]);
             } catch (\Throwable $e) {
                 $this->updateQueue(self::STATUS_ERROR, $e->getMessage());
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
                 return false;
             }
 
@@ -97,6 +98,7 @@ class Realization extends AbstractRealization implements RealizationInterface
             }
         } catch (\Throwable $t) {
             $this->updateQueue(self::STATUS_ERROR, $t->getMessage());
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             return false;
         }
         return true;

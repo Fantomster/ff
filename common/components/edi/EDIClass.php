@@ -340,6 +340,7 @@ class EDIClass extends Component
                 ];
                 $this->insertEdiErrorData($arr);
             }
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             return $e->getMessage();
         }
     }

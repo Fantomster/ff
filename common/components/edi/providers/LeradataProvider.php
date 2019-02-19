@@ -65,6 +65,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
         try {
             $this->getFilesListForInsertingInQueue();
         } catch (\Throwable $e) {
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             return false;
         }
     }
@@ -126,7 +127,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             $order->updateAttributes(['edi_order' => $order->id]);
             $transaction->commit();
         } catch (Exception $e) {
-            Yii::error($e);
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             $transaction->rollback();
         }
         return $result;

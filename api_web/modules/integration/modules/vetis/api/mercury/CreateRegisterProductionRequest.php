@@ -34,6 +34,12 @@ class CreateRegisterProductionRequest extends Component
      * @var
      */
     public $params;
+    /**
+     * Использовать ли ингредиенты при переработке
+     *
+     * @var bool
+     */
+    public $flagForUseIngredients = false;
 
     /**
      * @return RegisterProductionOperationRequest
@@ -52,10 +58,10 @@ class CreateRegisterProductionRequest extends Component
         $array = [];
 
         foreach ($this->params['products'] as $product) {
-            $stockEntry = MercStockEntry::find()->joinWith(['ingredients'])->where(['id' => $product['id']])->one();
+            $stockEntry = MercStockEntry::findOne($product['id']);
             if ($stockEntry) {
                 $rawData = unserialize($stockEntry->raw_data);
-                if (!empty($stockEntry->ingredients)) {
+                if ($this->flagForUseIngredients && !empty($stockEntry->ingredients)) {
                     foreach ($stockEntry->ingredients as $ingredient) {
                         $ingredients = $this->computeNeededAmount($ingredient->product_name, $product['select_amount']);
                         foreach ($ingredients as $ingred) {
@@ -117,6 +123,7 @@ class CreateRegisterProductionRequest extends Component
                 'cargoExpertized' => 'VSEFULL'
             ]
         ];
+
         $request->productionOperation = $array;
 
         return $request;
@@ -137,7 +144,7 @@ class CreateRegisterProductionRequest extends Component
         $res->firstDate->day = date('d', $time);
         $res->firstDate->hour = date('h', $time);
 
-        if (isset($date->secondDate)) {
+        if (isset($date->second_date)) {
             $time = strtotime($date->second_date);
             $res->secondDate = new ComplexDate();
             $res->secondDate->year = date('Y', $time);
@@ -148,6 +155,11 @@ class CreateRegisterProductionRequest extends Component
         return $res;
     }
 
+    /**
+     * @param $name
+     * @param $needAmount
+     * @return array
+     */
     private function computeNeededAmount($name, $needAmount)
     {
         $ingredients = MercStockEntry::find()->where(['product_name' => $name, 'active' => true, 'amount' > 0])->orderBy('expiry_date')->all();

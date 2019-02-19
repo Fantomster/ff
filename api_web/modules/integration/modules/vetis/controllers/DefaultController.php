@@ -74,6 +74,8 @@ class DefaultController extends WebApiController
                         'type-of-well-being-area-list',
                         'ttn-type-list',
                         'create-transport-vsd',
+                        'create-conversion',
+                        'create-conversion-with-ingredients',
                     ],
                     'roles'      => [
                         Registry::MANAGER_RESTAURANT,
@@ -2818,7 +2820,7 @@ class DefaultController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/integration/vetis/conversion",
+     * @SWG\Post(path="/integration/vetis/create-conversion",
      *     tags={"Integration/vetis"},
      *     summary="Создание ВСД на переработку",
      *     description="Создание ВСД на переработку",
@@ -2838,15 +2840,11 @@ class DefaultController extends WebApiController
      *                      "expiry_second_date": "2018-09-30",
      *                      "products": {
      *                          {
-     *                              "id":1,
+     *                              "id":849,
      *                              "select_amount":1
-     *                          },
-     *                          {
-     *                              "id":2,
-     *                              "select_amount":2
-     *                          },
+     *                          }
      *                      },
-     *                      "product_guid": "5b92cdea-e089-11e1-bcf3-b499babae7ea",
+     *                      "product_guid": "e8ff7f61-d5cd-4062-b328-7ae430ead04c",
      *                      "volume": 1,
      *                      "unit": "9d0c5e1c-4530-42bd-9efe-526072da8716",
      *                      "batchID": 123,
@@ -2875,9 +2873,68 @@ class DefaultController extends WebApiController
      * )
      * @throws \Exception
      */
-    public function actionConversion()
+    public function actionCreateConversion()
     {
-        $this->response = (new VetisWaybill())->conversion($this->request);
+        $this->response = (new VetisWaybill())->conversion($this->request, false);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/create-conversion-with-ingredients",
+     *     tags={"Integration/vetis"},
+     *     summary="Создание ВСД на переработку",
+     *     description="Создание ВСД на переработку",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "production_first_date": "2018-08-30",
+     *                      "production_second_date": "2018-08-30",
+     *                      "expiry_first_date": "2018-09-30",
+     *                      "expiry_second_date": "2018-09-30",
+     *                      "products": {
+     *                          {
+     *                              "id":849,
+     *                              "select_amount":1
+     *                          }
+     *                      },
+     *                      "product_guid": "e8ff7f61-d5cd-4062-b328-7ae430ead04c",
+     *                      "volume": 1,
+     *                      "unit": "9d0c5e1c-4530-42bd-9efe-526072da8716",
+     *                      "batchID": 123,
+     *                      "vsd_issueDate": "2018-08-31",
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionCreateConversionWithIngredients()
+    {
+        $this->response = (new VetisWaybill())->conversion($this->request, true);
     }
 
 

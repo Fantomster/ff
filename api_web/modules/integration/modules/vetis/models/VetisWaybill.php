@@ -1199,7 +1199,7 @@ class VetisWaybill extends WebApi
      * @return array
      * @throws ValidationException
      */
-    public function conversion($request)
+    public function conversion($request, $flagForUseIngredients = false)
     {
         $productionDate = new productionDate();
         $productionDate->first_date = $request['production_first_date'];
@@ -1208,7 +1208,6 @@ class VetisWaybill extends WebApi
         $expiryDate->first_date = $request['expiry_first_date'];
         $expiryDate->second_date = $request['expiry_second_date'];
         $expiryDate->production_date = !empty($productionDate->second_date) ? $productionDate->second_date : $productionDate->first_date;
-        $inputDate = new inputDate();
 
         $params = [
             'products'         => $request['products'], // ['id', 'select_amount']
@@ -1221,10 +1220,11 @@ class VetisWaybill extends WebApi
             'country'          => "1",
             'producer'         => "1",
             'vsd_issueNumber'  => "1",
-            'vsd_issueDate'    => $inputDate,
+            'vsd_issueDate'    => $request['vsd_issueDate'],
         ];
         $request = new CreateRegisterProductionRequest();
         $request->params = $params;
+        $request->flagForUseIngredients = $flagForUseIngredients;
 
         try {
             $result = mercuryApi::getInstance()->registerProductionOperation($request);

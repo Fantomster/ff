@@ -636,7 +636,7 @@ class PreorderWebApi extends WebApi
 
         if (!$order) {
             $currency_id = $relation->catalog->currency_id ?? Registry::DEFAULT_CURRENCY_ID;
-            $order = $this->createOrderModel($vendor->id, $preOrder->id, $currency_id);
+            $order = $this->createOrder($vendor->id, $preOrder->id, $currency_id);
         }
 
         foreach ($products as $product) {
@@ -647,7 +647,7 @@ class PreorderWebApi extends WebApi
             if (!$productModel) {
                 throw new BadRequestHttpException('product.not_found');
             }
-            $this->createOrderContentModel($order, $productModel, $product['quantity']);
+            $this->createOrderContent($order, $productModel, $product['quantity']);
         }
     }
 
@@ -658,7 +658,7 @@ class PreorderWebApi extends WebApi
      * @return Order
      * @throws ValidationException
      */
-    private function createOrderModel(int $vendorId, int $preOrderId, $currency_id)
+    private function createOrder(int $vendorId, int $preOrderId, $currency_id)
     {
         $client = $this->user->organization;
         //Создаем заказ
@@ -683,7 +683,7 @@ class PreorderWebApi extends WebApi
      * @param              $quantity
      * @throws ValidationException
      */
-    private function createOrderContentModel(Order $order, CatalogGoods $product, $quantity)
+    private function createOrderContent(Order $order, CatalogGoods $product, $quantity)
     {
         if ($order->isNewRecord) {
             $orderContent = new OrderContent();

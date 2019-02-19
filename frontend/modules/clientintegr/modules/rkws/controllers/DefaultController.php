@@ -32,7 +32,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $searchModel = new RkDicSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         
-        $organization = Yii::$app->user->identity->orgazanition;
+        $organization = Yii::$app->user->identity->organization;
         $lic0 = $organization->getLicenseList();
         //$lic = $this->checkLic();
         $lic = $lic0['rkws'];
@@ -214,7 +214,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $searchModel = new RkDicSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        $organization = Yii::$app->user->identity->orgazanition;
+        $organization = Yii::$app->user->identity->organization;
         $lic0 = $organization->getLicenseList();
         //$lic = $this->checkLic();
         $lic = $lic0['rkws'];

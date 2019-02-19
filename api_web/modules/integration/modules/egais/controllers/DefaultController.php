@@ -55,7 +55,7 @@ class DefaultController extends WebApiController
      */
     public function actionSetEgaisSettings()
     {
-        $this->response = (new EgaisMethods())->setEgaisSettings($this->request, $this->user->organization_id);
+        $this->response = (new EgaisMethods())->setEgaisSettings($this->request);
     }
 
     /**

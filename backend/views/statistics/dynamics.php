@@ -96,7 +96,7 @@ $gridColumns = [
 
         <?php
         echo ExportMenu::widget([
-            'dataProvider'    => $DataProvider,
+            'dataProvider'    => $dataProvider,
             'columns'         => $gridColumns,
             'target'          => ExportMenu::TARGET_BLANK,
             'batchSize'       => 20,
@@ -151,7 +151,7 @@ $gridColumns = [
             </div>
             <div class="form-group" style="width: 350px; margin: 0 auto; padding-bottom: 10px;">
                 <?=
-                $form->field($SearchModel, 'searchString', ['template'=>' <div class="input-group"><span class="input-group-addon">
+                $form->field($searchModel, 'searchString', ['template'=>' <div class="input-group"><span class="input-group-addon">
     <i class="fa fa-search"></i></span>{input}{error}</div>'])->textInput([
                     'id' => 'searchString',
                     'class' => 'form-control',
@@ -162,7 +162,7 @@ $gridColumns = [
         <?php ActiveForm::end(); ?>
         <?=
         GridView::widget([
-            'dataProvider' => $DataProvider,
+            'dataProvider' => $dataProvider,
             'pager'        => [
                 'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed
             ],

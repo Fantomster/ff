@@ -232,14 +232,16 @@ class LazyVendorPriceWebApi extends LazyVendorWebApi
         $catId = $catalog->id;
         if (!empty($post['article'])) {
             $product = CatalogBaseGoods::find()->where(
-                "article=:article AND product=:name AND cat_id=$catId", [
+                "article=:article AND product=:name AND cat_id=:cat_id", [
                 ':article' => $post['article'],
                 ':name'    => $post['name'],
+                ':cat_id'  => $catId,
             ])->one();
         } else {
             $product = CatalogBaseGoods::find()->where(
-                "product=:name AND cat_id=$catId", [
-                ':name' => $post['name'],
+                "product=:name AND cat_id=:cat_id", [
+                ':name'   => $post['name'],
+                ':cat_id' => $catId,
             ])->one();
         }
         if (!empty($product)) {
@@ -266,16 +268,14 @@ class LazyVendorPriceWebApi extends LazyVendorWebApi
         $product->cat_id = $catId;
         $t = \Yii::$app->db->beginTransaction();
         try {
-            if (!$baseProduct->validate()) {
+            if (!$baseProduct->save()) {
                 throw new ValidationException($baseProduct->getFirstErrors());
             }
-            $baseProduct->save();
             $productId = $baseProduct->id;
             $product->base_goods_id = $productId;
-            if (!$product->validate()) {
+            if (!$product->save()) {
                 throw new ValidationException($product->getFirstErrors());
             }
-            $product->save();
             $t->commit();
         } catch (\Throwable $e) {
             $t->rollBack();
@@ -290,7 +290,16 @@ class LazyVendorPriceWebApi extends LazyVendorWebApi
      */
     private function addProductResult(array $post)
     {
-        $result = [];
+        $result = [
+            'vendor_id'     => '',
+            'article'       => '',
+            'category_id'   => '',
+            'price'         => '',
+            'ed'            => '',
+            'units'         => 1,
+            'status'        => 1,
+            'product_image' => false,
+        ];
         $result['vendor_id'] = $post['vendor_id'];
         $result['article'] = $post['article'];
         $result['name'] = $post['name'];
@@ -307,8 +316,6 @@ class LazyVendorPriceWebApi extends LazyVendorWebApi
         }
         if (!empty($post['product_image'])) {
             $result['product_image'] = true;
-        } else {
-            $result['product_image'] = false;
         }
         return $result;
     }

@@ -113,7 +113,9 @@ class EmailIntegrationController extends Controller
         //$temp_file[69] = '/app/console/runtime/testnac66.xlsx';
         //$temp_file[70] = '/app/console/runtime/testnac70.XLS';
         //$temp_file[71] = '/app/console/runtime/testnac71.xlsx';
-        $temp_file[72] = '/app/console/runtime/testnac72.xlsx';
+        //$temp_file[72] = '/app/console/runtime/testnac72.xlsx';
+        //$temp_file[73] = '/app/console/runtime/testnac73.xls';
+        $temp_file[74] = '/app/console/runtime/testnac74.xls';
 
         $i = 1;
 
@@ -145,7 +147,7 @@ class EmailIntegrationController extends Controller
             print_r("Result price_without_tax_sum:" . $result[$i - 1]['invoice']['price_without_tax_sum'] . PHP_EOL);
             print_r("Result price_with_tax_sum:" . $result[$i - 1]['invoice']['price_with_tax_sum'] . PHP_EOL);
             print_r("=================================" . PHP_EOL);
-            print_r($result[$i - 1]['invoice']['rows']);
+            //print_r($result[$i - 1]['invoice']['rows']);
             //file_put_contents('result_'.$i.'.txt', $filet.PHP_EOL,true);
             //file_put_contents('result_'.$i.'.txt', print_r($result[$i-1],true));
             $i++;
@@ -196,7 +198,7 @@ class EmailIntegrationController extends Controller
                         foreach ($files as $file) {
                             $transaction = \Yii::$app->db->beginTransaction();
                             try {
-                                $this->log('+ CREATED INVOICE: id = ' . (new IntegrationInvoice())->saveInvoice($file) .' ORGANIZATION: '.$setting->organization->id. PHP_EOL);
+                                $this->log('+ CREATED INVOICE: id = ' . (new IntegrationInvoice())->saveInvoice($file) . ' ORGANIZATION: ' . $setting->organization->id . PHP_EOL);
                                 $transaction->commit();
                             } catch (\Exception $e) {
                                 $transaction->rollBack();

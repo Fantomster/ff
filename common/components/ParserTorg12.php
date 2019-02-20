@@ -1530,10 +1530,10 @@ class ParserTorg12
                     continue;
                 $cellValue = $this->worksheet->getCellByColumnAndRow($col, $row)->getValue();
                 if (mb_strpos($cellValue, $word1) !== false) {
-                    $has = 0;
+                    $has = 0; return $has;
                 }
                 if (mb_strpos($cellValue, $word2) !== false) {
-                    $has = 0;
+                    $has = 0; return $has;
                 }
             }
         }

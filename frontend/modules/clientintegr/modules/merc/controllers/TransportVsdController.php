@@ -186,6 +186,10 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
     public function actionStep4()
     {
         $session = Yii::$app->session;
+        $step1 = $session->get('TrVsd_step1');
+        $step2 = $session->get('TrVsd_step2');
+        $step3 = $session->get('TrVsd_step3');
+
         $model = new step4Form();
         $model->attributes = $session->get('TrVsd_step4');
         $session->remove('TrVsd_step4');
@@ -195,9 +199,9 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             $session->set('TrVsd_step4', $model->attributes);
             $request = new CreatePrepareOutgoingConsignmentRequest();
             $request->step4 = $model->attributes;
-            $request->step1 = $session->get('TrVsd_step1');
-            $request->step2 = $session->get('TrVsd_step2');
-            $request->step3 = $session->get('TrVsd_step3');
+            $request->step1 = $step1;
+            $request->step2 = $step2;
+            $request->step3 = $step3;
 
             if ($model->mode == step4Form::INPUT_MODE) {
                 $request->checkShipmentRegionalizationOperation();
@@ -359,6 +363,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
     public function actionConversionStep2()
     {
         $session = Yii::$app->session;
+        $step1 = $session->get('TrVsd_step1');
         $model = new createStoreEntryForm();
         $productionDate = new productionDate();
         $expiryDate = new expiryDate();
@@ -377,7 +382,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                     $model->vsd_issueDate = $inputDate;
                     $request = new CreateRegisterProductionRequest();
                     $request->step2 = $model->attributes;
-                    $request->step1 = $session->get('TrVsd_step1');
+                    $request->step1 = $step1;
                     try {
                         $result = mercuryApi::getInstance()->registerProductionOperation($request);
                         if (!isset($result)) {

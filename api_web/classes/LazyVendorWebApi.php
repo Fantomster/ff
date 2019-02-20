@@ -485,7 +485,7 @@ class LazyVendorWebApi extends WebApi
             $relation->supp_org_id = $supp_org_id;
             $relation->discount_product = $discount_products;
             $relation->cat_id = $cat_id;
-            $relation->invite = RelationSuppRest::INVITE_OFF;
+            $relation->invite = RelationSuppRest::INVITE_ON;
             $relation->status = RelationSuppRest::CATALOG_STATUS_ON;
             if (!$relation->save()) {
                 throw new ValidationException($relation->getFirstErrors());

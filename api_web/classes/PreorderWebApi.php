@@ -521,11 +521,12 @@ class PreorderWebApi extends WebApi
     {
         $newData = [];
         foreach ($preOrderContent as $index => $product) {
+            $parentProductId = $product['parent_product_id'] ?? null;
             $newData[] = [
                 'preorder_id'       => $preorderId,
                 'product_id'        => $product['id'],
                 'plan_quantity'     => $product['quantity'],
-                'parent_product_id' => $product['parent_product_id'] ?? null
+                'parent_product_id' => $product['id'] == $parentProductId ? null : $parentProductId
             ];
         }
         try {

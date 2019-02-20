@@ -159,6 +159,7 @@ class Preorder extends \yii\db\ActiveRecord
             Order::STATUS_REJECTED,
             Order::STATUS_CANCELLED
         ]])->all();
+        /** @var Order $order */
         foreach ($orders as $order) {
             $orderContents = $order->getOrderContent()->where(['product_id' => $product_id])->all();
             if ($orderContents) {

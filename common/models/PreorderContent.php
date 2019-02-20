@@ -118,21 +118,21 @@ class PreorderContent extends \yii\db\ActiveRecord
                 ])->one();
                 if ($orderContent) {
                     $coefficient = $this->getCoefficients($order->client_id);
-                    $quantity += round($orderContent->quantity * ($coefficient['first_coefficient'] / $coefficient['my_coefficient']), 3);
+                    $quantity += round($orderContent->quantity * ($coefficient['my_coefficient'] / $coefficient['parent_coefficient']), 3);
                 }
             }
-            if ($r) {
-                $analogsPreorderContent = self::find()->where([
-                    'preorder_id'       => $this->preorder_id,
-                    'parent_product_id' => $this->product_id
-                ])->all();
 
-                if ($analogsPreorderContent) {
-                    foreach ($analogsPreorderContent as $analog) {
-                        $quantity += floatval($analog->getAllQuantity(false));
-                    }
+            $analogsPreorderContent = self::find()->where([
+                'preorder_id'       => $this->preorder_id,
+                'parent_product_id' => $this->product_id
+            ])->all();
+
+            if ($analogsPreorderContent) {
+                foreach ($analogsPreorderContent as $analog) {
+                    $quantity += floatval($analog->getAllQuantity(false));
                 }
             }
+            
         }
         return round($quantity, 3);
     }
@@ -176,17 +176,7 @@ class PreorderContent extends \yii\db\ActiveRecord
      */
     private function getCoefficients($client_id)
     {
-        $result = ['my_coefficient' => 1, 'first_coefficient' => 1];
-
-        if ($this->parent_product_id) {
-            $analog = ProductAnalog::findOne([
-                'client_id'  => $client_id,
-                'product_id' => $this->parent_product_id
-            ]);
-            if ($analog) {
-                $result['my_coefficient'] = $analog->coefficient;
-            }
-        }
+        $result = ['parent_coefficient' => 1, 'my_coefficient' => 1];
 
         $analogFirst = ProductAnalog::find()->where([
             'client_id'  => $client_id,
@@ -194,7 +184,18 @@ class PreorderContent extends \yii\db\ActiveRecord
         ])->one();
 
         if ($analogFirst) {
-            $result['first_coefficient'] = $analogFirst->coefficient;
+            $result['my_coefficient'] = $analogFirst->coefficient;
+        }
+
+        $result['parent_coefficient'] = $result['my_coefficient'];
+        if ($this->parent_product_id) {
+            $analogParent = ProductAnalog::findOne([
+                'client_id'  => $client_id,
+                'product_id' => $this->parent_product_id
+            ]);
+            if ($analogParent) {
+                $result['parent_coefficient'] = $analogParent->coefficient;
+            }
         }
 
         return $result;

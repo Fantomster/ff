@@ -16,6 +16,7 @@ use common\models\{Catalog,
     Currency,
     Organization,
     Preorder,
+    PreorderContent,
     ProductAnalog};
 use yii\data\{ActiveDataProvider, Pagination};
 use yii\db\{Expression, Query};
@@ -181,7 +182,14 @@ class AnalogWebApi extends WebApi
             ->groupBy('cbg.id');
 
         if ($preorder_id) {
-            $query->andWhere(['!=', 'pa.product_id', $request['product_id']]);
+            $productsInPreOrder = PreorderContent::find()
+                ->select(['product_id'])
+                ->where(['preorder_id' => $preorder_id])
+                ->andWhere('parent_product_id IS NULL')
+                ->andWhere(['!=', 'product_id', $request['product_id']])
+                ->asArray()
+                ->column();
+            $query->andWhere(['NOT IN', 'pa.product_id', $productsInPreOrder]);
         }
 
         $result = $query->all();

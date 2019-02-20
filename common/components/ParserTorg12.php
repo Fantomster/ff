@@ -1523,17 +1523,13 @@ class ParserTorg12
         $word2 = 'сумма';
         $has = 1;
         for ($row = 0; $row <= $this->highestRow; $row++) {
-            if ($has == 0)
-                continue;
             for ($col = 0; $col <= $this->highestColumn; $col++) {
-                if ($has == 0)
-                    continue;
                 $cellValue = $this->worksheet->getCellByColumnAndRow($col, $row)->getValue();
                 if (mb_strpos($cellValue, $word1) !== false) {
-                    $has = 0; return $has;
+                    return 0;
                 }
                 if (mb_strpos($cellValue, $word2) !== false) {
-                    $has = 0; return $has;
+                    return 0;
                 }
             }
         }

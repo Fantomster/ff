@@ -193,7 +193,9 @@ class PreorderContent extends \yii\db\ActiveRecord
             'product_id' => $this->product_id
         ])->one();
 
-        $result['first_coefficient'] = $analogFirst->coefficient;
+        if ($analogFirst) {
+            $result['first_coefficient'] = $analogFirst->coefficient;
+        }
 
         return $result;
     }

@@ -1562,8 +1562,8 @@ class DefaultController extends WebApiController
     /**
      * @SWG\Post(path="/integration/vetis/business-entity",
      *     tags={"Integration/vetis"},
-     *     summary="Получение Фирмы производителя",
-     *     description="Получение Фирмы производителя",
+     *     summary="Получение Фирмы производителя (Хозяйствующего субъекта)",
+     *     description="Получение Фирмы производителя (Хозяйствующего субъекта)",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -1584,11 +1584,9 @@ class DefaultController extends WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  {
-     *                      "name": "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ ОНЛАЙН МАРКЕТ",
-     *                      "uuid": "021bc2d9-f514-4491-b21a-ffe63023236f",
-     *                      "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
-     *                  }
+     *                  "name": "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ ОНЛАЙН МАРКЕТ",
+     *                  "uuid": "021bc2d9-f514-4491-b21a-ffe63023236f",
+     *                  "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
      *              }
      *          )
      *     ),

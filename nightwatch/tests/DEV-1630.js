@@ -432,17 +432,17 @@ module.exports = {
 
 		// let array_length = browser.globals.vars.length_array;
 
-		browser.url('http://dev.mixcart.ronasit.com/login', () => {
-			console.log('Loading http://dev.mixcart.ronasit.com/login...');
+		browser.url(browser.globals.site_url + '/login', () => {
+			// console.log('Loading http://dev.mixcart.ronasit.com/login...');
 		});
 		browser.waitForElementVisible('#email', 7000, function () {
-			console.log('email input appeared...');
+			// console.log('email input appeared...');
 		});
 		browser.waitForElementVisible('#password', 7000, function () {
-			console.log('password input appeared...');
+			// console.log('password input appeared...');
 		});
 		browser.waitForElementVisible('.dropdown-trigger', 7000, function () {
-			console.log('drop-down trigger appeared appeared...');
+			// console.log('drop-down trigger appeared appeared...');
 		});
 		browser.click('.dropdown-trigger');
 		browser.click('.dropdown-content a:nth-child(1)');
@@ -461,8 +461,9 @@ module.exports = {
 			console.log('.header-profile-name appeared...');
 		});
 
-		browser.url('http://dev.mixcart.ronasit.com/client/create-order/my-supplier-goods', () => {
-			console.log('Loading http://dev.mixcart.ronasit.com/client/create-order/my-supplier-goods...');//Переходим на
+		browser.url(browser.globals.site_url + '/client/create-order/my-supplier-goods', () => {
+			// console.log('Loading
+		    // http://dev.mixcart.ronasit.com/client/create-order/my-supplier-goods...');//Переходим на
 		                                                                                                 // страницу
 		                                                                                                 // заказов
 		});
@@ -495,43 +496,43 @@ module.exports = {
 		}
 
 		browser.elements('css selector', 'app-product-list table tbody tr', function (res) {
-			console.log('filter a_ya');
+			// console.log('filter a_ya');
 		});
 		test_filter(browser, 0, filter_sort_a_ya, 'filter a_ya');
 		browser.elements('css selector', 'app-product-list table tbody tr', function (res) {
-			console.log('row count: ' + res.value.length);
+			// console.log('row count: ' + res.value.length);
 			browser.verify.equal(res.value.length, Object.keys(filter_sort_a_ya).length);
 		});
 		browser.elements('css selector', 'app-product-list table tbody tr', function (res) {
-			console.log('filter ya_a');
+			// console.log('filter ya_a');
 		});
 		test_filter(browser, 1, filter_sort_ya_a, 'filter ya_a');
 		browser.elements('css selector', 'app-product-list table tbody tr', function (res) {
-			console.log('row count: ' + res.value.length);
+			// console.log('row count: ' + res.value.length);
 			browser.verify.equal(res.value.length, Object.keys(filter_sort_ya_a).length);
 		});
 		browser.elements('css selector', 'app-product-list table tbody tr', function (res) {
-			console.log('filter price up');
+			// console.log('filter price up');
 		});
 		test_filter(browser, 2, filter_sort_price_up, 'filter price up');
 		browser.elements('css selector', 'app-product-list table tbody tr', function (res) {
-			console.log('row count: ' + res.value.length);
+			// console.log('row count: ' + res.value.length);
 			browser.verify.equal(res.value.length, Object.keys(filter_sort_price_up).length);
 		});
 		browser.elements('css selector', 'app-product-list table tbody tr', function (res) {
-			console.log('filter price down');
+			// console.log('filter price down');
 		});
 		test_filter(browser, 3, filter_sort_price_down, 'filter price down');
 		browser.elements('css selector', 'app-product-list table tbody tr', function (res) {
-			console.log('row count: ' + res.value.length);
+			// console.log('row count: ' + res.value.length);
 			browser.verify.equal(res.value.length, Object.keys(filter_sort_price_down).length);
 		});
 		browser.elements('css selector', 'app-product-list table tbody tr', function (res) {
-			console.log('filter supplier');
+			// console.log('filter supplier');
 		});
 		test_filter(browser, 4, filter_sort_supplier, 'filter supplier');
 		browser.elements('css selector', 'app-product-list table tbody tr', function (res) {
-			console.log('row count: ' + res.value.length);
+			// console.log('row count: ' + res.value.length);
 			browser.verify.equal(res.value.length, Object.keys(filter_sort_supplier).length);
 		});
 

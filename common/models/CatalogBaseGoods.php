@@ -43,7 +43,6 @@ use yii\web\BadRequestHttpException;
  * @property string           $barcode              Штрих-код товара на Market Place
  * @property string           $edi_supplier_article Артикул товара для EDI
  * @property string           $ssid                 Идентификатор SSID (не используется)
- *
  * @property Organization     $vendor
  * @property MpCategory       $category
  * @property CartContent[]    $cartContents
@@ -126,6 +125,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
             [['cat_id', 'category_id', 'supp_org_id', 'status', 'deleted', 'rating'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
             [['article', 'edi_supplier_article'], 'string', 'max' => 50],
+            [['article', 'edi_supplier_article'], 'match', 'pattern' => '/^[0-9a-zа-я]{1,50}$/iu'],
             [['article', 'product', 'brand', 'region', 'weight'], 'string', 'max' => 255],
             [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process', 'except' => 'import'],
             [['note'], 'string', 'max' => 255],

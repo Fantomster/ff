@@ -188,7 +188,7 @@ class LazyVendorPriceController extends WebApiController
      * @SWG\Post(path="/lazy-vendor/price/add-product",
      *     tags={"LazyVendor/Price"},
      *     summary="Добавление товара в каталог",
-     *     description="Добавление товарной позиции в каталог",
+     *     description="Добавление товарной позиции в каталог. Обязательнымы параметрами являются vendor_id, name, price, ed",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -202,7 +202,7 @@ class LazyVendorPriceController extends WebApiController
      *                      "vendor_id": 1,
      *                      "article": "123456",
      *                      "name": "tasty",
-     *                      "category": 1,
+     *                      "category_id": 1,
      *                      "price": 99.99,
      *                      "ed": "кг",
      *                      "units": 0.666,
@@ -217,7 +217,14 @@ class LazyVendorPriceController extends WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *              default={
-     *                  "status": true
+     *                   "vendor_id": 23,
+     *                   "article": "777666",
+     *                   "name": "продукт",
+     *                   "price": 99.99,
+     *                   "ed": "кг",
+     *                   "units": 1,
+     *                   "status": 1,
+     *                   "product_image": false
      *              }
      *          ),
      *     ),
@@ -231,6 +238,7 @@ class LazyVendorPriceController extends WebApiController
      *     )
      * )
      * @throws \Exception
+     * @throws \Throwable
      */
     public function actionAddProduct()
     {

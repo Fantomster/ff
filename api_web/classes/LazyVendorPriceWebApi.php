@@ -214,35 +214,102 @@ class LazyVendorPriceWebApi extends LazyVendorWebApi
         return ['status' => $productBase->status];
     }
 
-    public function addProduct($post)
+    /**
+     * Добавление продукта в каталог ленивого поставщика
+     *
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Throwable
+     */
+    public function addProduct(array $post)
     {
-        $this->validateRequest($post, ['vendor_id', 'article', 'name', 'category_id', 'price', 'ed']);
+        $this->validateRequest($post, ['vendor_id', 'name', 'price', 'ed']);
         if (!is_int($post['vendor_id'])) {
             throw new BadRequestHttpException('catalog.wrong_value');
         }
         $catalog = $this->getCatalog($post['vendor_id']);
-//        print_r($catalog->id);
-//        die();
+        $catId = $catalog->id;
+        if (!empty($post['article'])) {
+            $product = CatalogBaseGoods::find()->where(
+                "article=:article AND product=:name AND cat_id=$catId", [
+                ':article' => $post['article'],
+                ':name'    => $post['name'],
+            ])->one();
+        } else {
+            $product = CatalogBaseGoods::find()->where(
+                "product=:name AND cat_id=$catId", [
+                ':name' => $post['name'],
+            ])->one();
+        }
+        if (!empty($product)) {
+            throw new BadRequestHttpException('catalog.product_exist');
+        }
         $baseProduct = new CatalogBaseGoods();
         $product = new CatalogGoods();
-        $baseProduct->cat_id = $catalog->id;
-        $baseProduct->article = $post['article'];
+        $baseProduct->cat_id = $catId;
+        if (!empty($post['article'])) {
+            $baseProduct->article = $post['article'];
+        }
         $baseProduct->product = $post['name'];
-        $baseProduct->category_id = $post['category_id'];
+        if (!empty($post['category_id'])) {
+            $baseProduct->category_id = (int)$post['category_id'];
+        }
         $baseProduct->units = !empty($post['units']) && is_float($post['units']) ? $post['units'] : 1;
         $baseProduct->ed = $post['ed'];
         $baseProduct->price = $product->price = $post['price'];
         $baseProduct->status = !empty($post['status']) && in_array($post['status'], [0, 1]) ? $post['status'] : 1;
-        $product->cat_id = $catalog->id;
-        if (!$baseProduct->save()) {
-            throw new ValidationException($baseProduct->getFirstErrors());
+        $baseProduct->supp_org_id = $post['vendor_id'];
+        if (!empty($post['product_image'])) {
+            $baseProduct->image = WebApiHelper::convertLogoFile($post['product_image']);
         }
-        $productId = $baseProduct->id;
-        $product->base_goods_id = $productId;
-        if (!$product->save()) {
-            throw new ValidationException($product->getFirstErrors());
+        $product->cat_id = $catId;
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            if (!$baseProduct->validate()) {
+                throw new ValidationException($baseProduct->getFirstErrors());
+            }
+            $baseProduct->save();
+            $productId = $baseProduct->id;
+            $product->base_goods_id = $productId;
+            if (!$product->validate()) {
+                throw new ValidationException($product->getFirstErrors());
+            }
+            $product->save();
+            $t->commit();
+        } catch (\Throwable $e) {
+            $t->rollBack();
+            throw $e;
         }
-        die();
-        return $post;
+        return $this->addProductResult($post);
+    }
+
+    /**
+     * @param array $post
+     * @return array
+     */
+    private function addProductResult(array $post)
+    {
+        $result = [];
+        $result['vendor_id'] = $post['vendor_id'];
+        $result['article'] = $post['article'];
+        $result['name'] = $post['name'];
+        if (!empty($post['category_id'])) {
+            $result['category_id'] = $post['category_id'];
+        }
+        $result['price'] = $post['price'];
+        $result['ed'] = $post['ed'];
+        if (!empty($post['units'])) {
+            $result['units'] = $post['units'];
+        }
+        if (!empty($post['status'])) {
+            $result['status'] = $post['status'];
+        }
+        if (!empty($post['product_image'])) {
+            $result['product_image'] = true;
+        } else {
+            $result['product_image'] = false;
+        }
+        return $result;
     }
 }

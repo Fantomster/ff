@@ -370,7 +370,7 @@ class LazyVendorWebApi extends WebApi
             /**
              * @var Organization $model
              */
-            foreach ($models as $model) {
+            foreach (WebApiHelper::generator($models) as $model) {
                 $r = WebApiHelper::prepareOrganization($model);
 
                 if ($user = RelationUserOrganization::find()->joinWith('user')->where([

@@ -185,8 +185,9 @@ class ParserTorg12
             // определяем последний столбец документа
             $this->highestColumn = \PHPExcel_Cell::columnIndexFromString($this->worksheet->getHighestColumn());
 
-            if ($this->checkEncoding() == 0)
+            if ($this->checkEncoding() == 0) {
                 $this->kodirov = false;
+            }
 
             // разбираем заголовок накладной
             $this->parseHeader();
@@ -265,7 +266,9 @@ class ParserTorg12
         $cellValue = str_replace("  ", " ", $cellValue);
 
         if ($this->kodirov === true) { //если кодировка не читается, содержимое ячейки раскодируем вручную
-            $cellValue = $this->conver($cellValue);
+            if (strlen($cellValue) > 0) {
+                $cellValue = $this->conver($cellValue);
+            }
         }
 
         return $cellValue;
@@ -296,7 +299,9 @@ class ParserTorg12
         $cellValue = str_replace("  ", " ", $cellValue);
 
         if ($this->kodirov === true) {
-            $cellValue = $this->conver($cellValue);
+            if (strlen($cellValue) > 0) {
+                $cellValue = $this->conver($cellValue);
+            }
         }
 
         return $cellValue;
@@ -312,9 +317,8 @@ class ParserTorg12
      */
     private function parseHeader()
     {
-        $checkSell = function ($col, $row, $attribute) { //функция для поиска атрибута в заданной столццом и строкой ячейке
+        $checkSell = function ($col, $row, $attribute) { //функция для поиска атрибута в заданной столбцом и строкой ячейке
             $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue()); //получаем значение ячейки
-
             if (strpos($cellValue, 'счет-фактура №') !== false) {
 
                 $attributeValue = "";
@@ -379,7 +383,11 @@ class ParserTorg12
 
             if (in_array($cellValue, $attribute['label'])) {
                 // заголовок атрибута в одной ячейке
+                $attributeValueHeader = $this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
                 $attributeValue = $this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($col, $row + $attribute['shift_row'])->getValue());
+                if (($attributeValueHeader == $attributeValue) or ($attributeValue == '')) {
+                    $attributeValue = $this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($col, $row + $attribute['shift_row'] + 1)->getValue());
+                }
                 $value_is_string = 0;
                 if (strpos($attributeValue, ',') !== false)
                     $value_is_string = 1;
@@ -429,7 +437,6 @@ class ParserTorg12
         // запоминаем координаты номера накладной
         for ($row = 0; $row <= $this->highestRow; $row++) {
             for ($col = 0; $col <= $this->highestColumn; $col++) {
-
                 if (!empty($documentNumber) && !empty($documentDate)) {
                     break;
                 }
@@ -437,10 +444,11 @@ class ParserTorg12
                 // номер
                 if (empty($documentNumber)) {
                     $documentNumber = $checkSell($col, $row, $this->settingsHeader['document_number']);
-                    if (!empty($documentNumber)) {
 
+                    if (!empty($documentNumber)) {
                         $docArr = explode('%%%%', $documentNumber);
                         $documentNumber = $docArr[0];
+
                     }
                     /*    if (empty($documentNumber)) {
                       $documentNumber = $checkSell($col, $row, $this->settingsHeader['document_upd_info']);
@@ -482,6 +490,7 @@ class ParserTorg12
         } else {
             $this->invoice->errors['invoice_date'] = 'Не найдена дата накладной';
         }
+
     }
 
     /**
@@ -893,8 +902,6 @@ class ParserTorg12
          */
         for ($row = $this->firstRow; $row <= $this->highestRow; $row++) {
             for ($col = 0; $col <= $this->highestColumn; $col++) {
-
-
                 $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
 
                 // нужна дополнительная проверка ячейки из следующей строки, т.к. заголовки дублируются
@@ -1184,9 +1191,9 @@ class ParserTorg12
             if ($taxRate == '') {
                 $taxRate = $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['tax_rate']['col'] + 1, $row)->getValue(), true);
             }
-            if (strpos($taxRate,'.')) {
+            if (strpos($taxRate, '.')) {
                 $taxRate = $taxRate * 100;
-                $taxRate = $taxRate.'%';
+                $taxRate = $taxRate . '%';
             }
             $taxRate = str_replace('%', '', $taxRate);
             $taxRate = str_replace('без ндс', '0', strtolower($taxRate));
@@ -1272,6 +1279,12 @@ class ParserTorg12
             $sim = ord($str[$i]);
             if ($sim < 128) {
                 $ret .= $str[$i];
+                continue;
+            }
+            if (($sim == 226) and (ord($str[$i + 1]) == 132) and (ord($str[$i + 2]) == 150)) { // редкий случай
+                $i++;
+                $i++;
+                $ret .= '№';
                 continue;
             }
             if (($sim > 127) and ($sim < 194)) {
@@ -1511,17 +1524,13 @@ class ParserTorg12
         $word2 = 'сумма';
         $has = 1;
         for ($row = 0; $row <= $this->highestRow; $row++) {
-            if ($has == 0)
-                continue;
             for ($col = 0; $col <= $this->highestColumn; $col++) {
-                if ($has == 0)
-                    continue;
                 $cellValue = $this->worksheet->getCellByColumnAndRow($col, $row)->getValue();
                 if (mb_strpos($cellValue, $word1) !== false) {
-                    $has = 0;
+                    return 0;
                 }
                 if (mb_strpos($cellValue, $word2) !== false) {
-                    $has = 0;
+                    return 0;
                 }
             }
         }

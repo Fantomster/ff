@@ -28,9 +28,7 @@ class RabbitWebApi extends WebApi
      */
     public function addToQueue($request)
     {
-        if (empty($request['queue']) && empty($request['org_id'])) {
-            throw new BadRequestHttpException('queue or org_id parameters is empty');
-        }
+        $this->validateRequest($request, ['queue', 'org_id']);
 
         /**@var AbstractConsumer $queue */
         $queue = $this->getQueueClass($request['queue']);
@@ -44,15 +42,13 @@ class RabbitWebApi extends WebApi
                 'organization_id'     => $request['org_id']
             ]);
 
-            if (is_null($checkAdd)) {
-                throw new BadRequestHttpException('dictionaries were already loaded');
-            }
+            if (!is_null($checkAdd)) {
+                $lastExec = new \DateTime($checkAdd->last_executed);
+                $timeoutLastExec = $lastExec->getTimestamp() + $queue::$timeout;
 
-            $lastExec = new \DateTime($checkAdd->last_executed);
-            $timeoutLastExec = $lastExec->getTimestamp() + $queue::$timeout;
-
-            if (date('Y-m-d H:i:s', $timeoutLastExec) < date('Y-m-d H:i:s')) {
-                throw new BadRequestHttpException('dictionaries were already loaded');
+                if (date('Y-m-d H:i:s', $timeoutLastExec) < date('Y-m-d H:i:s')) {
+                    throw new BadRequestHttpException(\Yii::t('api_web', 'dictionaries_were_already_loaded'));
+                }
             }
 
             $queue::getUpdateData($request['org_id']);

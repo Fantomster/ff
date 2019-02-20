@@ -470,7 +470,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                   
                   LEFT JOIN organization ov ON ov.id = dat.order_vendor_id
                   LEFT JOIN $apiShema.outer_store osw ON osw.org_id = :business_id AND osw.service_id = :service_id AND dat.waybill_outer_store_id = osw.id
-                WHERE 1  $where_all  
+                WHERE dat.order_service_id  $where_all  
                 GROUP BY id, dat.order_acquirer_id, dat.order_service_id, wb_status_id, wb_service_id, sort_doc";
 
         if ($sort) {

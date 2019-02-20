@@ -185,8 +185,9 @@ class ParserTorg12
             // определяем последний столбец документа
             $this->highestColumn = \PHPExcel_Cell::columnIndexFromString($this->worksheet->getHighestColumn());
 
-            if ($this->checkEncoding() == 0)
+            if ($this->checkEncoding() == 0) {
                 $this->kodirov = false;
+            }
 
             // разбираем заголовок накладной
             $this->parseHeader();

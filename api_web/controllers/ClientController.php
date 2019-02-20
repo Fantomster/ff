@@ -44,7 +44,7 @@ class ClientController extends WebApiController
                     'actions'    => [
                         'detail-update',
                     ],
-                    'roles'      => [Registry::JUNIOR_PURCHASER],
+                    'roles'      => [Registry::PURCHASER_RESTAURANT],
                     'roleParams' => ['user' => $this->user]
                 ],
                 [

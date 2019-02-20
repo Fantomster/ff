@@ -50,7 +50,7 @@ class CartWebApi extends \api_web\components\WebApi
     {
         //Если прилетел массив товаров
         if (!isset($post['product_id'])) {
-            foreach ($post as $item) {
+            foreach (WebApiHelper::generator($post) as $item) {
                 $this->addItem($item);
             }
         } else {
@@ -209,7 +209,8 @@ class CartWebApi extends \api_web\components\WebApi
 
         if (!empty($orders)) {
             try {
-                foreach ($cart->getVendors() as $vendor) {
+                $vendors = $cart->getVendors();
+                foreach (WebApiHelper::generator($vendors) as $vendor) {
                     if (isset($orders) && empty($orders[$vendor->id])) {
                         continue;
                     }

@@ -515,7 +515,7 @@ class UserWebApi extends \api_web\components\WebApi
         //Данные для ответа
         if (!empty($dataProvider->models)) {
             $r = new \SplObjectStorage();
-            foreach ($dataProvider->models as $model) {
+            foreach (WebApiHelper::generator($dataProvider->models) as $model) {
                 $r->attach((object)$this->prepareVendor($model));
             }
             $return['vendors'] = $r;
@@ -551,7 +551,7 @@ class UserWebApi extends \api_web\components\WebApi
         $dataProvider->pagination->pageSize = 1000;
         $vendor_ids = $return = [];
 
-        foreach ($dataProvider->getModels() as $model) {
+        foreach (WebApiHelper::generator($dataProvider->getModels()) as $model) {
             $vendor_ids[$model->supp_org_id] = $model->supp_org_id;
         }
 
@@ -565,7 +565,7 @@ class UserWebApi extends \api_web\components\WebApi
             ->andWhere("locality != ''")
             ->orderBy('country');
 
-        foreach ($query->all() as $row) {
+        foreach (WebApiHelper::generator($query->all()) as $row) {
             $return[] = [
                 'title' => $row['country'] . ', ' . $row['locality'],
                 'value' => trim($row['country']) . ':' . trim($row['locality'])

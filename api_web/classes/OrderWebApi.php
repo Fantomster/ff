@@ -43,6 +43,14 @@ use Yii;
  */
 class OrderWebApi extends WebApi
 {
+    public $marketWebApi;
+
+    public function __construct()
+    {
+        $this->marketWebApi = new MarketWebApi();
+        parent::__construct();
+    }
+
     /**
      * Редактирование заказа
      *
@@ -176,7 +184,7 @@ class OrderWebApi extends WebApi
                             }
                         }
                     }
-                    foreach ($products as $product) {
+                    foreach (WebApiHelper::generator($products) as $product) {
                         $operation = strtolower($product['operation']);
                         if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
                             throw new BadRequestHttpException("error.request");
@@ -435,8 +443,6 @@ class OrderWebApi extends WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     public function getInfo(array $post)
     {
@@ -461,9 +467,6 @@ class OrderWebApi extends WebApi
     /**
      * @param Order $order
      * @return array
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
-     * @throws \Exception
      */
     public function getOrderInfo(Order $order)
     {
@@ -507,7 +510,7 @@ class OrderWebApi extends WebApi
 
         $arEdiNumbers = [];
         if (!empty($products)) {
-            foreach ($products as $model) {
+            foreach (WebApiHelper::generator($products) as $model) {
                 /**
                  * @var OrderContent $model
                  */
@@ -657,7 +660,7 @@ class OrderWebApi extends WebApi
             /**
              * @var Order $model
              */
-            foreach ($models as $model) {
+            foreach (WebApiHelper::generator($models) as $model) {
                 if ($model->status == OrderStatus::STATUS_DONE) {
                     $date = $model->completion_date ?? $model->actual_delivery;
                 } else {
@@ -769,8 +772,6 @@ class OrderWebApi extends WebApi
      * @param bool $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     public function products($post, bool $isUnconfirmedVendor = false)
     {
@@ -851,8 +852,7 @@ class OrderWebApi extends WebApi
 
             $result = $dataProvider->getModels();
             $cartClass = new CartWebApi();
-            $marketClass = new MarketWebApi();
-            foreach ($result as $model) {
+            foreach (WebApiHelper::generator($result) as $model) {
 
                 $units = round(($model['units'] ?? 0), 3);
                 if ($isUnconfirmedVendor) {
@@ -873,7 +873,7 @@ class OrderWebApi extends WebApi
                     'units'       => $units,
                     'currency'    => $model['symbol'],
                     'currency_id' => (int)$model['currency_id'],
-                    'image'       => @$marketClass->getProductImage(CatalogBaseGoods::findOne($model['id'])),
+                    'image'       => @$this->marketWebApi->getProductImage(CatalogBaseGoods::findOne($model['id'])),
                     'in_basket'   => $cartClass->countProductInCart($model['id']),
                     'edi_product' => $model['edi_supplier_article'] > 0 ? true : false,
                 ];
@@ -890,8 +890,6 @@ class OrderWebApi extends WebApi
      * @param bool $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     public function categories($post = null, bool $isUnconfirmedVendor = false)
     {
@@ -924,7 +922,6 @@ class OrderWebApi extends WebApi
             ->where(['in', 'supp_org_id', $suppliers])
             ->column();
         $return = [];
-        $marketWebApi = new MarketWebApi();
         foreach ($query as $id) {
 
             if ($id == 0) {
@@ -943,13 +940,13 @@ class OrderWebApi extends WebApi
                     $return[$model->parentCategory->id] = [
                         'id'    => $model->parentCategory->id,
                         'name'  => $model->parentCategory->name,
-                        'image' => $marketWebApi->getCategoryImage($model->parentCategory->id)
+                        'image' => $this->marketWebApi->getCategoryImage($model->parentCategory->id)
                     ];
                 }
                 $return[$model->parentCategory->id]['subcategories'][] = [
                     'id'            => $model->id,
                     'name'          => $model->name,
-                    'image'         => $marketWebApi->getCategoryImage($model->id),
+                    'image'         => $this->marketWebApi->getCategoryImage($model->id),
                     'count_product' => $model->getProductCount(null, $this->user->organization_id),
                 ];
             } else {
@@ -957,7 +954,7 @@ class OrderWebApi extends WebApi
                     $return[$model->id] = [
                         'id'    => $model->id,
                         'name'  => $model->name,
-                        'image' => $marketWebApi->getCategoryImage($model->id)
+                        'image' => $this->marketWebApi->getCategoryImage($model->id)
                     ];
                 }
             }
@@ -1045,7 +1042,6 @@ class OrderWebApi extends WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws \Throwable
-     * @throws \yii\db\Exception
      */
     public function repeat(array $post)
     {
@@ -1067,7 +1063,7 @@ class OrderWebApi extends WebApi
             }
 
             $request = [];
-            foreach ($content as $item) {
+            foreach (WebApiHelper::generator($content) as $item) {
                 $request[] = $this->prepareProduct($item);
             }
             //Добавляем товары для заказа в корзину
@@ -1200,7 +1196,6 @@ class OrderWebApi extends WebApi
      * @param $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws \yii\db\Exception
      */
     public function setDocumentNumber($post)
     {
@@ -1246,8 +1241,6 @@ class OrderWebApi extends WebApi
     {
         $quantity = !empty($model->quantity) ? round($model->quantity, 3) : round($model->product->units, 3);
 
-        $market = new MarketWebApi();
-
         $item = [];
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product->product;
@@ -1264,7 +1257,7 @@ class OrderWebApi extends WebApi
         $item['units'] = 0;
         $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
         $item['currency_id'] = $currency_id ?? (int)$model->product->catalog->currency->id;
-        $item['image'] = $market->getProductImage($model->product);
+        $item['image'] = $this->marketWebApi->getProductImage($model->product);
         $item['edi_number'] = $model->edi_number;
         $item['edi_product'] = $model->product->edi_supplier_article > 0 ? true : false;
         return $item;

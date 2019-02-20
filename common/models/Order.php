@@ -64,6 +64,7 @@ use yii\web\BadRequestHttpException;
  * @property IntegrationInvoice $invoice
  * @property IntegrationInvoice $invoiceRelation
  * @property EmailQueue[]       $relatedEmails
+ * @property int                $positionCount
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -1014,7 +1015,8 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public function getProducts() {
+    public function getProducts()
+    {
         $result = [];
         foreach ($this->orderContent as $orderContent) {
             $result[] = $orderContent->product_id;

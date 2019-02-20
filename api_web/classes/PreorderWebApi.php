@@ -13,7 +13,8 @@ use api_web\{components\Registry,
     components\WebApi,
     components\Notice,
     helpers\CurrencyHelper};
-use common\models\{Order,
+use common\models\{CartContent,
+    Order,
     OrderStatus,
     Preorder,
     Cart,
@@ -73,27 +74,27 @@ class PreorderWebApi extends WebApi
      */
     private function createPreorder(array $vendors, Cart $cart)
     {
-        $preOrder = new Preorder();
-        $preOrder->organization_id = $this->user->organization->id;
-        $preOrder->user_id = $this->user->id;
-        $preOrder->is_active = 1;
+        $preOrder = new Preorder([
+            'organization_id' => $this->user->organization->id,
+            'user_id'         => $this->user->id
+        ]);
         if (!$preOrder->save()) {
             throw new ValidationException($preOrder->getFirstErrors());
         }
         $cartWebApi = new CartWebApi();
-        $noCommentAndDate = [];
-        $preOrderId = $preOrder->id;
-        foreach ($vendors as $index => $vendor) {
+        foreach ($vendors as $vendor) {
             $contents = $cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->all();
             if (empty($contents)) {
                 throw new BadRequestHttpException('preorder.no_vendor_product_in_cart');
             }
-            if ($cartWebApi->createOrder($cart, $vendor, $noCommentAndDate, Order::STATUS_PREORDER, $preOrderId)) {
-                foreach ($contents as $key => $item) {
-                    $preOrderContent = new PreorderContent();
-                    $preOrderContent->preorder_id = $preOrderId;
-                    $preOrderContent->product_id = $item->product_id;
-                    $preOrderContent->plan_quantity = $item->quantity;
+            if ($cartWebApi->createOrder($cart, $vendor, [], Order::STATUS_PREORDER, $preOrder->id)) {
+                /** @var CartContent $item */
+                foreach (WebApiHelper::generator($contents) as $item) {
+                    $preOrderContent = new PreorderContent([
+                        'preorder_id'   => $preOrder->id,
+                        'product_id'    => $item->product_id,
+                        'plan_quantity' => $item->quantity
+                    ]);
                     if (!$preOrderContent->save()) {
                         throw new ValidationException($preOrderContent->getFirstErrors());
                     }
@@ -123,10 +124,7 @@ class PreorderWebApi extends WebApi
             if (!isset($myVendors[$post['vendor_id']])) {
                 throw new BadRequestHttpException('preorder.not_your_vendor');
             }
-            $vendor = Organization::findOne(['id' => $post['vendor_id'], 'type_id' => Organization::TYPE_SUPPLIER]);
-            if (empty($vendor)) {
-                throw new BadRequestHttpException('preorder.vendor_id_not_found');
-            }
+            $vendor = Organization::findOne(['id' => $post['vendor_id']]);
             $vendors[] = $vendor;
         } else {
             $vendors = $cart->getVendors();
@@ -149,13 +147,7 @@ class PreorderWebApi extends WebApi
     public function complete($post)
     {
         $this->validateRequest($post, ['id']);
-        $model = Preorder::findOne([
-            'id'              => (int)$post['id'],
-            'organization_id' => $this->user->organization_id
-        ]);
-        if (empty($model)) {
-            throw new BadRequestHttpException('preorder.not_found');
-        }
+        $model = $this->findPreOrder($post['id']);
         $model->is_active = 0;
         if ($model->save()) {
             return $this->prepareModel($model);
@@ -273,8 +265,6 @@ class PreorderWebApi extends WebApi
      * @param $request
      * @return array
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     public function orders($request)
     {
@@ -314,10 +304,10 @@ class PreorderWebApi extends WebApi
         if ($contents) {
             $productIds = ArrayHelper::getColumn($contents, 'product_id');
             $issetAnalog = $this->issetProductsAnalog($productIds);
-            /** @var PreorderContent $order */
-            foreach ($contents as $content) {
+            /** @var PreorderContent $content */
+            foreach (WebApiHelper::generator($contents) as $content) {
                 $products[] = [
-                    'id'            => $content->product_id,
+                    'id'            => (int)$content->product_id,
                     'name'          => $content->product->product,
                     'article'       => $content->product->article,
                     'plan_quantity' => round($content->plan_quantity, 3),
@@ -336,10 +326,12 @@ class PreorderWebApi extends WebApi
      */
     private function issetProductsAnalog($product_ids)
     {
-        return ProductAnalog::find()->where([
-            'client_id'  => $this->user->organization_id,
-            'product_id' => $product_ids
-        ])->indexBy('product_id')
+        return ProductAnalog::find()
+            ->where([
+                'client_id'  => $this->user->organization_id,
+                'product_id' => $product_ids
+            ])
+            ->indexBy('product_id')
             ->asArray()
             ->all();
     }
@@ -352,13 +344,7 @@ class PreorderWebApi extends WebApi
     public function get($post)
     {
         $this->validateRequest($post, ['id']);
-        $model = Preorder::findOne([
-            'id'              => (int)$post['id'],
-            'organization_id' => $this->user->organization_id
-        ]);
-        if (empty($model)) {
-            throw new BadRequestHttpException('preorder.not_found');
-        }
+        $model = $this->findPreOrder($post['id']);
         return $this->prepareModel($model, true);
     }
 
@@ -369,8 +355,6 @@ class PreorderWebApi extends WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     public function confirmOrders($post)
     {
@@ -417,8 +401,6 @@ class PreorderWebApi extends WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     public function confirmOrder($request)
     {
@@ -506,7 +488,7 @@ class PreorderWebApi extends WebApi
      * @return array|Preorder|\yii\db\ActiveRecord|null
      * @throws BadRequestHttpException
      */
-    private function findPreorder(int $id, bool $withContent = false)
+    private function findPreOrder(int $id, bool $withContent = false)
     {
         if (!$withContent) {
             $model = Preorder::findOne([
@@ -535,7 +517,7 @@ class PreorderWebApi extends WebApi
      * @param int   $preorderId
      * @throws \Exception
      */
-    private function createPreorderContent(array $preOrderContent, int $preorderId)
+    private function createPreOrderContent(array $preOrderContent, int $preorderId)
     {
         $newData = [];
         foreach ($preOrderContent as $index => $product) {
@@ -547,20 +529,19 @@ class PreorderWebApi extends WebApi
             ];
         }
         try {
-            foreach ($newData as $row) {
+            foreach (WebApiHelper::generator($newData) as $row) {
                 $findRow = $row;
                 unset($findRow['plan_quantity']);
                 $exists = PreorderContent::find()->where($findRow)->exists();
                 if (!$exists) {
-                    $model = new PreorderContent();
-                    $model->preorder_id = $preorderId;
-                    $model->product_id = $row['product_id'];
-                    $model->plan_quantity = $row['plan_quantity'];
-
+                    $model = new PreorderContent([
+                        'preorder_id'   => $preorderId,
+                        'product_id'    => $row['product_id'],
+                        'plan_quantity' => $row['plan_quantity']
+                    ]);
                     if (isset($row['parent_product_id'])) {
                         $model->parent_product_id = (int)$row['parent_product_id'];
                     }
-
                     if (!$model->save()) {
                         throw new ValidationException($model->getFirstErrors());
                     }
@@ -583,7 +564,7 @@ class PreorderWebApi extends WebApi
             throw new BadRequestHttpException('preorder.wrong_value_type');
         }
         //получаем предзаказ данного пользователя
-        $preOrder = $this->findPreorder($post['id'], true);
+        $preOrder = $this->findPreOrder($post['id'], true);
 
         $vendorIds = ArrayHelper::getColumn($post['products'], 'vendor_id');
         $vendorProducts = [];
@@ -603,7 +584,7 @@ class PreorderWebApi extends WebApi
                 $products = $vendorProducts[$vendor->id];
                 if (!empty($products)) {
                     //Создаем записи о товарах в preorder_content
-                    $this->createPreorderContent($products, $preOrder->id);
+                    $this->createPreOrderContent($products, $preOrder->id);
                     $service_id = $vendor->isEdi() ? Registry::EDI_SERVICE_ID : Registry::MC_BACKEND;
                     $this->handleOrder($vendor, $products, $preOrder, $service_id);
                 }
@@ -643,7 +624,7 @@ class PreorderWebApi extends WebApi
             $order = $this->createOrder($vendor->id, $preOrder->id, $currency_id);
         }
 
-        foreach ($products as $product) {
+        foreach (WebApiHelper::generator($products) as $product) {
             $productModel = CatalogGoods::findOne([
                 'base_goods_id' => $product['id'],
                 'cat_id'        => $relation->cat_id
@@ -787,8 +768,6 @@ class PreorderWebApi extends WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     public function updateOrder($request)
     {
@@ -836,7 +815,8 @@ class PreorderWebApi extends WebApi
         $issetAnalog = $this->issetProductsAnalog($productsId);
         $t = \Yii::$app->db->beginTransaction();
         try {
-            foreach ($orderContents as $orderContent) {
+            /** @var OrderContent $orderContent */
+            foreach (WebApiHelper::generator($orderContents) as $orderContent) {
                 if (isset($issetAnalog[$orderContent->product_id])) {
                     $orderContent->delete();
                 } else {
@@ -911,7 +891,8 @@ class PreorderWebApi extends WebApi
                 throw new ValidationException($newOrder->getFirstErrors());
             }
 
-            foreach ($order->orderContent as $orderContent) {
+            $orderContents = $order->orderContent;
+            foreach (WebApiHelper::generator($orderContents) as $orderContent) {
                 $nOrderContent = new OrderContent();
                 $nOrderContent->setAttributes($orderContent->getAttributes([
                     'article', 'initial_quantity', 'into_price',
@@ -1014,7 +995,7 @@ class PreorderWebApi extends WebApi
             throw new BadRequestHttpException("empty_param|quantity");
         }
 
-        $preOrder = $this->findPreorder($request['preorder_id']);
+        $preOrder = $this->findPreOrder($request['preorder_id']);
         $relation = $this->findRelation($request['vendor_id']);
 
         $analog = CatalogGoods::findOne([
@@ -1030,7 +1011,7 @@ class PreorderWebApi extends WebApi
                     'vendor_id' => $relation->supp_org_id
                 ])->all();
                 /** @var Order $order */
-                foreach ($orders as $order) {
+                foreach (WebApiHelper::generator($orders) as $order) {
                     $orderContent = $order->getOrderContent()->andWhere(['product_id' => $analog->base_goods_id])->one();
                     if ($orderContent) {
                         $r = $this->updateProduct([

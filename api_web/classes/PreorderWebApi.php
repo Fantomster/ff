@@ -732,12 +732,14 @@ class PreorderWebApi extends WebApi
         $t = \Yii::$app->db->beginTransaction();
         try {
             $orderContent->quantity = $request['quantity'];
-            if ($orderContent->quantity === 0) {
+            if ($orderContent->quantity == 0) {
                 $is = $this->issetProductsAnalog($orderContent->product_id);
                 if (isset($is[$orderContent->product_id])) {
                     if (!$orderContent->delete()) {
                         throw new Exception('Delete false');
                     }
+                } elseif (!$orderContent->save()) {
+                    throw new ValidationException($orderContent->getFirstErrors());
                 }
             } else {
                 if (!$orderContent->save()) {

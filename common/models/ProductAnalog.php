@@ -7,15 +7,16 @@ use Yii;
 /**
  * This is the model class for table "{{%product_analog}}".
  *
- * @property int $id
- * @property int $client_id ID ресторана
- * @property int $product_id ID из таблицы catalog_base_goods
- * @property int $parent_id id из таблицы product_analog
- * @property int $sort_value
- * @property string $coefficient Коэффициент
- *
- * @property Organization $client
+ * @property int              $id
+ * @property int              $client_id       ID ресторана
+ * @property int              $product_id      ID из таблицы catalog_base_goods
+ * @property int              $parent_id       id из таблицы product_analog
+ * @property int              $sort_value
+ * @property string           $coefficient     Коэффициент
+ * @property Organization     $client
  * @property CatalogBaseGoods $product
+ * @property ProductAnalog    $parent
+ * @property ProductAnalog    $firstAnalog
  */
 class ProductAnalog extends \yii\db\ActiveRecord
 {
@@ -47,11 +48,11 @@ class ProductAnalog extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'client_id' => 'ID ресторана',
-            'product_id' => 'ID из таблицы catalog_base_goods',
-            'parent_id' => 'id из таблицы product_analog',
-            'sort_value' => 'Sort Value',
+            'id'          => 'ID',
+            'client_id'   => 'ID ресторана',
+            'product_id'  => 'ID из таблицы catalog_base_goods',
+            'parent_id'   => 'id из таблицы product_analog',
+            'sort_value'  => 'Sort Value',
             'coefficient' => 'Коэффициент',
         ];
     }
@@ -61,7 +62,7 @@ class ProductAnalog extends \yii\db\ActiveRecord
      */
     public function getClient()
     {
-        return $this->hasOne(Organization::className(), ['id' => 'client_id']);
+        return $this->hasOne(Organization::class, ['id' => 'client_id']);
     }
 
     /**
@@ -69,6 +70,31 @@ class ProductAnalog extends \yii\db\ActiveRecord
      */
     public function getProduct()
     {
-        return $this->hasOne(CatalogBaseGoods::className(), ['id' => 'product_id']);
+        return $this->hasOne(CatalogBaseGoods::class, ['id' => 'product_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getParent()
+    {
+        return $this->hasOne(self::class, ['id' => 'parent_id']);
+    }
+
+    /**
+     * @return string
+     */
+    public function getFirstAnalog()
+    {
+        $gId = $this->parent_id ?? $this->id;
+
+        $model = self::find()->where(['OR',
+            ['id' => $gId],
+            ['parent_id' => $gId],
+        ])->orderBy(['sort_value' => SORT_ASC])->limit(1)->one();
+        if ($model) {
+            return $model;
+        }
+        return $this;
     }
 }

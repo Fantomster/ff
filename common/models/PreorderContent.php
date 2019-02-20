@@ -17,6 +17,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string           $updated_at           Дата и время последнего изменения записи в таблице
  * @property CatalogBaseGoods $product
  * @property Preorder         $preorder
+ * @property ProductAnalog    $productAnalog
  */
 class PreorderContent extends \yii\db\ActiveRecord
 {
@@ -132,7 +133,7 @@ class PreorderContent extends \yii\db\ActiveRecord
                     $quantity += floatval($analog->getAllQuantity(false));
                 }
             }
-            
+
         }
         return round($quantity, 3);
     }
@@ -199,5 +200,13 @@ class PreorderContent extends \yii\db\ActiveRecord
         }
 
         return $result;
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductAnalog()
+    {
+        return $this->hasOne(ProductAnalog::class, ['product_id' => 'product_id'])->onCondition(['client_id' => $this->preorder->organization_id]);
     }
 }

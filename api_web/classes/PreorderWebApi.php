@@ -31,6 +31,7 @@ use yii\data\{
 };
 
 use yii\db\Exception;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\db\Expression;
 use yii\web\BadRequestHttpException;
@@ -299,17 +300,30 @@ class PreorderWebApi extends WebApi
     private function productsInfo(Preorder $preOrder)
     {
         $products = [];
+        $productIds = (new Query())
+            ->select('p.product_id')
+            ->from(PreorderContent::tableName() . ' as p')
+            ->leftJoin(ProductAnalog::tableName() . ' as pa', 'pa.product_id = p.product_id')
+            ->where(['p.preorder_id' => $preOrder->id])
+            ->andWhere('pa.parent_id is null')
+            ->column();
+
         /** @var PreorderContent[] $contents */
-        $contents = $preOrder->preorderContents;
+        $contents = $preOrder->getPreorderContents()->onCondition(['in', 'product_id', $productIds])->all();
         if ($contents) {
-            $productIds = ArrayHelper::getColumn($contents, 'product_id');
             $issetAnalog = $this->issetProductsAnalog($productIds);
             /** @var PreorderContent $content */
             foreach (WebApiHelper::generator($contents) as $content) {
+                $product = $content->product;
+                if ($content->productAnalog) {
+                    if ($content->productAnalog->firstAnalog) {
+                        $product = $content->productAnalog->firstAnalog->product;
+                    }
+                }
                 $products[] = [
                     'id'            => (int)$content->product_id,
-                    'name'          => $content->product->product,
-                    'article'       => $content->product->article,
+                    'name'          => $product->product,
+                    'article'       => $product->article,
                     'plan_quantity' => round($content->plan_quantity, 3),
                     'quantity'      => $content->getAllQuantity(),
                     'sum'           => CurrencyHelper::asDecimal($content->getAllSum()),

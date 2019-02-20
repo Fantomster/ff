@@ -713,10 +713,10 @@ class StatisticsController extends Controller
         $today = new \DateTime();
         //var_dump(Yii::$app->request->post());
         $start_date = !empty(Yii::$app->request->get("start_date")) ? Yii::$app->request->get("start_date") : $today->format('d.m.Y');
-        $SearchModel = new DynamicUsageSearch();
-        $DataProvider = $SearchModel->search($params);
+        $searchModel = new DynamicUsageSearch();
+        $dataProvider = $searchModel->search($params);
 
-        return $this->render('dynamics', compact('SearchModel', 'DataProvider', 'start_date'));
+        return $this->render('dynamics', compact('searchModel', 'dataProvider', 'start_date'));
 
     }
 

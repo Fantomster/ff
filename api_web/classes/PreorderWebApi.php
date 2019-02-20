@@ -96,6 +96,11 @@ class PreorderWebApi extends WebApi
                         'product_id'    => $item->product_id,
                         'plan_quantity' => $item->quantity
                     ]);
+
+                    $parent_id = $this->getFirstProductAnalog($item->product_id);
+                    if ($parent_id) {
+                        $preOrderContent->parent_product_id = $parent_id;
+                    }
                     if (!$preOrderContent->save()) {
                         throw new ValidationException($preOrderContent->getFirstErrors());
                     }
@@ -300,18 +305,25 @@ class PreorderWebApi extends WebApi
     private function productsInfo(Preorder $preOrder)
     {
         $products = [];
-        $productIds = (new Query())
-            ->select('p.product_id')
-            ->from(PreorderContent::tableName() . ' as p')
-            ->leftJoin(ProductAnalog::tableName() . ' as pa', 'pa.product_id = p.product_id')
-            ->where(['p.preorder_id' => $preOrder->id])
-            ->andWhere('pa.parent_id is null')
-            ->column();
+        $productsArray = (new Query())
+            ->select([
+                'plan_quantity' => new Expression("sum(a.plan_quantity)"),
+                'product_id'    => new Expression("coalesce(c.product_id, b.product_id, a.product_id)"),
+                'id'            => new Expression("MIN(a.id)"),
+                'has_analogs'   => new Expression("case when b.product_id is not null then 1 else 0 end"),
+            ])
+            ->from(PreorderContent::tableName() . ' as a')
+            ->leftJoin(ProductAnalog::tableName() . ' as b', 'a.product_id = b.product_id')
+            ->leftJoin(ProductAnalog::tableName() . ' as c', 'c.id = b.parent_id')
+            ->where(['a.preorder_id' => $preOrder->id])
+            ->groupBy(new Expression("coalesce(c.product_id, b.product_id, a.product_id)"))
+            ->indexBy('id')
+            ->all();
+        //->createCommand()->getRawSql();
 
         /** @var PreorderContent[] $contents */
-        $contents = $preOrder->getPreorderContents()->onCondition(['in', 'product_id', $productIds])->all();
+        $contents = $preOrder->getPreorderContents()->onCondition(['in', 'id', array_keys($productsArray)])->all();
         if ($contents) {
-            $issetAnalog = $this->issetProductsAnalog($productIds);
             /** @var PreorderContent $content */
             foreach (WebApiHelper::generator($contents) as $content) {
                 $product = $content->product;
@@ -324,10 +336,10 @@ class PreorderWebApi extends WebApi
                     'id'            => (int)$content->product_id,
                     'name'          => $product->product,
                     'article'       => $product->article,
-                    'plan_quantity' => round($content->plan_quantity, 3),
+                    'plan_quantity' => round($productsArray[$content->id]['plan_quantity'], 3),
                     'quantity'      => $content->getAllQuantity(),
                     'sum'           => CurrencyHelper::asDecimal($content->getAllSum()),
-                    'isset_analog'  => $issetAnalog[$content->product_id] ?? false,
+                    'isset_analog'  => (bool)$productsArray[$content->id]['has_analogs']
                 ];
             }
         }
@@ -348,6 +360,24 @@ class PreorderWebApi extends WebApi
             ->indexBy('product_id')
             ->asArray()
             ->all();
+    }
+
+    /**
+     * @param $product_id
+     * @return false|string|null
+     */
+    private function getFirstProductAnalog($product_id)
+    {
+        $r = (new Query())
+            ->select('b.product_id')
+            ->from(ProductAnalog::tableName() . ' as a')
+            ->leftJoin(ProductAnalog::tableName() . ' as b', 'b.id = a.parent_id')
+            ->where([
+                'a.product_id' => $product_id,
+                'a.client_id'  => $this->user->organization_id
+            ])
+            ->scalar();
+        return ($r > 0) ? (int)$r : null;
     }
 
     /**
@@ -552,7 +582,7 @@ class PreorderWebApi extends WebApi
                     $model = new PreorderContent([
                         'preorder_id'   => $preorderId,
                         'product_id'    => $row['product_id'],
-                        'plan_quantity' => $row['plan_quantity']
+                        'plan_quantity' => $row['plan_quantity'],
                     ]);
                     if (isset($row['parent_product_id'])) {
                         $model->parent_product_id = (int)$row['parent_product_id'];
@@ -568,11 +598,12 @@ class PreorderWebApi extends WebApi
     }
 
     /**
-     * @param $post
+     * @param      $post
+     * @param bool $createPreOrderContent
      * @return array
-     * @throws
+     * @throws BadRequestHttpException
      */
-    public function addProduct($post)
+    public function addProduct($post, $createPreOrderContent = true)
     {
         $this->validateRequest($post, ['id', 'products']);
         if (!is_array($post['products'])) {
@@ -599,7 +630,9 @@ class PreorderWebApi extends WebApi
                 $products = $vendorProducts[$vendor->id];
                 if (!empty($products)) {
                     //Создаем записи о товарах в preorder_content
-                    $this->createPreOrderContent($products, $preOrder->id);
+                    if ($createPreOrderContent) {
+                        $this->createPreOrderContent($products, $preOrder->id);
+                    }
                     $service_id = $vendor->isEdi() ? Registry::EDI_SERVICE_ID : Registry::MC_BACKEND;
                     $this->handleOrder($vendor, $products, $preOrder, $service_id);
                 }
@@ -1038,7 +1071,7 @@ class PreorderWebApi extends WebApi
                         PreorderContent::deleteAll([
                             'preorder_id'       => $preOrder->id,
                             'product_id'        => $analog->base_goods_id,
-                            'parent_product_id' => (int)$request['product_id']
+                            'parent_product_id' => $this->getFirstProductAnalog($analog->base_goods_id)
                         ]);
                         $orderDelete = ArrayHelper::merge($orderDelete, $r['order_delete']);
                     }
@@ -1052,7 +1085,7 @@ class PreorderWebApi extends WebApi
                             'id'                => (int)$analog->base_goods_id,
                             'cat_id'            => (int)$analog->cat_id,
                             'vendor_id'         => (int)$relation->supp_org_id,
-                            'parent_product_id' => (int)$request['product_id'],
+                            'parent_product_id' => $this->getFirstProductAnalog($analog->base_goods_id),
                             'quantity'          => round($request['quantity'], 3)
                         ]
                     ]

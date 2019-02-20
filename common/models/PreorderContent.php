@@ -4,6 +4,7 @@ namespace common\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\Query;
 
 /**
  * This is the model class for table "{{%preorder_content}}".
@@ -123,14 +124,22 @@ class PreorderContent extends \yii\db\ActiveRecord
                 }
             }
 
-            $analogsPreorderContent = self::find()->where([
-                'preorder_id'       => $this->preorder_id,
-                'parent_product_id' => $this->product_id
-            ])->all();
+            if ($r) {
+                $analogsPreorderContent = self::find()
+                    ->orWhere("parent_product_id = :parent_id AND product_id != :pid", [
+                        ":parent_id" => $this->getFirstProductAnalog($this->product_id, $order->client_id),
+                        ":pid"       => $this->product_id
+                    ])
+                    ->orWhere("product_id = :parent AND parent_product_id is null", [
+                        ":parent" => $this->getFirstProductAnalog($this->product_id, $order->client_id)
+                    ])
+                    ->andWhere(['preorder_id' => $this->preorder_id])
+                    ->all();
 
-            if ($analogsPreorderContent) {
-                foreach ($analogsPreorderContent as $analog) {
-                    $quantity += floatval($analog->getAllQuantity(false));
+                if ($analogsPreorderContent) {
+                    foreach ($analogsPreorderContent as $analog) {
+                        $quantity += $analog->getAllQuantity(false);
+                    }
                 }
             }
 
@@ -156,10 +165,16 @@ class PreorderContent extends \yii\db\ActiveRecord
             }
 
             if ($r) {
-                $analogsPreorderContent = self::find()->where([
-                    'preorder_id'       => $this->preorder_id,
-                    'parent_product_id' => $this->product_id
-                ])->all();
+                $analogsPreorderContent = self::find()
+                    ->orWhere("parent_product_id = :parent_id AND product_id != :pid", [
+                        ":parent_id" => $this->getFirstProductAnalog($this->product_id, $order->client_id),
+                        ":pid"       => $this->product_id
+                    ])
+                    ->orWhere("product_id = :parent AND parent_product_id is null", [
+                        ":parent" => $this->getFirstProductAnalog($this->product_id, $order->client_id)
+                    ])
+                    ->andWhere(['preorder_id' => $this->preorder_id])
+                    ->all();
 
                 if ($analogsPreorderContent) {
                     foreach ($analogsPreorderContent as $analog) {
@@ -208,5 +223,49 @@ class PreorderContent extends \yii\db\ActiveRecord
     public function getProductAnalog()
     {
         return $this->hasOne(ProductAnalog::class, ['product_id' => 'product_id'])->onCondition(['client_id' => $this->preorder->organization_id]);
+    }
+
+    /**
+     *
+     */
+    public function getPlanQuantity()
+    {
+        $analog = $this->productAnalog;
+        if ($analog) {
+            $pIds = (new Query())
+                ->select('product_id')
+                ->from(ProductAnalog::tableName())
+                ->where([
+                    "OR",
+                    ['id' => $analog->firstAnalog->id],
+                    ['parent_id' => $analog->firstAnalog->id]
+                ])
+                ->column();
+
+            return self::find()->where([
+                'preorder_id' => $this->preorder_id,
+                'product_id'  => $pIds
+            ])->sum('plan_quantity');
+        }
+        return $this->plan_quantity;
+    }
+
+    /**
+     * @param $product_id
+     * @param $client_id
+     * @return int|null
+     */
+    private function getFirstProductAnalog($product_id, $client_id)
+    {
+        $r = (new Query())
+            ->select('b.product_id')
+            ->from(ProductAnalog::tableName() . ' as a')
+            ->leftJoin(ProductAnalog::tableName() . ' as b', 'b.id = a.parent_id')
+            ->where([
+                'a.product_id' => $product_id,
+                'a.client_id'  => $client_id
+            ])
+            ->scalar();
+        return ($r > 0) ? (int)$r : null;
     }
 }

@@ -3,7 +3,7 @@
 use yii\widgets\Pjax;
 use yii\grid\GridView;
 use kartik\date\DatePicker;
-use yii\widgets\ActiveForm;
+use kartik\form\ActiveForm;
 use kartik\export\ExportMenu;
 
 $this->title = implode(' - ', [
@@ -14,15 +14,25 @@ $this->title = implode(' - ', [
 $this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;
+        var timer = null;
         $(document).on("change", "#startDate", function() {
             if (!justSubmitted) {
-                $("#startDateForm").submit();
+                $("#search-form").submit();
                 justSubmitted = true;
                 setTimeout(function() {
                     justSubmitted = false;
                 }, 500);
             }
         });
+        
+           $(document).on("change keyup paste cut", "#searchString", function() {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(function() {
+                    $("#search-form").submit();
+                }, 700);
+            });
     });
         ');
 
@@ -113,11 +123,11 @@ $gridColumns = [
         ?>
 
         <?php
-        Pjax::begin(['enablePushState' => true, 'id' => 'ReportList', 'timeout' => 30000]);
+        Pjax::begin(['enablePushState' => false, 'id' => 'ReportList', 'timeout' => 30000]);
         $form = ActiveForm::begin([
             'options' => [
-                'data-pjax' => false,
-                'id'        => 'startDateForm',
+                'data-pjax' => true,
+                'id' => 'search-form',
             ],
             'method'  => 'get',
         ]);
@@ -139,12 +149,20 @@ $gridColumns = [
                 ])
                 ?>
             </div>
+            <div class="form-group" style="width: 350px; margin: 0 auto; padding-bottom: 10px;">
+                <?=
+                $form->field($SearchModel, 'searchString', ['template'=>' <div class="input-group"><span class="input-group-addon">
+    <i class="fa fa-search"></i></span>{input}{error}</div>'])->textInput([
+                    'id' => 'searchString',
+                    'class' => 'form-control',
+                    'placeholder' => 'Поиск'])->label(false)
+                ?>
+            </div>
         </div>
         <?php ActiveForm::end(); ?>
         <?=
         GridView::widget([
             'dataProvider' => $DataProvider,
-            'filterModel'  => $SearchModel,
             'pager'        => [
                 'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed
             ],

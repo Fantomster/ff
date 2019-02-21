@@ -53,7 +53,11 @@ class AnalogWebApi extends WebApi
             'currency_id'  => 'cur.id',
             'currency_sym' => 'cur.symbol',
             'group_id'     => new Expression('COALESCE(pa.parent_id, pa.id)'),
-            'sort_value'   => 'pa.sort_value'
+            'sort_value'   => 'pa.sort_value',
+            "c_article_1"  => new Expression("(cbg.article + 0)"),
+            "c_article"    => "cbg.article",
+            "i"            => new Expression("cbg.article REGEXP '^-?[0-9]+$'"),
+            "alf_cyr"      => new Expression("cbg.product REGEXP '^-?[а-яА-Я].*$'"),
         ])
             ->from(Catalog::tableName() . ' as cat')
             ->innerJoin(CatalogGoods::tableName() . ' as cg', "cg.cat_id = cat.id")
@@ -94,7 +98,28 @@ class AnalogWebApi extends WebApi
         }
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query
+            'query' => $query,
+            'sort'  => [
+                'attributes'   => [
+                    'product' => [
+                        'asc'     => ['alf_cyr' => SORT_DESC, 'product' => SORT_ASC],
+                        'desc'    => ['alf_cyr' => SORT_ASC, 'product' => SORT_DESC],
+                        'default' => SORT_ASC
+                    ],
+                    'price',
+                    'units',
+                    'article',
+                    'name',
+                    'c_article_1',
+                    'c_article',
+                    'i'
+                ],
+                'defaultOrder' => [
+                    'product'     => SORT_ASC,
+                    'c_article_1' => SORT_ASC,
+                    'c_article'   => SORT_ASC
+                ]
+            ],
         ]);
 
         $pagination = new Pagination();

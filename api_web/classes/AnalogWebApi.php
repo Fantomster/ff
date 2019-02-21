@@ -229,7 +229,7 @@ class AnalogWebApi extends WebApi
             'currency_sym' => 'cur.symbol',
             'group_id'     => 'pa.id',
             'sort_value'   => 'pa.sort_value',
-            'analog_count' => 'COUNT(p_count.id)'
+            'analog_count' => 'COUNT(p_count.id) + 1'
         ])
             ->from(ProductAnalog::tableName() . ' as pa')
             ->leftJoin(ProductAnalog::tableName() . " as p_count", "p_count.parent_id = pa.id")

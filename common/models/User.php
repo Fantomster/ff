@@ -682,7 +682,7 @@ class User extends \amnah\yii2\user\models\User
         }
         if ($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER) {
             $this->createRelationUserOrganization($organizationID, $roleID);
-            $organization = $this->organization;
+            $organization = Organization::findOne(['id' => $organizationID]);
             if (isset($organization) && $organization->parent_id) {
                 $children = Organization::findAll(['parent_id' => $organization->parent_id]);
                 $children = array_merge($children, Organization::findAll(['id' => $organization->parent_id]));
@@ -754,29 +754,32 @@ class User extends \amnah\yii2\user\models\User
         /**
          * Уведомления по Email
          */
-        $emailNotification = new notifications\EmailNotification();
-        $emailNotification->user_id = $this->id;
+        $emailNotification = notifications\EmailNotification::findOne(['user_id' => $this->id, 'rel_user_org_id' => $rel->id]);
+        if (empty($emailNotification)) {
+            $emailNotification = new notifications\EmailNotification();
+        }
+        $emailNotification->user_id         = $this->id;
         $emailNotification->rel_user_org_id = $rel->id;
-        $emailNotification->orders = 1;
-        $emailNotification->requests = 1;
-        $emailNotification->changes = 1;
-        $emailNotification->invites = 1;
-        $emailNotification->order_done = isset($organization) ? (($organization->type_id == Organization::TYPE_SUPPLIER) ? 0 : 1) : 0;
+        $emailNotification->orders          = 1;
+        $emailNotification->requests        = 1;
+        $emailNotification->changes         = 1;
+        $emailNotification->invites         = 1;
+        $emailNotification->order_done      = isset($organization) ? (($organization->type_id == Organization::TYPE_SUPPLIER) ? 0 : 1) : 0;
         $emailNotification->save();
 
         /**
          * Уведомления по СМС
          */
-        $smsNotification = notifications\SmsNotification::findOne(['user_id' => $this->id]);
+        $smsNotification = notifications\SmsNotification::findOne(['user_id' => $this->id, 'rel_user_org_id' => $rel->id]);
         if (empty($smsNotification)) {
             $smsNotification = new notifications\SmsNotification();
         }
-        $smsNotification->user_id = $this->id;
+        $smsNotification->user_id         = $this->id;
         $smsNotification->rel_user_org_id = $rel->id;
-        $smsNotification->orders = 1;
-        $smsNotification->requests = 1;
-        $smsNotification->changes = 1;
-        $smsNotification->invites = 1;
+        $smsNotification->orders          = 1;
+        $smsNotification->requests        = 1;
+        $smsNotification->changes         = 1;
+        $smsNotification->invites         = 1;
         $smsNotification->save();
 
         return $rel->id;

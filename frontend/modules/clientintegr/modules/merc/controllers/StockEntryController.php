@@ -266,41 +266,60 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['results' => ['id' => '', 'text' => '']];
         $res = [];
-        if (!is_null($q)) {
-            if ($c !== '74a3cbb1-56fa-94f3-ab3f-e8db4940d96b' && $c != null) {
-                $res = [];
-                $list = cerberApi::getInstance()->getForeignEnterpriseList($q, $c, $hc);
-                if (isset($list)) {
+        if ($hc == null) {
+            if (!is_null($q)) {
+                if ($c !== '74a3cbb1-56fa-94f3-ab3f-e8db4940d96b' && $c != null) {
                     $res = [];
-                    foreach ($list as $item) {
-                        if (($item->last) && ($item->active))
-                            $res[] = ['id'   => $item->guid,
-                                      'text' => $item->name . '(' .
-                                          $item->address->addressView
-                                          . ')'
-                            ];
+                    $list = cerberApi::getInstance()->getForeignEnterpriseList($q, $c, $hc);
+                    if (isset($list)) {
+                        $res = [];
+                        foreach ($list as $item) {
+                            if (($item->last) && ($item->active))
+                                $res[] = ['id'   => $item->guid,
+                                          'text' => $item->name . '(' .
+                                              $item->address->addressView
+                                              . ')'
+                                ];
+                        }
+                    }
+                }
+
+                if ($c == '74a3cbb1-56fa-94f3-ab3f-e8db4940d96b' || $c == null) {
+                    $list = cerberApi::getInstance()->getRussianEnterpriseList($q, $hc);
+                    if (isset($list)) {
+
+                        foreach ($list as $item) {
+                            if (($item->last) && ($item->active))
+                                $res[] = ['id'   => $item->guid,
+                                          'text' => $item->name . '(' .
+                                              $item->address->addressView
+                                              . ')'
+                                ];
+                        }
                     }
                 }
             }
+        } else {
+            $list = cerberApi::getInstance()->getActivityLocationList($hc);
+            if (isset($list)) {
+                $q = mb_strtolower($q);
+                foreach ($list as $item) {
+                    if (($item['enterprise']['last']) && ($item['enterprise']['active']))
+                        if (!is_null($q) && (mb_strpos(mb_strtolower($item['enterprise']['name']), $q) === false)) {
+                            continue;
+                        }
 
-            if ($c == '74a3cbb1-56fa-94f3-ab3f-e8db4940d96b' || $c == null) {
-                $list = cerberApi::getInstance()->getRussianEnterpriseList($q, $hc);
-                if (isset($list)) {
-
-                    foreach ($list as $item) {
-                        if (($item->last) && ($item->active))
-                            $res[] = ['id'   => $item->guid,
-                                      'text' => $item->name . '(' .
-                                          $item->address->addressView
-                                          . ')'
-                            ];
-                    }
+                    $res[] = ['id'   => $item['enterprise']['guid'],
+                              'text' => $item['enterprise']['name'] . '(' .
+                                  $item['enterprise']['address']['addressView']
+                                  . ')'
+                    ];
                 }
             }
-            if (count($res) > 0)
-                $out['results'] = $res;
-
         }
+        if (count($res) > 0)
+            $out['results'] = $res;
+
         return $out;
     }
 }

@@ -83,7 +83,14 @@ JS;
                         'url' => $url,
                         'dataType' => 'json',
                         'data' => new JsExpression('function(params) { 
-                        return {q:params.term}; }'),
+                          if(hc_guid) {
+                            return {q:params.term,hc:hc_guid}; 
+                            }
+                            else
+                            {
+                             return {q:params.term};
+                            }
+                        }'),
                     ],
                     'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
                 ],

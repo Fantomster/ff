@@ -56,7 +56,8 @@ class EmailRoboWebApi extends WebApi
         if (!$model) {
             throw new BadRequestHttpException('integration.email.setting_not_found');
         }
-        $model->password = str_pad('', strlen($model->password), '*');
+        $model->password = $model->getCountCharsPassword();
+
         return ['result' => $model];
     }
 
@@ -84,11 +85,6 @@ class EmailRoboWebApi extends WebApi
         try {
             foreach ($post as $key => $field) {
                 if (!in_array($key, ['id', 'organization_id'])) {
-                    if ($key == 'password') {
-                        if (strlen($field) == strlen($model->password) && $field == str_pad('', strlen($model->password), '*')){
-                            continue;
-                        }
-                    }
                     $model->setAttribute($key, $field);
                 }
             }
@@ -98,6 +94,8 @@ class EmailRoboWebApi extends WebApi
         } catch (\Throwable $t) {
             throw $t;
         }
+
+        $model->password = $model->getCountCharsPassword();
 
         return ['result' => $model];
     }

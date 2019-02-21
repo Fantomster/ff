@@ -29,15 +29,6 @@ class UserController extends WebApiController
                 [
                     'allow'      => true,
                     'actions'    => [
-                        'get',
-                        'vendors',
-                    ],
-                    'roles'      => [Registry::OPERATOR],
-                    'roleParams' => ['user' => $this->user]
-                ],
-                [
-                    'allow'      => true,
-                    'actions'    => [
                         'remove-vendor',
                     ],
                     'roles'      => [Registry::PURCHASER_RESTAURANT],
@@ -46,10 +37,9 @@ class UserController extends WebApiController
                 [
                     'allow'      => true,
                     'actions'    => [
+                        'get',
+                        'vendors',
                         'get-gmt',
-                        'registration',
-                        'registration-repeat-sms',
-                        'registration-confirm',
                         'login',
                         'password-recovery',
                         'vendor-status-list',
@@ -64,14 +54,22 @@ class UserController extends WebApiController
                     'roles'      => [Registry::OPERATOR],
                     'roleParams' => ['user' => $this->user]
                 ],
+                ['allow'   => true,
+                 'actions' => [
+                     'organization',
+                     'set-organization',
+                 ],
+                 'roles'   => [Registry::AUTH_USER]
+                ],
                 [
                     'allow'   => true,
                     'actions' => [
-                        'organization',
-                        'set-organization',
+                        'registration',
+                        'registration-repeat-sms',
+                        'registration-confirm',
                     ],
-                    'roles'   => [Registry::AUTH_USER]
-                ]
+                    'roles'   => []
+                ],
             ],
         ];
 

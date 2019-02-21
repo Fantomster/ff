@@ -43,6 +43,13 @@ class ClientController extends WebApiController
                     'allow'      => true,
                     'actions'    => [
                         'detail-update',
+                    ],
+                    'roles'      => [Registry::PURCHASER_RESTAURANT],
+                    'roleParams' => ['user' => $this->user]
+                ],
+                [
+                    'allow'      => true,
+                    'actions'    => [
                         'detail',
                         'nds-country-list',
                         'notification-list',

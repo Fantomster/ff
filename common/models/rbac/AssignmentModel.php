@@ -11,6 +11,9 @@
 namespace common\models\rbac;
 
 use common\components\DbManager;
+use common\models\rbac\helpers\RbacHelper;
+use common\models\RelationUserOrganization;
+use common\models\User;
 
 class AssignmentModel extends \yii2mod\rbac\models\AssignmentModel
 {
@@ -24,10 +27,16 @@ class AssignmentModel extends \yii2mod\rbac\models\AssignmentModel
      */
     public function assignUserByOrg(array $items, int $orgId): bool
     {
+        /** @var User $user */
+        $user = $this->user;
+        $reverseRoleList = array_flip(RbacHelper::$dictRoles);
         foreach ($items as $name) {
             $item = $this->manager->getRole($name);
             $item = $item ?: $this->manager->getPermission($name);
             (new DbManager())->assignUserByOrg($item, $this->userId, $orgId);
+            $user->createRelationUserOrganization($orgId, $reverseRoleList[$name]);
+            $user->role_id = $reverseRoleList[$name];
+            $user->save();
         }
 
         return true;
@@ -37,8 +46,11 @@ class AssignmentModel extends \yii2mod\rbac\models\AssignmentModel
      * Revokes a roles and permissions from the user.
      *
      * @param array $items
+     * @param       $orgId
      * @return bool
+     * @throws \Throwable
      * @throws \yii\db\Exception
+     * @throws \yii\db\StaleObjectException
      */
     public function revokeUserByOrg(array $items, $orgId): bool
     {
@@ -46,6 +58,10 @@ class AssignmentModel extends \yii2mod\rbac\models\AssignmentModel
             $item = $this->manager->getRole($name);
             $item = $item ?: $this->manager->getPermission($name);
             (new DbManager())->revokeUserByOrg($item, $this->userId, $orgId);
+            (RelationUserOrganization::findOne([
+                'user_id'         => $this->userId,
+                'organization_id' => $orgId
+            ]))->delete();
         }
 
         return true;

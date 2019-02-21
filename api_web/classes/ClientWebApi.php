@@ -669,7 +669,7 @@ class ClientWebApi extends WebApi
                     ]
                 ];
                 //Создаем пользователя
-                $user = $user_api->createUser($request, $role_id, User::STATUS_ACTIVE);
+                $user = $user_api->createUser($request, $role_id, $this->user->organization_id, User::STATUS_ACTIVE);
                 //Устанавливаем текущую организацию
                 $user->setOrganization($this->user->organization, true);
                 //Создаем профиль пользователя
@@ -677,7 +677,7 @@ class ClientWebApi extends WebApi
                 $user->refresh();
             }
             //Создаем связь нового сотрудника с рестораном
-            $user->createRelationUserOrganization($this->user->organization->id, $role_id);
+            $user->createRelationUserOrganization($this->user->organization_id, $role_id);
             //Все хорошо, применяем изменения в базе
             $transaction->commit();
             //Тут нужно отправить письмо для смены пароля пользователю

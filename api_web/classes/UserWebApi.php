@@ -112,7 +112,7 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new ValidationException($organization->getFirstErrors());
             }
 
-            $user = $this->createUser($post, Role::getManagerRole($organization->type_id));
+            $user = $this->createUser($post, Role::getManagerRole($organization->type_id), $organization->id);
             $user->setOrganization($organization, true);
             $user->setRelationUserOrganization($organization->id, $user->role_id);
             $profile = $this->createProfile($post, $user);
@@ -142,11 +142,12 @@ class UserWebApi extends \api_web\components\WebApi
      * @param array   $post
      * @param integer $role_id
      * @param null    $status
+     * @param null    $org_id
      * @return User
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function createUser(array $post, $role_id, $status = null)
+    public function createUser(array $post, $role_id, $org_id, $status = null)
     {
         if (User::findOne(['email' => $post['user']['email']])) {
             throw new BadRequestHttpException('This email is already present in the system.');
@@ -162,7 +163,7 @@ class UserWebApi extends \api_web\components\WebApi
         }
         $user->setRegisterAttributes($role_id, $status);
         $user->save();
-        $this->addRbacRole($user->id, $role_id);
+        $this->addRbacRole($user->id, $role_id, $org_id);
 
         return $user;
     }
@@ -170,14 +171,15 @@ class UserWebApi extends \api_web\components\WebApi
     /**
      * @param $userId
      * @param $roleId
+     * @param $org_id
      * @throws ValidationException
      */
-    public function addRbacRole($userId, $roleId): void
+    public function addRbacRole($userId, $roleId, $org_id): void
     {
         $authAssign = new AuthAssignment([
             'item_name'       => RbacHelper::$dictRoles[$roleId],
             'user_id'         => $userId,
-            'organization_id' => $this->user->organization_id
+            'organization_id' => $org_id
         ]);
 
         if (!$authAssign->save()) {

@@ -32,11 +32,9 @@ use common\models\vetis\VetisUnit;
 use common\models\vetis\VetisTransport;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use frontend\modules\clientintegr\modules\merc\models\expiryDate;
-use frontend\modules\clientintegr\modules\merc\models\inputDate;
 use frontend\modules\clientintegr\modules\merc\models\productForm;
 use frontend\modules\clientintegr\modules\merc\models\productionDate;
 use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
-use frontend\modules\clientintegr\modules\merc\models\transportVsd\step4Form;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
@@ -698,7 +696,7 @@ class VetisWaybill extends WebApi
         $attributes = unserialize($model->data);
         if (isset($attributes->producing->location->guid)) {
             $productionName = VetisRussianEnterprise::find()->select(['name', 'uuid', 'guid'])
-                ->where(['guid' => $attributes->producing->location->guid])->one();
+                ->where(['guid' => $attributes->producing->location->guid])->all();
         }
 
         return [

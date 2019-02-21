@@ -694,9 +694,13 @@ class VetisWaybill extends WebApi
         $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\Products();
         $_ = new Mercury();
         $attributes = unserialize($model->data);
-        if (isset($attributes->producing->location->guid)) {
+        if (isset($attributes->producing)) {
+            $guids = [];
+            foreach ($attributes->producing as $item) {
+                $guids[] = $item->location->guid;
+            }
             $productionName = VetisRussianEnterprise::find()->select(['name', 'uuid', 'guid'])
-                ->where(['guid' => $attributes->producing->location->guid])->all();
+                ->where(['guid' => $guids])->all();
         }
 
         return [

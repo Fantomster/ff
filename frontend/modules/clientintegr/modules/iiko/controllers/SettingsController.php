@@ -201,7 +201,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentUserRole = User::findOne(Yii::$app->user->id);
         /**@var $roles array Available roles ids */
-        $roles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_ADMIN, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_FRANCHISEE_LEADER, Role::ROLE_FKEEPER_MANAGER];
+        $roles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_ADMIN, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_FRANCHISEE_LEADER, Role::ROLE_FKEEPER_MANAGER, Role::ROLE_FRANCHISEE_OWNER];
         if (in_array($currentUserRole->role_id, $roles)) {
             $arOrgsObj = $currentUser->getAllOrganization();
             $provider = new ArrayDataProvider([

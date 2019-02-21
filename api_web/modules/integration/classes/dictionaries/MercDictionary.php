@@ -187,8 +187,8 @@ class MercDictionary extends WebApi implements DictionaryInterface
                 'inn'                 => $model->inn,
                 'address'             => $model->addressView,
                 'active'              => $model->active,
-                'business_entity'     => $model->businessEntity->name,
-                'business_entity_inn' => $model->businessEntity->inn,
+                'business_entity'     => $model->businessEntity->name ?? null,
+                'business_entity_inn' => $model->businessEntity->inn ?? null,
             ];
         }
 

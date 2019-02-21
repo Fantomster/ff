@@ -91,8 +91,6 @@ class AnalogWebApi extends WebApi
             } else {
                 $query->orderBy([$sortField => $sortDirection]);
             }
-        } else {
-            $query->orderBy(['cbg.product' => SORT_ASC]);
         }
 
         $dataProvider = new ActiveDataProvider([

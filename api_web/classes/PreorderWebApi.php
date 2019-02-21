@@ -44,6 +44,8 @@ use yii\web\BadRequestHttpException;
  */
 class PreorderWebApi extends WebApi
 {
+    /** @var OrderWebApi */
+    private $orderWebApi;
 
     private $arAvailableFields = [
         'id',
@@ -65,6 +67,12 @@ class PreorderWebApi extends WebApi
             Order::STATUS_EDI_ACCEPTANCE_FINISHED
         ]
     ];
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->orderWebApi = new OrderWebApi();
+    }
 
     /**
      * @param array $vendors
@@ -287,10 +295,9 @@ class PreorderWebApi extends WebApi
         $items = [];
         $orders = $model->orders;
         if (!empty($orders)) {
-            $orderWebApi = new OrderWebApi();
             /** @var Order $order */
             foreach (WebApiHelper::generator($orders) as $order) {
-                $items[] = $orderWebApi->getOrderInfo($order);
+                $items[] = $this->orderWebApi->getOrderInfo($order);
             }
         }
 
@@ -397,7 +404,7 @@ class PreorderWebApi extends WebApi
      * @param $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @throws \Throwable
      */
     public function confirmOrders($post)
     {
@@ -411,26 +418,40 @@ class PreorderWebApi extends WebApi
         }
         $orders = $model->orders;
         if (!empty($orders)) {
-            /** @var Order $order */
-            foreach (WebApiHelper::generator($orders) as $order) {
-                if (empty($order->requested_delivery)) {
-                    throw new BadRequestHttpException('orders.requested_delivery_empty');
+            $t = \Yii::$app->db->beginTransaction();
+            try {
+                /** @var Order $order */
+                foreach (WebApiHelper::generator($orders) as $order) {
+                    if (empty($order->requested_delivery)) {
+                        throw new BadRequestHttpException('orders.requested_delivery_empty');
+                    }
+
+                    $diff = $order->forMinOrderPrice();
+                    if ($diff > 0) {
+                        throw new BadRequestHttpException("orders.min_order_price_not_success|{$order->id}|{$diff}||{$order->currency->symbol}");
+                    }
+
+                    $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                    if (!$order->save()) {
+                        throw new ValidationException($model->getFirstErrors());
+                    }
+                    //Емайл и смс о новом заказе
+                    try {
+                        Notice::init('Order')->sendEmailAndSmsOrderCreated($this->user->organization, $order);
+                        //Сообщение в очередь поставщику, что есть новый заказ
+                        Notice::init('Order')->sendOrderToTurnVendor($order->vendor);
+                        //Сообщение в очередь, Изменение количества товара в корзине
+                        Notice::init('Order')->sendOrderToTurnClient($this->user);
+                    } catch (\Exception $e) {
+                        \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                    }
                 }
-                $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                if (!$order->save()) {
-                    throw new ValidationException($model->getFirstErrors());
-                }
-                //Емайл и смс о новом заказе
-                try {
-                    Notice::init('Order')->sendEmailAndSmsOrderCreated($this->user->organization, $order);
-                    //Сообщение в очередь поставщику, что есть новый заказ
-                    Notice::init('Order')->sendOrderToTurnVendor($order->vendor);
-                    //Сообщение в очередь, Изменение количества товара в корзине
-                    Notice::init('Order')->sendOrderToTurnClient($this->user);
-                } catch (\Exception $e) {
-                    \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
-                }
+                $t->commit();
+            } catch (\Throwable $e) {
+                $t->rollBack();
+                throw $e;
             }
+
         } else {
             throw new BadRequestHttpException('order.not_found');
         }
@@ -449,18 +470,16 @@ class PreorderWebApi extends WebApi
     {
         $this->validateRequest($request, ['id', 'order_id']);
 
-        $model = Preorder::findOne([
-            'id'              => (int)$request['id'],
-            'organization_id' => $this->user->organization_id
-        ]);
-        if (empty($model)) {
-            throw new BadRequestHttpException('preorder.not_found');
-        }
-
+        $model = $this->findPreOrder($request['id']);
         /** @var Order $order */
         $order = $model->getOrders()->andWhere(['order.id' => $request['order_id']])->one();
         if (empty($order)) {
             throw new BadRequestHttpException('order.not_found');
+        }
+
+        $diff = $order->forMinOrderPrice();
+        if ($diff > 0) {
+            throw new BadRequestHttpException("order.min_order_price_not_success|{$diff}|{$order->currency->symbol}");
         }
 
         if (empty($order->requested_delivery)) {
@@ -482,7 +501,7 @@ class PreorderWebApi extends WebApi
             \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
 
-        return (new OrderWebApi())->getOrderInfo($order);
+        return $this->orderWebApi->getOrderInfo($order);
     }
 
     /**
@@ -796,7 +815,7 @@ class PreorderWebApi extends WebApi
                 $order->delete();
             } else {
                 $order->calculateTotalPrice();
-                $orderInfo = (new OrderWebApi())->getOrderInfo($order);
+                $orderInfo = $this->orderWebApi->getOrderInfo($order);
             }
             $t->commit();
         } catch (\Exception $e) {
@@ -837,7 +856,7 @@ class PreorderWebApi extends WebApi
             throw new ValidationException($order->getFirstErrors());
         }
 
-        return (new OrderWebApi())->getOrderInfo($order);
+        return $this->orderWebApi->getOrderInfo($order);
     }
 
     /**
@@ -885,7 +904,7 @@ class PreorderWebApi extends WebApi
                 $order->delete();
             } else {
                 $order->calculateTotalPrice();
-                $orderInfo = (new OrderWebApi())->getOrderInfo($order);
+                $orderInfo = $this->orderWebApi->getOrderInfo($order);
             }
             $t->commit();
         } catch (\Exception $e) {
@@ -965,7 +984,7 @@ class PreorderWebApi extends WebApi
             $t->commit();
             $result = [
                 'preorder' => $this->get(['id' => $newOrder->preorder_id]),
-                'order'    => (new OrderWebApi())->getOrderInfo($newOrder)
+                'order'    => $this->orderWebApi->getOrderInfo($newOrder)
             ];
         } catch (\Exception $e) {
             $t->rollBack();
@@ -1022,7 +1041,7 @@ class PreorderWebApi extends WebApi
             $order->refresh();
             $result = [
                 'preorder' => $this->get(['id' => $order->preorder_id]),
-                'order'    => (new OrderWebApi())->getOrderInfo($order)
+                'order'    => $this->orderWebApi->getOrderInfo($order)
             ];
         } catch (\Exception $e) {
             $t->rollBack();

@@ -527,6 +527,7 @@ class OrderWebApi extends WebApi
         $result['status_updated_at'] = $this->asDate($order->status_updated_at);
         $result['edi_doc_date'] = $this->asDate($order->edi_doc_date);
         $result['requested_delivery'] = $this->asDate($order->requested_delivery, false);
+        $result['created_at'] = $this->asDate($order->created_at, false);
 
         return $result;
     }

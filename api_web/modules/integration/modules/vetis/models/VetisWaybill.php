@@ -697,7 +697,7 @@ class VetisWaybill extends WebApi
         if (isset($attributes->producing)) {
             $guids = [];
             foreach ($attributes->producing as $item) {
-                $guids[] = $item->location->guid;
+                $guids[] = $item->location->guid ?? $item->guid;
             }
             $productionName = VetisRussianEnterprise::find()->select(['name', 'uuid', 'guid'])
                 ->where(['guid' => $guids])->all();

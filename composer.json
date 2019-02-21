@@ -59,7 +59,7 @@
         "ktamas77/firebase-php": "dev-master",
         "light/yii2-swagger": "^1.0",
         "loveorigami/yii2-magnific-popup": "@dev",
-        "modernkernel/yii2-flag-icon-css": "*",
+        "modernkernel/yii2-flag-icon-css": "1.0.0",
         "mohorev/yii2-upload-behavior": "*",
         "mongosoft/yii2-soap-client": "*",
         "mongosoft/yii2-soap-server": "*",

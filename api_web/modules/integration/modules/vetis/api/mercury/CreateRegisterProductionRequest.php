@@ -13,6 +13,7 @@ use api_web\components\Registry;
 use common\models\IntegrationSettingValue;
 use common\models\vetis\VetisProductItem;
 use yii\base\Component;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class CreateRegisterProductionRequest
@@ -91,6 +92,9 @@ class CreateRegisterProductionRequest extends Component
         }
 
         $product = VetisProductItem::findOne(['guid' => $this->params['product_guid']]);
+        if (!$product) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+        }
 
         $productionDate = $this->params['dateOfProduction'];
 

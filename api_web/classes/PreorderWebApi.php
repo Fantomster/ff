@@ -14,6 +14,7 @@ use api_web\{components\Registry,
     components\Notice,
     helpers\CurrencyHelper};
 use common\models\{CartContent,
+    CatalogBaseGoods,
     Order,
     OrderStatus,
     Preorder,
@@ -307,7 +308,7 @@ class PreorderWebApi extends WebApi
         $products = [];
         $productsArray = (new Query())
             ->select([
-                'plan_quantity' => new Expression("sum(a.plan_quantity)"),
+                'plan_quantity' => new Expression("sum(coalesce(a.plan_quantity * b.coefficient, a.plan_quantity))"),
                 'product_id'    => new Expression("coalesce(c.product_id, b.product_id, a.product_id)"),
                 'id'            => new Expression("MIN(a.id)"),
                 'has_analogs'   => new Expression("case when b.product_id is not null then 1 else 0 end"),
@@ -319,18 +320,16 @@ class PreorderWebApi extends WebApi
             ->groupBy(new Expression("coalesce(c.product_id, b.product_id, a.product_id)"))
             ->indexBy('id')
             ->all();
-        //->createCommand()->getRawSql();
 
         /** @var PreorderContent[] $contents */
         $contents = $preOrder->getPreorderContents()->onCondition(['in', 'id', array_keys($productsArray)])->all();
         if ($contents) {
             /** @var PreorderContent $content */
             foreach (WebApiHelper::generator($contents) as $content) {
-                $product = $content->product;
-                if ($content->productAnalog) {
-                    if ($content->productAnalog->firstAnalog) {
-                        $product = $content->productAnalog->firstAnalog->product;
-                    }
+                if ($content->product_id != $productsArray[$content->id]['product_id']) {
+                    $product = CatalogBaseGoods::findOne($productsArray[$content->id]['product_id']);
+                } else {
+                    $product = $content->product;
                 }
                 $products[] = [
                     'id'            => (int)$content->product_id,
@@ -559,17 +558,18 @@ class PreorderWebApi extends WebApi
      *
      * @param array $preOrderContent
      * @param int   $preorderId
+     * @param       $planQuantity
      * @throws \Exception
      */
-    private function createPreOrderContent(array $preOrderContent, int $preorderId)
+    private function createPreOrderContent(array $preOrderContent, int $preorderId, $planQuantity)
     {
         $newData = [];
         foreach ($preOrderContent as $index => $product) {
-            $parentProductId = $product['parent_product_id'] ?? null;
+            $parentProductId = $product['parent_product_id'] ?? $this->getFirstProductAnalog($product['id']);
             $newData[] = [
                 'preorder_id'       => $preorderId,
                 'product_id'        => $product['id'],
-                'plan_quantity'     => $product['quantity'],
+                'plan_quantity'     => $planQuantity ? $product['quantity'] : 0,
                 'parent_product_id' => $product['id'] == $parentProductId ? null : $parentProductId
             ];
         }
@@ -599,11 +599,11 @@ class PreorderWebApi extends WebApi
 
     /**
      * @param      $post
-     * @param bool $createPreOrderContent
+     * @param bool $planQuantity
      * @return array
-     * @throws BadRequestHttpException
+     * @throws
      */
-    public function addProduct($post, $createPreOrderContent = true)
+    public function addProduct($post, $planQuantity = true)
     {
         $this->validateRequest($post, ['id', 'products']);
         if (!is_array($post['products'])) {
@@ -630,9 +630,7 @@ class PreorderWebApi extends WebApi
                 $products = $vendorProducts[$vendor->id];
                 if (!empty($products)) {
                     //Создаем записи о товарах в preorder_content
-                    if ($createPreOrderContent) {
-                        $this->createPreOrderContent($products, $preOrder->id);
-                    }
+                    $this->createPreOrderContent($products, $preOrder->id, $planQuantity);
                     $service_id = $vendor->isEdi() ? Registry::EDI_SERVICE_ID : Registry::MC_BACKEND;
                     $this->handleOrder($vendor, $products, $preOrder, $service_id);
                 }
@@ -869,6 +867,11 @@ class PreorderWebApi extends WebApi
             foreach (WebApiHelper::generator($orderContents) as $orderContent) {
                 if (isset($issetAnalog[$orderContent->product_id])) {
                     $orderContent->delete();
+                    PreorderContent::deleteAll([
+                        'preorder_id'       => $order->preorder_id,
+                        'product_id'        => $orderContent->product_id,
+                        'parent_product_id' => $this->getFirstProductAnalog($orderContent->product_id)
+                    ]);
                 } else {
                     $orderContent->quantity = 0;
                     if (!$orderContent->save()) {
@@ -1089,7 +1092,7 @@ class PreorderWebApi extends WebApi
                             'quantity'          => round($request['quantity'], 3)
                         ]
                     ]
-                ]);
+                ], false);
             }
             $t->commit();
         } catch (\Exception $e) {

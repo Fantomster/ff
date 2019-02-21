@@ -10,6 +10,7 @@ namespace api_web\classes;
 use api_web\helpers\CurrencyHelper;
 use api_web\helpers\WebApiHelper;
 use common\models\{Catalog, CatalogBaseGoods, CatalogGoods, Organization, RelationSuppRest};
+use api_web\exceptions\ValidationException;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
 use yii\web\BadRequestHttpException;
@@ -211,5 +212,75 @@ class LazyVendorPriceWebApi extends LazyVendorWebApi
             throw $e;
         }
         return ['status' => $productBase->status];
+    }
+
+    /**
+     * Добавление продукта в каталог ленивого поставщика
+     *
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Throwable
+     */
+    public function addProduct(array $post)
+    {
+        $this->validateRequest($post, ['vendor_id', 'name', 'price', 'ed']);
+        if (!is_int($post['vendor_id'])) {
+            throw new BadRequestHttpException('catalog.wrong_value');
+        }
+        $catalog = $this->getCatalog($post['vendor_id']);
+        $catId = $catalog->id;
+        if (!empty($post['article'])) {
+            $product = CatalogBaseGoods::find()->where(
+                "article=:article AND product=:name AND cat_id=:cat_id", [
+                ':article' => $post['article'],
+                ':name'    => $post['name'],
+                ':cat_id'  => $catId,
+            ])->one();
+        } else {
+            $product = CatalogBaseGoods::find()->where(
+                "product=:name AND cat_id=:cat_id", [
+                ':name'   => $post['name'],
+                ':cat_id' => $catId,
+            ])->one();
+        }
+        if (!empty($product)) {
+            throw new BadRequestHttpException('catalog.product_exist');
+        }
+        $baseProduct = new CatalogBaseGoods();
+        $product = new CatalogGoods();
+        $baseProduct->cat_id = $catId;
+        if (!empty($post['article'])) {
+            $baseProduct->article = $post['article'];
+        }
+        $baseProduct->product = $post['name'];
+        if (!empty($post['category_id'])) {
+            $baseProduct->category_id = (int)$post['category_id'];
+        }
+        $baseProduct->units = !empty($post['units']) && is_float($post['units']) ? $post['units'] : 1;
+        $baseProduct->ed = $post['ed'];
+        $baseProduct->price = $product->price = $post['price'];
+        $baseProduct->status = !empty($post['status']) && in_array($post['status'], [0, 1]) ? $post['status'] : 1;
+        $baseProduct->supp_org_id = $post['vendor_id'];
+        if (!empty($post['product_image'])) {
+            $baseProduct->image = WebApiHelper::convertLogoFile($post['product_image']);
+        }
+        $product->cat_id = $catId;
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            if (!$baseProduct->save()) {
+                throw new ValidationException($baseProduct->getFirstErrors());
+            }
+            $productId = $baseProduct->id;
+            $product->base_goods_id = $productId;
+            if (!$product->save()) {
+                throw new ValidationException($product->getFirstErrors());
+            }
+            $t->commit();
+        } catch (\Throwable $e) {
+            $t->rollBack();
+            throw $e;
+        }
+        return $this->preparePriceRow($product);
     }
 }

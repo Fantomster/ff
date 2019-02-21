@@ -281,42 +281,6 @@ class LazyVendorPriceWebApi extends LazyVendorWebApi
             $t->rollBack();
             throw $e;
         }
-        return $this->addProductResult($post);
-    }
-
-    /**
-     * @param array $post
-     * @return array
-     */
-    private function addProductResult(array $post)
-    {
-        $result = [
-            'vendor_id'     => '',
-            'article'       => '',
-            'category_id'   => '',
-            'price'         => '',
-            'ed'            => '',
-            'units'         => 1,
-            'status'        => 1,
-            'product_image' => false,
-        ];
-        $result['vendor_id'] = $post['vendor_id'];
-        $result['article'] = $post['article'];
-        $result['name'] = $post['name'];
-        if (!empty($post['category_id'])) {
-            $result['category_id'] = $post['category_id'];
-        }
-        $result['price'] = $post['price'];
-        $result['ed'] = $post['ed'];
-        if (!empty($post['units'])) {
-            $result['units'] = $post['units'];
-        }
-        if (!empty($post['status'])) {
-            $result['status'] = $post['status'];
-        }
-        if (!empty($post['product_image'])) {
-            $result['product_image'] = true;
-        }
-        return $result;
+        return $this->preparePriceRow($product);
     }
 }

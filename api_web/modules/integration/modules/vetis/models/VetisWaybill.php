@@ -756,6 +756,11 @@ class VetisWaybill extends WebApi
         $model->globalID = $request['gtin'];
         $model->correspondsToGost = (int)$request['has_gost'];
         $model->gost = $request['gost'];
+        $model->packagingType_guid = $request['package']['type_uuid'];
+        $model->packagingVolume = $request['package']['volume'];
+        $model->packagingQuantity = $request['package']['amount'];
+        $model->unit_guid = $request['package']['unit_guid'];
+        $model->producers = $request['producers'];
 
         if ($model->validate()) {
             try {

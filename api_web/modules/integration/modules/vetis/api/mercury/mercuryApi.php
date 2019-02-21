@@ -650,21 +650,35 @@ class mercuryApi extends baseApi
             $productItem->producer->guid = $this->issuerID;
             $productItem->tmOwner = new BusinessEntity();
             $productItem->tmOwner->guid = $this->issuerID;
-            $productItem->producing = new ProductItemProducing();
-            $productItem->producing->location = new Enterprise();
-            $productItem->producing->location->guid = $this->enterpriseGuid;
+            if (!empty($form->producers)) {
+                foreach ($form->producers as $item) {
+                    $prdItem = new ProductItemProducing();
+                    $prdItem->location = new Enterprise();
+                    $prdItem->location->guid = $item;
+                    $productItem->producing[] = $prdItem;
+                }
+            } else {
+                $productItem->producing = new ProductItemProducing();
+                $productItem->producing->location = new Enterprise();
+                $productItem->producing->location->guid = $this->enterpriseGuid;
+            }
 
-            /*if(isset($form->packagingType_guid))
-            {
+            if (isset($form->packagingType_guid)) {
                 $packaging = new Packaging();
                 $packaging->packagingType = new PackingType();
-                $packaging->packagingType->guid = $form->packagingType_guid;
-                if(isset($form->unit_guid)) {
+                $packaging->packagingType->uuid = $form->packagingType_guid;
+                if (isset($form->packagingQuantity)) {
+                    $packaging->quantity = $form->packagingQuantity;
+                }
+                if (isset($form->packagingVolume)) {
+                    $packaging->volume = $form->packagingVolume;
+                }
+                if (isset($form->unit_guid)) {
                     $packaging->unit = new Unit();
                     $packaging->unit->guid = $form->unit_guid;
                 }
                 $productItem->packaging = $packaging;
-            }*/
+            }
 
             $resultingList->productItem = $productItem;
             $request_body->modificationOperation->resultingList = $resultingList;

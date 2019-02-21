@@ -15,6 +15,12 @@ use Real\Validator\Gtin;
 class productForm extends VetisProductItem
 {
     /**
+     * Список производителей
+     *
+     * @var array
+     */
+    public $producers;
+    /**
      * {@inheritdoc}
      */
     public function rules()

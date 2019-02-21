@@ -1854,7 +1854,7 @@ class DefaultController extends WebApiController
      *                          "41fb53ea-31c3-b116-9ce2-7d7df18c5832"
      *                      },
      *                      "package": {
-     *                          "type_guid": "41fb53ea-31c3-b116-9ce2-7d7df18c5832",
+     *                          "type_uuid": "41fb53ea-31c3-b116-9ce2-7d7df18c5832",
      *                          "amount": 1,
      *                          "volume": 12,
      *                          "unit_guid": "41fb53ea-31c3-b116-9ce2-7d7df18c5832"

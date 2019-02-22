@@ -301,8 +301,10 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
                 $q = mb_strtolower($q);
                 foreach ($list as $item) {
                     if (($item['enterprise']['last']) && ($item['enterprise']['active']))
-                        if (!is_null($q) && (mb_strpos(mb_strtolower($item['enterprise']['name']), $q) === false)) {
-                            continue;
+                        if (!empty($q)) {
+                            if (mb_strpos(mb_strtolower($item['enterprise']['name']), $q) === false) {
+                                continue;
+                            }
                         }
 
                     $res[] = ['id'   => $item['enterprise']['guid'],

@@ -317,7 +317,7 @@ class PreorderWebApi extends WebApi
             ->select([
                 'plan_quantity' => new Expression("sum(coalesce(a.plan_quantity * b.coefficient, a.plan_quantity))"),
                 'product_id'    => new Expression("coalesce(c.product_id, b.product_id, a.product_id)"),
-                'id'            => new Expression("MIN(a.id)"),
+                'id'            => new Expression("a.id"),
                 'has_analogs'   => new Expression("case when b.product_id is not null then 1 else 0 end"),
             ])
             ->from(PreorderContent::tableName() . ' as a')
@@ -525,7 +525,7 @@ class PreorderWebApi extends WebApi
                 'name' => $model->user->profile->full_name
             ],
             'count'        => [
-                'products' => (int)$model->getPreorderContents()->count(),
+                'products' => (int)$model->getPreorderContents()->andWhere(['>', 'plan_quantity', 0])->count(),
                 'orders'   => (int)$model->getOrders()->count(),
             ],
             'sum'          => $model->getSum(),
@@ -1093,7 +1093,8 @@ class PreorderWebApi extends WebApi
                         PreorderContent::deleteAll([
                             'preorder_id'       => $preOrder->id,
                             'product_id'        => $analog->base_goods_id,
-                            'parent_product_id' => $this->getFirstProductAnalog($analog->base_goods_id)
+                            'parent_product_id' => $this->getFirstProductAnalog($analog->base_goods_id),
+                            'plan_quantity'     => 0
                         ]);
                         $orderDelete = ArrayHelper::merge($orderDelete, $r['order_delete']);
                     }

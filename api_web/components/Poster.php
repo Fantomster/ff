@@ -386,7 +386,7 @@ class Poster
                 'id'   => $item->productOuter->outer_uid,
                 'type' => $item->productOuter->outerProductType->value,
                 'num'  => $item->quantity_waybill * $item->koef,
-                'sum'  => $item->price_without_vat,
+                'sum'  => $item->price_without_vat / $item->koef,
             ];
         }
 

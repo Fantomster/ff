@@ -12,6 +12,7 @@ use api_web\exceptions\ValidationException;
 use api_web\modules\integration\classes\documents\Waybill;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue as ISV;
+use common\models\Journal;
 use common\models\OuterAgent;
 use common\models\OuterProduct;
 use common\models\OuterProductType;
@@ -367,6 +368,7 @@ class Poster
     /**
      * @param Waybill $waybill
      * @return bool
+     * @throws ValidationException
      */
     public function sendWaybill(Waybill $waybill)
     {
@@ -384,13 +386,37 @@ class Poster
                 'id'   => $item->productOuter->outer_uid,
                 'type' => $item->productOuter->outerProductType->value,
                 'num'  => $item->quantity_waybill * $item->koef,
-                'sum'  => $item->price_with_vat,
+                'sum'  => $item->price_without_vat,
             ];
         }
 
         $supply['ingredient'] = $arIngredients;
         $response = $this->sendRequest($url, 'post', $supply);
+        $this->writeInJournal($response, $waybill->acquirer_id);
 
         return (bool)$response['success'];
+    }
+
+    /**
+     * Запись в журнал
+     *
+     * @param        $message
+     * @param int    $orgId
+     * @param string $type
+     * @throws ValidationException
+     */
+    private function writeInJournal($message, int $orgId = 0, $type = 'success'): void
+    {
+        $journal = new Journal();
+        $journal->response = is_array($message) ? json_encode($message) : $message;
+        $journal->service_id = (int)Registry::POSTER_SERVICE_ID;
+        $journal->type = $type;
+        $journal->log_guide = 'CreateWaybill';
+        $journal->organization_id = $orgId;
+        $journal->user_id = (\Yii::$app instanceof \Yii\web\Application && isset($this->user->id)) ? $this->user->id : null;
+        $journal->operation_code = '0';
+        if (!$journal->save()) {
+            throw new ValidationException($journal->getFirstErrors());
+        }
     }
 }

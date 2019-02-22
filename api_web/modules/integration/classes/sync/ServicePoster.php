@@ -143,10 +143,9 @@ class ServicePoster extends AbstractSyncFactory
                         Registry::POSTER_SERVICE_ID, $model->acquirer_id);
                 }
             }
-
         } catch (\Throwable $t) {
             \Yii::error($t->getMessage() . PHP_EOL . $t->getTraceAsString());
-            throw new BadRequestHttpException($t->getMessage());
+            throw new BadRequestHttpException(print_r($t->getMessage()) . PHP_EOL . print_r($t->getTraceAsString()));
         }
 
         return ['result' => $res];

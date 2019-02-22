@@ -169,7 +169,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         $step1 = $session->get('TrVsd_step1');
         $session->set('TrVsd_step1', $step1);
         $step2 = $session->get('TrVsd_step2');
-        $session->set('TrVsd_step2', $step1);
+        $session->set('TrVsd_step2', $step2);
         $model = new step3Form();
         $model->attributes = $session->get('TrVsd_step3');
         $session->remove('TrVsd_step3');

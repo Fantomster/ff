@@ -142,9 +142,12 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
     public function actionStep2()
     {
         $session = Yii::$app->session;
+        $step1 = $session->get('TrVsd_step1');
+        $session->set('TrVsd_step1', $step1);
         $model = new step2Form();
         $model->attributes = $session->get('TrVsd_step2');
         $session->remove('TrVsd_step2');
+
 
         $post = Yii::$app->request->post();
         if ($model->load($post)) {
@@ -163,6 +166,10 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
     public function actionStep3()
     {
         $session = Yii::$app->session;
+        $step1 = $session->get('TrVsd_step1');
+        $session->set('TrVsd_step1', $step1);
+        $step2 = $session->get('TrVsd_step2');
+        $session->set('TrVsd_step2', $step1);
         $model = new step3Form();
         $model->attributes = $session->get('TrVsd_step3');
         $session->remove('TrVsd_step3');

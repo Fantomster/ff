@@ -11,6 +11,7 @@ return [
     'bootstrap'           => ['log',], // 'assetsAutoCompress'
     'controllerNamespace' => 'market\controllers',
     'components'          => [
+        'authManager'        => null,
         'request'            => [
             'csrfParam' => '_csrf-fk',
         ],

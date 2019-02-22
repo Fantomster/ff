@@ -11,6 +11,7 @@ return [
     'bootstrap'           => ['log'],
     'controllerNamespace' => 'franchise\controllers',
     'components'          => [
+        'authManager'  => null,
         'view'         => [
             'theme' => [
                 'pathMap' => [

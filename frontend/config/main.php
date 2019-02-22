@@ -17,6 +17,7 @@ return [
 //                    'cloudWatchLog' => 'cloudWatchLog',
 //                    'groupName' => 'Errors_at_mixcart.test',
 //                ],        
+        'authManager'         => null,
         'request'             => [
             'csrfParam'        => '_csrf-fk',
             'enableCsrfCookie' => true,
@@ -39,8 +40,8 @@ return [
             'showScriptName'  => false,
         ],
     ],
-    'params'  => $params,
-    'modules' => [
+    'params'              => $params,
+    'modules'             => [
         'billing' => [
             'class' => 'frontend\modules\billing\Module',
         ],

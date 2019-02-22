@@ -1,16 +1,48 @@
 <?php
+
 namespace api_web\controllers;
 
 use api_web\classes\JournalWebApi;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
+use yii\filters\AccessControl;
 
 /**
  * Class JournalController
  *
+ * @property JournalWebApi $classWebApi
  * @package api_web\controllers
  */
 class JournalController extends WebApiController
 {
+    public $className = JournalWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'list'
+                    ],
+                    'roles'      => [
+                        Registry::MANAGER_RESTAURANT,
+                        Registry::BOOKER_RESTAURANT,
+                    ],
+                    'roleParams' => ['user' => $this->user]
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
+
     /**
      * @SWG\Post(path="/journal/list",
      *     tags={"Journal"},
@@ -32,8 +64,8 @@ class JournalController extends WebApiController
      *                             "end": "24.08.2018"
      *                         },
      *                         "user_id": 3768,
-     *                         "service_id": 2,
-     *                         "type": "error"
+     *                         "service_id": {2},
+     *                         "type": {"error"}
      *                      },
      *                      "pagination": {
      *                          "page": 1,
@@ -83,6 +115,6 @@ class JournalController extends WebApiController
      */
     public function actionList()
     {
-        $this->response = (new JournalWebApi())->list($this->request);
+        $this->response = $this->classWebApi->list($this->request);
     }
 }

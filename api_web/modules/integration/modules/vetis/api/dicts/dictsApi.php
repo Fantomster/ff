@@ -20,6 +20,7 @@ class dictsApi extends baseApi
     public function init()
     {
         $this->system = 'dicts';
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\dicts\Dicts();
         $this->wsdlClassName = Dicts::class;
         parent::init();
     }

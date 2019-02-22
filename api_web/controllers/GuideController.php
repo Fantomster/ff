@@ -3,16 +3,68 @@
 namespace api_web\controllers;
 
 use api_web\classes\GuideWebApi;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
+use yii\filters\AccessControl;
 
 /**
  * Class GuideController
+ *
  * @property GuideWebApi $classWebApi
  * @package api_web\controllers
  */
 class GuideController extends WebApiController
 {
     public $className = GuideWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'list',
+                        'get',
+                        'add-to-cart'
+                    ],
+                    'roles'      => [Registry::PROCUREMENT_INITIATOR],
+                    'roleParams' => ['user' => $this->user]
+
+                ],
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'create',
+                        'create-from-order',
+                        'delete',
+                        'rename',
+                        'change-color',
+                        'action-product',
+                    ],
+                    'roles'      => [Registry::PURCHASER_RESTAURANT],
+                    'roleParams' => ['user' => $this->user]
+
+                ],
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'get-products',
+                    ],
+                    'roles'      => [Registry::OPERATOR],
+                    'roleParams' => ['user' => $this->user]
+
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @SWG\Post(path="/guide/get",
@@ -596,7 +648,6 @@ class GuideController extends WebApiController
     {
         $this->response = $this->classWebApi->addToCart($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/guide/action-product",

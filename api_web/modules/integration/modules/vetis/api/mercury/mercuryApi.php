@@ -25,6 +25,7 @@ class mercuryApi extends baseApi
     public function init()
     {
         require_once(__DIR__ . "/Mercury.php");
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
         $this->system = 'mercury';
         $this->wsdlClassName = Mercury::class;
         parent::init();
@@ -405,7 +406,7 @@ class mercuryApi extends baseApi
      * @throws \yii\base\InvalidConfigException
      * @throws \Exception
      */
-    public function resolveDiscrepancyOperation($model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)
+    public function resolveDiscrepancyOperation(createStoreEntryForm $model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)
     {
         $result = null;
 
@@ -649,9 +650,35 @@ class mercuryApi extends baseApi
             $productItem->producer->guid = $this->issuerID;
             $productItem->tmOwner = new BusinessEntity();
             $productItem->tmOwner->guid = $this->issuerID;
-            $productItem->producing = new ProductItemProducing();
-            $productItem->producing->location = new Enterprise();
-            $productItem->producing->location->guid = $this->enterpriseGuid;
+            if (!empty($form->producers)) {
+                foreach ($form->producers as $item) {
+                    $prdItem = new ProductItemProducing();
+                    $prdItem->location = new Enterprise();
+                    $prdItem->location->guid = $item;
+                    $productItem->producing[] = $prdItem;
+                }
+            } else {
+                $productItem->producing = new ProductItemProducing();
+                $productItem->producing->location = new Enterprise();
+                $productItem->producing->location->guid = $this->enterpriseGuid;
+            }
+
+            if (isset($form->packagingType_guid)) {
+                $packaging = new Packaging();
+                $packaging->packagingType = new PackingType();
+                $packaging->packagingType->uuid = $form->packagingType_guid;
+                if (isset($form->packagingQuantity)) {
+                    $packaging->quantity = $form->packagingQuantity;
+                }
+                if (isset($form->packagingVolume)) {
+                    $packaging->volume = $form->packagingVolume;
+                }
+                if (isset($form->unit_guid)) {
+                    $packaging->unit = new Unit();
+                    $packaging->unit->guid = $form->unit_guid;
+                }
+                $productItem->packaging = $packaging;
+            }
 
             $resultingList->productItem = $productItem;
             $request_body->modificationOperation->resultingList = $resultingList;

@@ -26,7 +26,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     {
         $this->organisation_id = User::findOne(Yii::$app->user->id)->organization_id;
 
-        if(empty($this->organisation_id)) {
+        if (empty($this->organisation_id)) {
             return false;
         }
 
@@ -37,29 +37,28 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     {
         return ArrayHelper::merge(parent::actions(), [
             'agent-mapping' => [                                       // identifier for your editable column action
-                'class' => EditableColumnAction::className(),     // action class name
-                'modelClass' => OneSContragent::className(),                // the model for the record being edited
-                'outputValue' => function ($model, $attribute, $key, $index) {
+                'class'           => EditableColumnAction::className(),     // action class name
+                'modelClass'      => OneSContragent::className(),                // the model for the record being edited
+                'outputValue'     => function ($model, $attribute, $key, $index) {
                     $vendor = $model->vendor;
                     return isset($vendor) ? $vendor->name : null;      // return any custom output value if desired
                 },
-                'outputMessage' => function($model, $attribute, $key, $index) {
+                'outputMessage'   => function ($model, $attribute, $key, $index) {
                     return '';                                  // any custom error to return after model save
                 },
                 'showModelErrors' => true,                        // show model validation errors after save
-                'errorOptions' => ['header' => '']  ,              // error summary HTML options
-                'postOnly' => true,
-                'ajaxOnly' => true,
+                'errorOptions'    => ['header' => ''],              // error summary HTML options
+                'postOnly'        => true,
+                'ajaxOnly'        => true,
             ]
         ]);
     }
-
 
     public function actionIndex()
     {
         $searchModel = new OneSDicSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $license = OneSService::getLicense();
+        $license = OneSService::getLicense(Yii::$app->user->identity->organization_id);
         $view = $license ? 'index' : '/default/_nolic';
         $params = ['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'lic' => $license];
         $spravoch_zagruzhen = OneSDicSearch::getDicsLoad();
@@ -122,17 +121,18 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     {
         $searchModel = new OneSDicSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $license = OneSService::getLicense();
+        $license = OneSService::getLicense(Yii::$app->user->identity->organization_id);
         $view = $license ? 'index' : '/default/_nolic';
         $params = ['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'lic' => $license];
-            if (Yii::$app->request->isPjax) {
-                return $this->renderPartial($view, $params);
-            } else {
-                return $this->render($view, $params);
-            }
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial($view, $params);
+        } else {
+            return $this->render($view, $params);
+        }
     }
 
-    public function actionTest() {
+    public function actionTest()
+    {
         $model = oneSWaybill::findOne(7);
         header('Content-type: text/xml');
         echo $model->getXmlDocument();

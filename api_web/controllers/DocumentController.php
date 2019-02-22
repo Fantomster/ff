@@ -3,6 +3,8 @@
 namespace api_web\controllers;
 
 use api_web\classes\DocumentWebApi;
+use api_web\components\Registry;
+use yii\filters\AccessControl;
 
 /**
  * Class DocumentController
@@ -13,6 +15,41 @@ use api_web\classes\DocumentWebApi;
 class DocumentController extends \api_web\components\WebApiController
 {
     public $className = DocumentWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'documents-list',
+                        'document-content',
+                        'waybill-detail',
+                        'update-waybill-detail',
+                        'reset-waybill-positions',
+                        'map-waybill-order',
+                        'document-status',
+                        'waybill-status',
+                        'get',
+                        'sort-list',
+                    ],
+                    'roles'      => [
+                        Registry::MANAGER_RESTAURANT,
+                        Registry::BOOKER_RESTAURANT,
+                    ],
+                    'roleParams' => ['user' => $this->user]
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @param $action

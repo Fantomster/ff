@@ -1,34 +1,64 @@
 <?php
 
+use kartik\grid\GridView;
+
 $this->title = 'Доступы iiko Office';
 
 $this->params['breadcrumbs'][] = [
     'label' => 'Управление лицензиями',
-    'url' => '/integration'
+    'url'   => '/integration'
 ];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <div class="catalog-index">
     <div>
-        <h2><?=$this->title?></h2>
-        <a class="btn btn-success pull-right" href="/iiko/create" >Создать</a>
+        <h2><?= $this->title ?></h2>
+        <a class="btn btn-success pull-right" href="/iiko/create">Создать</a>
     </div>
 
     <div class="box-header with-border">
         <div class="box-title pull-left">
             <?=
-            \yii\grid\GridView::widget([
+            \kartik\grid\GridView::widget([
                 'dataProvider' => $dataProvider,
-                'filterModel' => $searchModel,
-                'summary' => false,
-                'columns' => [
-                    'fd',
-                    'td',
+                'filterModel'  => $searchModel,
+                'summary'      => false,
+                'columns'      => [
+                    [
+                        'attribute'           => 'fd',
+                        'filterType'          => \kartik\grid\GridView::FILTER_DATE,
+                        'filterWidgetOptions' => ([
+                            'model'         => $searchModel,
+                            'attribute'     => 'date',
+                            'pluginOptions' => [
+                                'autoclose' => true,
+                                'format'    => 'dd.mm.yyyy',
+                            ]
+                        ]),
+                        'value'               => function ($data) {
+                            return date('d.m.Y', strtotime($data->fd));
+                        }
+                    ],
+                    [
+                        'attribute'           => 'td',
+                        'filterType'          => \kartik\grid\GridView::FILTER_DATE,
+                        'filterWidgetOptions' => ([
+                            'model'         => $searchModel,
+                            'attribute'     => 'date',
+                            'pluginOptions' => [
+                                'autoclose' => true,
+                                'format'    => 'dd.mm.yyyy',
+                            ]
+                        ]),
+                        'value'               => function ($data) {
+                            return date('d.m.Y', strtotime($data->td));
+                        }
+                    ],
                     [
                         'attribute' => 'org',
-                        'label' => 'Организация MixCart',
-                        'value' => function ($model) {
+                        'label'     => 'Организация MixCart',
+                        'value'     => function ($model) {
                             if (isset($model))
                                 return $model->organization ? $model->organization->name : null;
 
@@ -36,12 +66,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'attribute' => 'status_id',
-                        'value' => function ($model) {
+                        'filter'    => [0 => 'Не активно', 1 => 'Активно'],
+                        'value'     => function ($model) {
                             if ($model) return ($model->status_id == 1) ? 'Активно' : 'Не активно';
                         },
                     ],
                     [
-                        'class' => 'yii\grid\ActionColumn',
+                        'class'    => 'yii\grid\ActionColumn',
                         'template' => '{update}{delete}',
                     ]
                 ],

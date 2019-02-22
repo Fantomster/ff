@@ -367,7 +367,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $agentModel = OneSContragent::findOne(['id' => $model->agent_uuid]);
         $storeModel = OneSStore::findOne(['id' => $model->store_id]);
 
-        $lic = OneSService::getLicense();
+        $lic = OneSService::getLicense(Yii::$app->user->identity->organization_id);
         $view = $lic ? 'indexmap' : '/default/_nolic';
         $vatFilter = [];
         $vatFilter["vat"] = 1;
@@ -476,9 +476,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
             $query2 = (new Query())
                 ->select([
-                    "id"    => "id",
-                    "name" => "name",
-                    "measure"  => "measure"
+                    "id"      => "id",
+                    "name"    => "name",
+                    "measure" => "measure"
                 ])
                 ->from('one_s_good')
                 ->where(['is_active' => 1])
@@ -489,9 +489,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
             $query3 = (new Query())
                 ->select([
-                    "id"    => "id",
-                    "name" => "name",
-                    "measure"  => "measure"
+                    "id"      => "id",
+                    "name"    => "name",
+                    "measure" => "measure"
                 ])
                 ->from('one_s_good')
                 ->where(['is_active' => 1])
@@ -502,9 +502,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
             $query1 = (new Query())
                 ->select([
-                    "id"    => "id",
-                    "name" => "name",
-                    "measure"  => "measure",
+                    "id"      => "id",
+                    "name"    => "name",
+                    "measure" => "measure",
                 ])
                 ->from('one_s_good')
                 ->union($query2)
@@ -551,7 +551,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionUpdate($id, $page)
     {
         $model = $this->findModel($id);
-        $lic = OneSService::getLicense();
+        $lic = OneSService::getLicense(Yii::$app->user->identity->organization_id);
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post())) {
             if ($model->agent_uuid == '') {

@@ -68,7 +68,7 @@ class FullmapController extends DefaultController
         $dataProvider->pagination->pageSize = 10;
 
         $services = ['0' => 'Выберите сервис'];
-        $lic0 = Organization::getLicenseList();
+        $lic0 = $client->getLicenseList();
         if ((isset($lic0['rkws'])) && (isset($lic0['rkws_ucs']))) {
             $services = $services + ['1' => 'R-keeper'];
         }

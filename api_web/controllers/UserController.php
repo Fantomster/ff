@@ -4,7 +4,9 @@ namespace api_web\controllers;
 
 use api_web\classes\UserWebApi;
 use api_web\components\Notice;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
+use yii\filters\AccessControl;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -16,6 +18,65 @@ use yii\web\BadRequestHttpException;
 class UserController extends WebApiController
 {
     public $className = UserWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'remove-vendor',
+                    ],
+                    'roles'      => [Registry::PURCHASER_RESTAURANT],
+                    'roleParams' => ['user' => $this->user]
+                ],
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'get',
+                        'vendors',
+                        'get-gmt',
+                        'login',
+                        'password-recovery',
+                        'vendor-status-list',
+                        'vendor-location-list',
+                        'password-change',
+                        'mobile-change',
+                        'get-agreement',
+                        'change-unconfirmedUsers-phone',
+                        'get-available-businesses',
+                        'set-agreement',
+                    ],
+                    'roles'      => [Registry::OPERATOR],
+                    'roleParams' => ['user' => $this->user]
+                ],
+                ['allow'   => true,
+                 'actions' => [
+                     'organization',
+                     'set-organization',
+                 ],
+                 'roles'   => [Registry::AUTH_USER]
+                ],
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'registration',
+                        'registration-repeat-sms',
+                        'registration-confirm',
+                    ],
+                    'roles'   => []
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @SWG\Post(path="/user/get",

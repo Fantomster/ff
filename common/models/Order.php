@@ -47,7 +47,7 @@ use yii\web\BadRequestHttpException;
  * @property string             $edi_doc_date       Дата накладной заказа по EDI
  * @property int                $is_recadv_sent     Показатель состояния отправки файла recadv (0 - не отправлен, 1 -
  *           отправлен)
- *
+ * @property int                $preorder_id
  * @property EmailQueue[]       $emailQueues
  * @property User               $acceptedBy
  * @property Organization       $client
@@ -64,6 +64,7 @@ use yii\web\BadRequestHttpException;
  * @property IntegrationInvoice $invoice
  * @property IntegrationInvoice $invoiceRelation
  * @property EmailQueue[]       $relatedEmails
+ * @property int                $positionCount
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -79,7 +80,7 @@ class Order extends \yii\db\ActiveRecord
     const STATUS_EDI_ACCEPTANCE_FINISHED = 9;
     const STATUS_EDI_SENDING_TO_VENDOR = 10;
     const STATUS_EDI_SENDING_ERROR = 11;
-    const STATUS_PREORDER = 12;
+    const STATUS_PREORDER = OrderStatus::STATUS_PREORDER;
     const DISCOUNT_NO_DISCOUNT = null;
     const DISCOUNT_FIXED = 1;
     const DISCOUNT_PERCENT = 2;
@@ -405,6 +406,7 @@ class Order extends \yii\db\ActiveRecord
             OrderStatus::STATUS_CANCELLED                   => Yii::t('app', 'common.models.canceled', ['ru' => 'Отменен']),
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT => Yii::t('app', 'common.models.waiting_client', ['ru' => 'Ожидает подтверждения клиента']),
             OrderStatus::STATUS_REJECTED                    => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
+            OrderStatus::STATUS_PREORDER                    => Yii::t('app', 'common.models.order.status_preorder', ['ru' => 'Предзаказ']),
         ];
     }
 
@@ -421,6 +423,7 @@ class Order extends \yii\db\ActiveRecord
             OrderStatus::STATUS_DONE                        => Yii::t('app', 'common.models.done_two', ['ru' => 'Завершен']),
             OrderStatus::STATUS_REJECTED                    => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
             OrderStatus::STATUS_CANCELLED                   => Yii::t('app', 'common.models.client_canceled', ['ru' => 'Отменен клиентом']),
+            OrderStatus::STATUS_PREORDER                    => Yii::t('app', 'common.models.order.status_preorder', ['ru' => 'Предзаказ']),
         ];
         if (!$short) {
             $result[OrderStatus::STATUS_FORMING] = Yii::t('app', 'common.models.forming', ['ru' => 'Формируется']);
@@ -613,6 +616,7 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getRecipientsList()
     {
+        $recipients = [];
         $recipients[] = $this->createdBy;
         if (isset($this->accepted_by_id)) {
             $recipients[] = $this->acceptedBy;
@@ -643,6 +647,14 @@ class Order extends \yii\db\ActiveRecord
         if (!empty($this->vendor->additionalEmail)) {
             foreach ($this->vendor->additionalEmail as $addEmail) {
                 $recipients[] = $addEmail;
+            }
+        }
+
+        //Новые контакты, для ленивых поставщиков
+        if ($this->vendor->type_id == Organization::TYPE_LAZY_VENDOR && !empty($this->vendor->organizationContact)) {
+            /** @var OrganizationContact $model */
+            foreach ($this->vendor->organizationContact as $model) {
+                $recipients[] = $model;
             }
         }
 
@@ -1000,4 +1012,15 @@ class Order extends \yii\db\ActiveRecord
         return $result;
     }
 
+    /**
+     * @return array
+     */
+    public function getProducts()
+    {
+        $result = [];
+        foreach ($this->orderContent as $orderContent) {
+            $result[] = $orderContent->product_id;
+        }
+        return $result;
+    }
 }

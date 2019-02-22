@@ -4,10 +4,6 @@ namespace common\models;
 
 use common\models\guides\GuideProduct;
 use common\models\guides\Guide;
-use Yii;
-use yii\data\ActiveDataProvider;
-use common\behaviors\UploadBehavior;
-use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "relation_supp_rest".

@@ -18,15 +18,21 @@ class iikoLogger
     /**
      * iikoLogger constructor.
      *
+     * @param null $orgId
      * @throws \Exception
      */
-    function __construct()
+    function __construct($orgId = null)
     {
         self::$guide = md5(uniqid(microtime(), 1));
         self::insert(['guide' => self::$guide]);
         if (!(\Yii::$app instanceof yii\console\Application)) {
             $this->setUser(\Yii::$app->user->getId());
             self::update(['ip' => \Yii::$app->request->getUserIP()]);
+        }
+        if (!empty($orgId)) {
+            self::update([
+                'organization_id' => $orgId
+            ]);
         }
     }
 

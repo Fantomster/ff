@@ -2,7 +2,6 @@
 
 namespace api_web\classes;
 
-use api_web\components\FireBase;
 use api_web\components\Registry;
 use api_web\helpers\WebApiHelper;
 use api_web\models\ForgotForm;
@@ -10,6 +9,8 @@ use common\models\licenses\License;
 use common\models\ManagerAssociate;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
+use common\models\rbac\AuthAssignment;
+use common\models\rbac\helpers\RbacHelper;
 use common\models\RelationSuppRest;
 use common\models\RelationUserOrganization;
 use common\models\Role;
@@ -20,6 +21,7 @@ use common\models\UserToken;
 use api_web\components\Notice;
 use common\models\RelationSuppRestPotential;
 use common\models\Organization;
+use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
@@ -110,7 +112,7 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new ValidationException($organization->getFirstErrors());
             }
 
-            $user = $this->createUser($post, Role::getManagerRole($organization->type_id));
+            $user = $this->createUser($post, Role::getManagerRole($organization->type_id), $organization->id);
             $user->setOrganization($organization, true);
             $user->setRelationUserOrganization($organization->id, $user->role_id);
             $profile = $this->createProfile($post, $user);
@@ -140,11 +142,12 @@ class UserWebApi extends \api_web\components\WebApi
      * @param array   $post
      * @param integer $role_id
      * @param null    $status
+     * @param null    $org_id
      * @return User
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function createUser(array $post, $role_id, $status = null)
+    public function createUser(array $post, $role_id, $org_id, $status = null)
     {
         if (User::findOne(['email' => $post['user']['email']])) {
             throw new BadRequestHttpException('This email is already present in the system.');
@@ -160,8 +163,28 @@ class UserWebApi extends \api_web\components\WebApi
         }
         $user->setRegisterAttributes($role_id, $status);
         $user->save();
+        $this->addRbacRole($user->id, $role_id, $org_id);
 
         return $user;
+    }
+
+    /**
+     * @param $userId
+     * @param $roleId
+     * @param $org_id
+     * @throws ValidationException
+     */
+    public function addRbacRole($userId, $roleId, $org_id): void
+    {
+        $authAssign = new AuthAssignment([
+            'item_name'       => RbacHelper::$dictRoles[$roleId],
+            'user_id'         => $userId,
+            'organization_id' => $org_id
+        ]);
+
+        if (!$authAssign->save()) {
+            throw new ValidationException($authAssign->getFirstErrors());
+        }
     }
 
     /**
@@ -494,7 +517,7 @@ class UserWebApi extends \api_web\components\WebApi
         //Данные для ответа
         if (!empty($dataProvider->models)) {
             $r = new \SplObjectStorage();
-            foreach ($dataProvider->models as $model) {
+            foreach (WebApiHelper::generator($dataProvider->models) as $model) {
                 $r->attach((object)$this->prepareVendor($model));
             }
             $return['vendors'] = $r;
@@ -530,7 +553,7 @@ class UserWebApi extends \api_web\components\WebApi
         $dataProvider->pagination->pageSize = 1000;
         $vendor_ids = $return = [];
 
-        foreach ($dataProvider->getModels() as $model) {
+        foreach (WebApiHelper::generator($dataProvider->getModels()) as $model) {
             $vendor_ids[$model->supp_org_id] = $model->supp_org_id;
         }
 
@@ -544,7 +567,7 @@ class UserWebApi extends \api_web\components\WebApi
             ->andWhere("locality != ''")
             ->orderBy('country');
 
-        foreach ($query->all() as $row) {
+        foreach (WebApiHelper::generator($query->all()) as $row) {
             $return[] = [
                 'title' => $row['country'] . ', ' . $row['locality'],
                 'value' => trim($row['country']) . ':' . trim($row['locality'])
@@ -576,7 +599,7 @@ class UserWebApi extends \api_web\components\WebApi
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $where = [
-                'rest_org_id' => $this->user->organization->id,
+                'rest_org_id' => $this->user->organization_id,
                 'supp_org_id' => $vendor->id
             ];
 
@@ -793,12 +816,13 @@ class UserWebApi extends \api_web\components\WebApi
      * Возвращает GMT из базы, если его нет сохраняет из headers, добавляет плюс к не отрицательному таймзону
      *
      * @return string $gmt
-     * */
+     * @throws ValidationException
+     */
     public function checkGMTFromDb()
     {
         $gmt = $this->getGmt()['GMT'];
 
-        if (!empty($this->user)) {
+        if (!empty($this->user) && !is_null($this->user->organization_id)) {
             $model = $this->user->organization;
             if (is_null($model->gmt)) {
                 $model->gmt = $gmt;
@@ -806,6 +830,7 @@ class UserWebApi extends \api_web\components\WebApi
                     throw new ValidationException($model->getFirstErrors());
                 }
             }
+
             $gmt = $model->gmt;
         }
 
@@ -833,7 +858,7 @@ class UserWebApi extends \api_web\components\WebApi
             ->where('coalesce(a.parent_id, a.id) = coalesce(c.parent_id, c.id)')
             ->andWhere([
                 'b.user_id' => $this->user->id,
-                'a.type_id' => 1,
+                'a.type_id' => Organization::TYPE_RESTAURANT,
                 'b.role_id' => [
                     Role::ROLE_RESTAURANT_MANAGER,
                     Role::ROLE_RESTAURANT_EMPLOYEE,
@@ -901,6 +926,7 @@ class UserWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('no such user relation');
         }
         $modelName = '\common\models\notifications\\' . $modelName;
+        /** @var ActiveRecord $modelName */
         $notification = $modelName::findOne(['user_id' => $userId, 'rel_user_org_id' => $relation]);
         if (!$notification) {
             $notification = new ${$modelName}();

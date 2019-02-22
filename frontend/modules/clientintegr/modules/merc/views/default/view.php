@@ -7,7 +7,7 @@ use api\common\models\merc\MercVsd;
 
 ?>
 <?php
-$lic = mercService::getLicense();
+$lic = mercService::getLicense(Yii::$app->user->identity->organization_id);
 $timestamp_now = time();
 ($lic->status_id == 1) && ($timestamp_now <= (strtotime($lic->td))) ? $lic_merc = 1 : $lic_merc = 0;
 ?>
@@ -21,14 +21,14 @@ $timestamp_now = time();
         'options' => [
             'class' => 'breadcrumb',
         ],
-        'links' => [
+        'links'   => [
             [
                 'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru' => 'Интеграция']),
-                'url' => ['/clientintegr/default'],
+                'url'   => ['/clientintegr/default'],
             ],
             [
                 'label' => Yii::t('message', 'frontend.client.integration.mercury', ['ru' => 'Интеграция с системой ВЕТИС "Меркурий"']),
-                'url' => ['/clientintegr/merc/default'],
+                'url'   => ['/clientintegr/merc/default'],
             ],
             'Просмотр ВСД',
         ],

@@ -3,7 +3,9 @@
 namespace api_web\controllers;
 
 use api_web\classes\RequestWebApi;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
+use yii\filters\AccessControl;
 
 /**
  * Class RequestController
@@ -14,6 +16,47 @@ use api_web\components\WebApiController;
 class RequestController extends WebApiController
 {
     public $className = RequestWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'get',
+                        'list-client',
+                        'list-vendor',
+                        'callback-list',
+                        'create',
+                        'close',
+                        'set-contractor',
+                        'unset-contractor',
+                    ],
+                    'roles'   => [Registry::PURCHASER_RESTAURANT],
+                    'roleParams' => ['user' => $this->user]
+                ],
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'add-callback',
+                        'callback-list',
+                        'category-list'
+                    ],
+                    'roles'   => [Registry::OPERATOR],
+                    'roleParams' => ['user' => $this->user]
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
+
     /**
      * @SWG\Post(path="/request/get",
      *     tags={"Request"},
@@ -726,7 +769,7 @@ class RequestController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
-     * @throws 
+     * @throws
      */
     public function actionUnsetContractor()
     {

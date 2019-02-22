@@ -44,6 +44,9 @@ class Registry
     /**@var int const for Poster service_id in all_service table */
     const POSTER_SERVICE_ID = 11;
 
+    /** @var int ID из таблицы Currency значение валюты по умолчанию */
+    const DEFAULT_CURRENCY_ID = 1;
+
     /** - Waybill section - */
     const WAYBILL_COMPARED = 1;
     const WAYBILL_FORMED = 2;
@@ -142,9 +145,9 @@ class Registry
 
     /** @var array коды операций выгрузки накладныхх по сервисам */
     static $operation_code_send_waybill = [
-        self::RK_SERVICE_ID           => 33,
-        self::IIKO_SERVICE_ID         => 5,
-        self::TILLYPAD_SERVICE_ID     => 5
+        self::RK_SERVICE_ID       => 33,
+        self::IIKO_SERVICE_ID     => 5,
+        self::TILLYPAD_SERVICE_ID => 5
     ];
 
     /** @var array Список ставок НДС */
@@ -154,4 +157,19 @@ class Registry
         18 => 18,
         20 => 20,
     ];
+
+    /**
+     * Список ролей RBAC
+     */
+    const ADMINISTRATOR_MIXCART = 'ADMINISTRATOR_MIXCART';
+    const MANAGER_MIXCART = 'MANAGER_MIXCART';
+    const BUSINESS_OWNER = 'BUSINESS_OWNER';
+    const ADMINISTRATOR_RESTAURANT = 'ADMINISTRATOR_RESTAURANT';
+    const MANAGER_RESTAURANT = 'MANAGER_RESTAURANT';
+    const BOOKER_RESTAURANT = 'BOOKER_RESTAURANT';
+    const PURCHASER_RESTAURANT = 'PURCHASER_RESTAURANT';
+    const JUNIOR_PURCHASER = 'JUNIOR_PURCHASER';
+    const PROCUREMENT_INITIATOR = 'PROCUREMENT_INITIATOR';
+    const OPERATOR = 'OPERATOR';
+    const AUTH_USER = 'AUTH_USER';
 }

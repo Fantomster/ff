@@ -11,11 +11,13 @@ namespace api_web\modules\integration\modules\vetis\helpers;
 use api\common\models\merc\MercVsd;
 use api_web\classes\UserWebApi;
 use api_web\components\Registry;
+use api_web\exceptions\ValidationException;
 use api_web\helpers\BaseHelper;
 use api_web\helpers\WebApiHelper;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
 use api_web\modules\integration\modules\vetis\api\cerber\cerberApi;
+use common\models\Journal;
 use common\models\vetis\VetisCountry;
 use common\models\vetis\VetisProductByType;
 use common\models\vetis\VetisSubproductByProduct;
@@ -34,7 +36,7 @@ class VetisHelper extends BaseHelper
     /**@var int organization id */
     private $orgId;
     /**@var array $expertizeList расшифровки статусов экспертиз */
-    public static $expertizeList = [
+    public static $expertiseList = [
         'UNKNOWN'     => 'the_result_is_unknown', //Результат неизвестен
         'UNDEFINED'   => 'the_result_can_not_be_determined', //Результат невозможно определить (не нормируется)
         'POSITIVE'    => 'positive_result', //Положительный результат
@@ -43,11 +45,65 @@ class VetisHelper extends BaseHelper
         'VSERAW'      => 'VSE_subjected_the_raw_materials_from_which_the_products_were_manufactured', // ВСЭ подвергнуто сырьё, из которого произведена продукция
         'VSEFULL'     => 'the_products_are_fully', // Продукция подвергнута ВСЭ в полном объеме
     ];
+
     /**@var array $ordersStatuses статусы для заказов */
     public static $ordersStatuses = [
         'WITHDRAWN' => 'vsd_status_withdrawn', //'Сертификаты аннулированы',
         'CONFIRMED' => 'vsd_status_confirmed', //'Сертификаты ожидают погашения',
         'UTILIZED'  => 'vsd_status_utilized', //'Сертификаты погашены',
+    ];
+
+    /**
+     * Список типов из меркурия
+     *
+     * @see http://help.vetrf.ru/wiki/ProductType
+     * @var array
+     */
+    static $vetis_product_types = [
+        1 => 'Мясо и мясопродукты.',
+        2 => 'Корма и кормовые добавки.',
+        3 => 'Живые животные.',
+        4 => 'Лекарственные средства.',
+        5 => 'Пищевые продукты.',
+        6 => 'Непищевые продукты и другое.',
+        7 => 'Рыба и морепродукты.',
+        8 => 'Продукция, не требующая разрешения.',
+    ];
+
+    /**
+     * Список транспортных типов перевозки для нашего внутреннего словаря vetis_transport
+     *
+     * @var array
+     */
+    static $transport_storage_types = [
+        'FROZEN'     => 'Замороженный',
+        'CHILLED'    => 'Охлажденный',
+        'COOLED'     => 'Охлаждаемый',
+        'VENTILATED' => 'Вентилируемый'
+    ];
+
+    /**
+     * Список типов благополучния региона
+     *
+     * @var array
+     */
+    static $well_being_of_the_area = [
+        'Благополучный регион',
+        'Неблагополучный регион',
+        'Регион с неопределенным статусом'
+    ];
+
+    /**
+     * Список типов ТТН
+     *
+     * @var array
+     */
+    static $ttn_types = [
+        1 => 'Товарно-транспортная накладная',
+        2 => 'Коносамент',
+        3 => 'CMR',
+        4 => 'Авианакладная',
+        5 => 'Транспортная накладная ',
     ];
 
     /**
@@ -86,7 +142,7 @@ class VetisHelper extends BaseHelper
         $this->vehicle_number = isset($transportInfo['transportNumber']['vehicleNumber']) ? $transportInfo['transportNumber']['vehicleNumber'] : null;
         $other = json_decode($this->vsdModel->other_info, true);
         if (isset($other['cargoExpertized'])) {
-            $this->cargo_expertized = \Yii::t('api_web', self::$expertizeList[$other['cargoExpertized']]);
+            $this->cargo_expertized = \Yii::t('api_web', self::$expertiseList[$other['cargoExpertized']]);
         }
         $this->location_prosperity = $other['locationProsperity'];
         $this->special_marks = $other['specialMarks'];
@@ -112,12 +168,10 @@ class VetisHelper extends BaseHelper
         $this->getShortInfoVsd($uuid);
 
         $hc = cerberApi::getInstance()->getEnterpriseByGuid($this->vsdModel->sender_guid);
-        if (isset($hc)) {
-            if (isset($hc->owner)) {
-                $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
-            }
+        if (isset($hc) && isset($hc->owner)) {
+            $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
         }
-        $this->consignor_business = isset($hc) ? $hc->name . ', ИНН:' . $hc->inn : null;
+        $this->consignor_business = isset($hc) ? $hc->name . ', ИНН:' . $hc->inn ?? null : null;
         $this->product_type = isset($this->vsdModel->product_type) ?
             MercVsd::$product_types[$this->vsdModel->product_type] : null;
         $product = VetisProductByType::findOne(['guid' => $this->vsdModel->product_guid]);
@@ -337,4 +391,59 @@ class VetisHelper extends BaseHelper
         return IntegrationSettingValue::getSettingsByServiceId(Registry::MERC_SERVICE_ID,
             $orgId, $settingNames);
     }
+
+    /**
+     * @param $orgId
+     * @return array|string
+     * @throws BadRequestHttpException
+     */
+    public function getIssuerId($orgId)
+    {
+        $issueId = $this->getSettings($orgId, ['issuer_id']);
+        if (!$issueId) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.setting_issuer_id_not_defined'));
+        }
+
+        return $issueId;
+    }
+
+    /**
+     * @param $orgId
+     * @return array|string
+     * @throws BadRequestHttpException
+     */
+    public function getEnterpriseGuid($orgId)
+    {
+        $enterpriseGuid = $this->getSettings($orgId, ['enterprise_guid']);
+        if (!$enterpriseGuid) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.setting_enterprise_guid_not_defined'));
+        }
+
+        return $enterpriseGuid;
+    }
+
+    /**
+     * Запись в журнал
+     *
+     * @param        $message
+     * @param        $userId
+     * @param int    $orgId
+     * @param string $type
+     * @throws ValidationException
+     */
+    public function writeInJournal($message, int $userId, int $orgId = 0, $type = 'success', $logGuid = 'Vetis'): void
+    {
+        $journal = new Journal();
+        $journal->response = is_array($message) ? json_encode($message) : $message;
+        $journal->service_id = Registry::MERC_SERVICE_ID;
+        $journal->type = $type;
+        $journal->log_guide = $logGuid;
+        $journal->organization_id = $orgId;
+        $journal->user_id = $userId;
+        $journal->operation_code = '0';
+        if (!$journal->save()) {
+            throw new ValidationException($journal->getFirstErrors());
+        }
+    }
+
 }

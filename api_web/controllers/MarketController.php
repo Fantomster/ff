@@ -3,7 +3,9 @@
 namespace api_web\controllers;
 
 use api_web\classes\MarketWebApi;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
+use yii\filters\AccessControl;
 
 /**
  * Class MarketController
@@ -14,6 +16,36 @@ use api_web\components\WebApiController;
 class MarketController extends WebApiController
 {
     public $className = MarketWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'products',
+                        'categories',
+                        'product',
+                        'organizations',
+                    ],
+                    'roles'      => [
+                        Registry::OPERATOR
+                    ],
+                    'roleParams' => [
+                        'user' => $this->user
+                    ]
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @SWG\Post(path="/market/products",

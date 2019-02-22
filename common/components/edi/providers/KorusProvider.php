@@ -9,9 +9,9 @@
 namespace common\components\edi\providers;
 
 use common\components\edi\AbstractProvider;
-use common\components\edi\AbstractRealization;
+use common\components\edi\EDIClass;
 use common\components\edi\ProviderInterface;
-use common\models\EdiOrder;
+use common\models\Order;
 use common\models\OrderContent;
 use yii\base\Exception;
 use yii\web\BadRequestHttpException;
@@ -39,6 +39,7 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
     private $pass;
     private $glnCode;
     private $orgID;
+    private $orderID;
 
     /**
      * Provider constructor.
@@ -115,8 +116,9 @@ EOXML;
 
     public function sendOrderInfo($order, $done = false): bool
     {
-        $transaction = Yii::$app->db_api->beginTransaction();
+        $transaction = Yii::$app->db->beginTransaction();
         $result = false;
+        $this->orderID = $order->id;
         try {
             $orderContent = OrderContent::findAll(['order_id' => $order->id]);
             $dateArray = $this->getDateData($order);
@@ -164,11 +166,17 @@ EOXML;
 </soapenv:Envelope>
 EOXML;
         $array = $this->executeCurl($soap_request, $action);
-
+        $order = Order::findOne(['id' => $this->orderID]);
+        $organizationID = $order->client_id;
         if ($array['ns2SendResponse']['ns2Res'] == 1) {
+            $journalMessage = Yii::t("app", 'По заказу {order} отправлен файл {file}', ['order' => $this->orderID, 'file' => $relationId]);
+            EDIClass::writeEdiDataToJournal($organizationID, $journalMessage);
             return true;
         } else {
-            Yii::error("Korus returns error code");
+            $error = $array['ns2SendResponse']['ns2Res'] ?? 'error';
+            $journalMessage = Yii::t("app", 'Korus вернул код ошибки ') . $error;
+            EDIClass::writeEdiDataToJournal($organizationID, $journalMessage, 'error');
+            Yii::error("Korus returns error code: " . print_r($array, 1));
             return false;
         }
     }
@@ -250,10 +258,14 @@ EOXML;
 EOXML;
         $array = $this->executeCurl($soap_request, $action);
         if ($array['ns2ReceiveResponse']['ns2Res'] != 1) {
-            throw new Exception('KorusIntegration getList Error №' . $array['ns2ReceiveResponse']['ns2Res']);
+            $error = 'KorusIntegration getList Error №' . $array['ns2ReceiveResponse']['ns2Res'];
+            Yii::error($error);
+            throw new Exception($error);
         }
         if (!isset($array['ns2ReceiveResponse']['ns2Cnt'])) {
-            throw new Exception('KorusIntegration getList Error № 1');
+            $error = 'KorusIntegration getList Error № 1';
+            Yii::error($error);
+            throw new Exception($error);
         }
         return base64_decode($array['ns2ReceiveResponse']['ns2Cnt']);
     }

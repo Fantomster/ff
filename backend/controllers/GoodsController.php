@@ -122,7 +122,7 @@ class GoodsController extends Controller
                     return $this->renderAjax('_success', ['message' => $message]);
                 }
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
-                $catalogBaseGoods->supp_org_id = $supp_org_id;
+                //$catalogBaseGoods->supp_org_id = $supp_org_id;
 
                 if ($catalogBaseGoods->market_place == 1) {
                     if ($post && $catalogBaseGoods->validate()) {

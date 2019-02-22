@@ -80,7 +80,7 @@ class OrderSearch extends Order
      */
     public function search($params)
     {
-        if (isset($this->id) && $this->id > 0){
+        if (isset($this->id) && $this->id > 0) {
             $params['OrderSearch']['id'] = $this->id;
         }
 
@@ -248,6 +248,9 @@ class OrderSearch extends Order
                     ['service_id' => null]
                 ]);
         }
+
+        $query->andFilterWhere(['not in', 'status', [Order::STATUS_PREORDER]]);
+
         $dataProvider = new ActiveDataProvider([
             'query'      => $query,
             'sort'       => ['defaultOrder' => ['id' => SORT_DESC]],

@@ -8,24 +8,26 @@ use yii\web\BadRequestHttpException;
 /**
  * This is the model class for table "catalog".
  *
- * @property int               $id           Идентификатор записи в таблице
- * @property int               $type         Тип каталога товаров (0 - не каталог, 1 - базовый каталог, 2 -
+ * @property int                $id           Идентификатор записи в таблице
+ * @property int                $type         Тип каталога товаров (0 - не каталог, 1 - базовый каталог, 2 -
  *           индивидуальный каталог)
- * @property int               $supp_org_id  Идентификатор организации-поставщика
- * @property string            $name         Наименование каталога товаров поставщика
- * @property int               $status       Статус каталога товаров (0 - не действующий, 1 - действующий)
- * @property string            $created_at   Дата и время создания записи в таблице
- * @property string            $updated_at   Дата и время последнего изменения записи в таблице
- * @property int               $currency_id  Идентификатор валюты
- * @property string            $main_index   Имя индекса для полнотекстового поиска
- * @property string            $mapping      Альтернативные варианты названия при полнотекстовом поиске
- * @property int               $index_column Идентификатор поля для индексации при полнотекстовом поиске
- * @property Organization      $vendor
- * @property Currency          $currency
- * @property CatalogSnapshot[] $catalogSnapshots
- * @property CatalogTemp[]     $catalogTemps
- * @property Catalog           $nameCatalog
- * @property Catalog[]         $catalogs
+ * @property int                $supp_org_id  Идентификатор организации-поставщика
+ * @property string             $name         Наименование каталога товаров поставщика
+ * @property int                $status       Статус каталога товаров (0 - не действующий, 1 - действующий)
+ * @property string             $created_at   Дата и время создания записи в таблице
+ * @property string             $updated_at   Дата и время последнего изменения записи в таблице
+ * @property int                $currency_id  Идентификатор валюты
+ * @property string             $main_index   Имя индекса для полнотекстового поиска
+ * @property string             $mapping      Альтернативные варианты названия при полнотекстовом поиске
+ * @property int                $index_column Идентификатор поля для индексации при полнотекстовом поиске
+ * @property Organization       $vendor
+ * @property Currency           $currency
+ * @property CatalogBaseGoods[] $catalogBaseGoods
+ * @property CatalogGoods[]     $catalogGoods
+ * @property CatalogSnapshot[]  $catalogSnapshots
+ * @property CatalogTemp[]      $catalogTemps
+ * @property Catalog            $nameCatalog
+ * @property Catalog[]          $catalogs
  */
 class Catalog extends \yii\db\ActiveRecord
 {
@@ -442,5 +444,21 @@ class Catalog extends \yii\db\ActiveRecord
     {
         CatalogTemp::deleteAll(['cat_id' => $this->id]);
         parent::delete();
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCatalogBaseGoods()
+    {
+        return $this->hasMany(CatalogBaseGoods::class, ['cat_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCatalogGoods()
+    {
+        return $this->hasMany(CatalogGoods::class, ['cat_id' => 'id']);
     }
 }

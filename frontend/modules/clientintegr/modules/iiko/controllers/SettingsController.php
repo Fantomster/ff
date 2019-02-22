@@ -30,7 +30,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
     {
         $searchModel = new iikoDicconstSearch();
         $dataProvider = $searchModel->search([Yii::$app->request->queryParams]);
-        $lic = iikoService::getLicense();
+        $lic = iikoService::getLicense(Yii::$app->user->identity->organization_id);
         $vi = $lic ? 'index' : '/default/_nolic';
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
@@ -66,7 +66,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             }
         }
 
-        $lic = iikoService::getLicense();
+        $lic = iikoService::getLicense(Yii::$app->user->identity->organization_id);
         $vi = $lic ? 'update' : '/default/_nolic';
 
         $post = Yii::$app->request->post();
@@ -161,7 +161,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         return $count;
     }
 
-    private function handleSelectedStores($post, $org)
+    public function handleSelectedStores($post, $org)
     {
         $stores = $post['Stores'];
         foreach ($stores as $storeID => $selected) {
@@ -201,7 +201,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentUserRole = User::findOne(Yii::$app->user->id);
         /**@var $roles array Available roles ids */
-        $roles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_ADMIN, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_FRANCHISEE_LEADER];
+        $roles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_ADMIN, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_FRANCHISEE_LEADER, Role::ROLE_FKEEPER_MANAGER, Role::ROLE_FRANCHISEE_OWNER];
         if (in_array($currentUserRole->role_id, $roles)) {
             $arOrgsObj = $currentUser->getAllOrganization();
             $provider = new ArrayDataProvider([

@@ -5,6 +5,7 @@ namespace common\components\edi;
 use api_web\components\notice_class\OrderNotice;
 use api_web\components\Registry;
 use common\models\edi\EdiFilesQueue;
+use common\models\Journal;
 use common\models\OuterUnit;
 use common\models\RelationUserOrganization;
 use common\models\Role;
@@ -13,8 +14,6 @@ use common\models\Catalog;
 use common\models\CatalogBaseGoods;
 use common\models\CatalogGoods;
 use common\models\Currency;
-use common\models\EdiOrder;
-use common\models\EdiOrderContent;
 use common\models\edi\EdiOrganization;
 use common\models\Order;
 use common\models\OrderContent;
@@ -28,11 +27,24 @@ use yii\base\Exception;
 use yii\db\Expression;
 use Yii;
 
+/**
+ * Class EDIClass
+ *
+ * @package common\components\edi
+ */
 class EDIClass extends Component
 {
     public $ediDocumentType;
     public $fileName;
 
+    /**
+     * @param $content
+     * @param $providerID
+     * @return bool|string
+     * @throws \Throwable
+     * @throws \yii\db\Exception
+     * @throws \yii\db\StaleObjectException
+     */
     public function parseFile($content, $providerID)
     {
         if (!$content) {
@@ -58,6 +70,16 @@ class EDIClass extends Component
         return $success;
     }
 
+    /**
+     * @param       $simpleXMLElement
+     * @param       $documentType
+     * @param       $providerID
+     * @param bool  $isAlcohol
+     * @param bool  $isLeraData
+     * @param array $exceptionArray
+     * @return bool|string
+     * @throws \Throwable
+     */
     public function handleOrderResponse($simpleXMLElement, $documentType, $providerID, $isAlcohol = false, $isLeraData = false, $exceptionArray = [])
     {
         try {
@@ -89,7 +111,7 @@ class EDIClass extends Component
                 throw new Exception('No such order');
             }
 
-            \Yii::$app->language = $order->edi_order->lang ?? 'ru';
+            \Yii::$app->language = $order->ediOrder->lang ?? 'ru';
             $user = User::findOne(['id' => $order->created_by_id]);
             if (!$user) {
                 throw new Exception('No such user');
@@ -300,6 +322,7 @@ class EDIClass extends Component
             $action = ($isDesadv) ? " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
             $systemMessage = $order->vendor->name . '' . $action;
             OrderController::sendSystemMessage($user, $order->id, $systemMessage);
+            self::writeEdiDataToJournal($order->client_id, Yii::t('app', 'По заказу {order} получен файл {file}', ['order' => $order->id, 'file' => $this->fileName]), 'success', $user->id);
             return true;
         } catch (Exception $e) {
             if ($isLeraData) {
@@ -323,8 +346,12 @@ class EDIClass extends Component
     }
 
     /**
+     * @param $xml
+     * @param $providerID
      * @return bool
+     * @throws \Throwable
      * @throws \yii\db\Exception
+     * @throws \yii\db\StaleObjectException
      */
     public function handlePriceListUpdating($xml, $providerID): bool
     {
@@ -480,6 +507,13 @@ class EDIClass extends Component
         return true;
     }
 
+    /**
+     * @param int      $catID
+     * @param int      $catalogBaseGoodID
+     * @param float    $price
+     * @param int|null $vat
+     * @return bool
+     */
     public function insertGood(int $catID, int $catalogBaseGoodID, float $price, int $vat = null): bool
     {
         $catalogGood = new CatalogGoods();
@@ -496,6 +530,12 @@ class EDIClass extends Component
         }
     }
 
+    /**
+     * @param Organization $organization
+     * @param              $currency
+     * @param Organization $rest
+     * @return int
+     */
     private function createCatalog(Organization $organization, $currency, Organization $rest): int
     {
         $catalog = new Catalog();
@@ -509,26 +549,45 @@ class EDIClass extends Component
         return $catalogID;
     }
 
-    public function getSendingOrderContent($order, $done, $dateArray, $orderContent)
+    /**
+     * @param Order $order
+     * @param       $done
+     * @param       $dateArray
+     * @param       $orderContent
+     * @return bool|string
+     */
+    public function getSendingOrderContent(Order $order, $done, $dateArray, $orderContent)
     {
         $vendor = $order->vendor;
         $client = $order->client;
         if (Yii::$app instanceof \yii\console\Application) {
-            $controller = new Controller("", "");
+            $controller = new Controller("", null);
         } else {
             $controller = Yii::$app->controller;
         }
 
         $glnArray = $client->getGlnCodes($client->id, $vendor->id);
+        if (!$glnArray) {
+            Yii::error('Empty GLN');
+            return false;
+        }
         $string = $controller->renderPartial($done ? '@common/views/e_com/order_done' : '@common/views/e_com/create_order', compact('order', 'glnArray', 'dateArray', 'orderContent'));
         return $string;
     }
 
+    /**
+     * @param $arr
+     * @throws \yii\db\Exception
+     */
     public function insertEdiErrorData($arr): void
     {
         Yii::$app->db->createCommand()->insert(EdiFilesQueue::tableName(), $arr)->execute();
     }
 
+    /**
+     * @param $position
+     * @return array
+     */
     private function fillArrayData($position)
     {
         $arr = [
@@ -547,5 +606,32 @@ class EDIClass extends Component
             'AMOUNTWITHVAT'      => isset($position->AMOUNTWITHVAT) ? $position->AMOUNTWITHVAT : null,
         ];
         return $arr;
+    }
+
+    /**
+     * @param        $organizationID
+     * @param null   $response
+     * @param string $type
+     * @param null   $userID
+     */
+    public static function writeEdiDataToJournal($organizationID, $response = null, $type = 'success', $userID = null)
+    {
+        $userID = $userID ?? Yii::$app->user->id ?? null;
+        $organizationID = $organizationID ?? null;
+        if ($userID && is_null($organizationID)) {
+            $user = User::findOne($userID);
+            if ($user) {
+                $organizationID = $user->organization_id;
+            }
+        }
+
+        $journal = new Journal();
+        $journal->user_id = $userID;
+        $journal->organization_id = $organizationID;
+        $journal->service_id = Registry::EDI_SERVICE_ID;
+        $journal->response = $response;
+        $journal->type = $type;
+        $journal->operation_code = '0';
+        $journal->save();
     }
 }

@@ -27,7 +27,10 @@ class SiteController extends Controller
             Yii::getAlias('@api_web/controllers/PaymentController.php'),
             Yii::getAlias('@api_web/controllers/CartController.php'),
             Yii::getAlias('@api_web/controllers/OrderController.php'),
+            Yii::getAlias('@api_web/controllers/AnalogController.php'),
             Yii::getAlias('@api_web/controllers/PreorderController.php'),
+            Yii::getAlias('@api_web/controllers/LazyVendorController.php'),
+            Yii::getAlias('@api_web/controllers/LazyVendorPriceController.php'),
             Yii::getAlias('@api_web/controllers/ClientController.php'),
             Yii::getAlias('@api_web/controllers/VendorController.php'),
             Yii::getAlias('@api_web/controllers/GuideController.php'),
@@ -41,6 +44,7 @@ class SiteController extends Controller
             Yii::getAlias('@api_web/controllers/CallbackController.php'),
             Yii::getAlias('@api_web/controllers/DocumentController.php'),
             Yii::getAlias('@api_web/controllers/JournalController.php'),
+            Yii::getAlias('@api_web/controllers/PromoController.php'),
         ];
 
         /**

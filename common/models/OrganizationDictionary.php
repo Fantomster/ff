@@ -16,6 +16,7 @@ namespace common\models;
 use api_web\components\FireBase;
 use api_web\components\Registry;
 use api_web\modules\integration\classes\Integration;
+use common\models\vetis\VetisProductItem;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
@@ -263,6 +264,12 @@ class OrganizationDictionary extends ActiveRecord
                 ])->one(\Yii::$app->db_api);
 
             return $result['selected'] . "/" . $result['all'];
+        } elseif ($this->outerDic->name == 'transport') {
+            //todo_in_next_task
+            return $this->count;
+        } elseif ($this->outerDic->name == 'productItem') {
+            $enterpriseGuid = IntegrationSettingValue::getSettingsByServiceId(Registry::MERC_SERVICE_ID, $this->org_id, ['enterpriseGuid']);
+            return VetisProductItem::find()->where(['producer_guid' => $enterpriseGuid, 'active' => 1])->count();
         } else {
             return $this->count ?? 0;
         }

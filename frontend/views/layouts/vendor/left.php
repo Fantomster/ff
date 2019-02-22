@@ -7,7 +7,7 @@ use yii\helpers\Url;
 $user = Yii::$app->user->identity;
 
 $roles = [
-    \common\models\Role::ROLE_RESTAURANT_MANAGER,
+    \common\models\Role::ROLE_SUPPLIER_MANAGER,
     \common\models\Role::ROLE_FKEEPER_MANAGER,
     \common\models\Role::ROLE_ADMIN,
     \common\models\Role::getFranchiseeEditorRoles(),
@@ -73,7 +73,8 @@ $menuItems = [
         ],*/
     ],
 ];
-if (in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()) || Yii::$app->user->can('manage')) {
+if (in_array($user->role_id, $roles) || Yii::$app->user->can('manage')) {
+
     $menuItems[] = [
         'label' => Yii::t('message', 'frontend.views.layouts.left.settings', ['ru' => 'Настройки']),
         'icon' => 'gears',

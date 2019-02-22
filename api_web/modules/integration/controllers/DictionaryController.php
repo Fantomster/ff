@@ -8,13 +8,73 @@
 
 namespace api_web\modules\integration\controllers;
 
+use api_web\components\Registry;
 use api_web\modules\integration\classes\dictionaries\AbstractDictionary;
 use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\classes\Integration;
+use yii\filters\AccessControl;
+use api_web\modules\integration\modules\vetis\models\VetisWaybill;
 use yii\web\BadRequestHttpException;
 
+/**
+ * Класс для работы со Справочниками
+ * Class DictionaryController
+ *
+ * @package api_web\modules\integration\controllers
+ */
 class DictionaryController extends \api_web\components\WebApiController
 {
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'list',
+                    ],
+                    'roles'      => [
+                        Registry::MANAGER_RESTAURANT,
+                        Registry::BOOKER_RESTAURANT,
+                    ],
+                    'roleParams' => ['user' => $this->user]
+                ],
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'product-list',
+                        'agent-list',
+                        'agent-update',
+                        'store-list',
+                        'store-flat-list',
+                        'unit-list',
+                        'category-list',
+                        'category-set-selected',
+                        'check-agent-name',
+                        'product-type-list',
+                        'product-type-set-selected',
+                        'vetis-business-entity',
+                        'vetis-russian-enterprise',
+                        'vetis-foreign-enterprise',
+                        'vetis-transport',
+                        'vetis-product-item',
+                    ],
+                    'roles'      => [
+                        Registry::OPERATOR
+                    ],
+                    'roleParams' => ['user' => $this->user]
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
+
     /**
      * @param $action
      * @return bool
@@ -435,7 +495,6 @@ class DictionaryController extends \api_web\components\WebApiController
      * )
      * @throws BadRequestHttpException
      */
-
     public function actionStoreList()
     {
         if (!isset($this->request['service_id'])) {
@@ -510,7 +569,6 @@ class DictionaryController extends \api_web\components\WebApiController
      * )
      * @throws BadRequestHttpException
      */
-
     public function actionStoreFlatList()
     {
         if (!isset($this->request['service_id'])) {
@@ -592,7 +650,6 @@ class DictionaryController extends \api_web\components\WebApiController
      * )
      * @throws BadRequestHttpException
      */
-
     public function actionUnitList()
     {
         if (!isset($this->request['service_id'])) {
@@ -690,7 +747,6 @@ class DictionaryController extends \api_web\components\WebApiController
      * )
      * @throws BadRequestHttpException
      */
-
     public function actionCategoryList()
     {
         if (!isset($this->request['service_id'])) {
@@ -743,7 +799,6 @@ class DictionaryController extends \api_web\components\WebApiController
      * @throws BadRequestHttpException
      * @throws \api_web\exceptions\ValidationException
      */
-
     public function actionCategorySetSelected()
     {
         if (!isset($this->request['service_id'])) {
@@ -859,7 +914,6 @@ class DictionaryController extends \api_web\components\WebApiController
      * )
      * @throws BadRequestHttpException
      */
-
     public function actionProductTypeList()
     {
         if (!isset($this->request['service_id'])) {
@@ -912,14 +966,369 @@ class DictionaryController extends \api_web\components\WebApiController
      * @throws BadRequestHttpException
      * @throws \api_web\exceptions\ValidationException
      */
-
     public function actionProductTypeSetSelected()
     {
         if (!isset($this->request['service_id'])) {
             throw new BadRequestHttpException('empty_param|service_id');
         }
-        /** @var  $factory \api_web\modules\integration\classes\dictionaries\AbstractDictionary */
+        /** @var \api_web\modules\integration\classes\dictionaries\AbstractDictionary $factory */
         $factory = (new Dictionary($this->request['service_id'], 'ProductType'));
         $this->response = $factory->productTypeSetSelected($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/vetis-business-entity",
+     *     tags={"Integration/dictionary"},
+     *     summary="Словарь Хозяйствующие субъекты",
+     *     description="Словарь Хозяйствующие субъекты",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "pagination":{
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "name": "СЕЛЬСКОХОЗЯЙСТВЕННЫЙ ПРОИЗВОДСТВЕННЫЙ КООПЕРАТИВ ПЛЕМЗАВОД КОЛХОЗ ИМЕНИ КИРОВА",
+     *                      "fullname": "СЕЛЬСКОХОЗЯЙСТВЕННЫЙ ПРОИЗВОДСТВЕННЫЙ КООПЕРАТИВ ПЛЕМЗАВОД КОЛХОЗ ИМЕНИ
+     *                      КИРОВА",
+     *                      "uuid": "00000c3b-48d1-40bf-ba74-4899f99d032a",
+     *                      "guid": "0605cda7-e107-49af-abfe-970714f99849",
+     *                      "inn": null,
+     *                      "address": "Российская Федерация, г. Москва, Осенний б-р",
+     *                      "active": 1
+     *                  },
+     *                  {
+     *                      "name": "Тулунский психоневрологический интернат",
+     *                      "fullname": "Тулунский психоневрологический интернат",
+     *                      "uuid": "0000331b-68ec-42a7-9ef6-b1715af275fa",
+     *                      "guid": "58b751b5-d236-4c97-9f3c-fa21268e7f21",
+     *                      "inn": null,
+     *                      "address": "353795 ст.Андреевская ул.Красная д. 12",
+     *                      "active": 1
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function actionVetisBusinessEntity()
+    {
+        /** @var \api_web\modules\integration\classes\dictionaries\MercDictionary $factory */
+        $factory = (new Dictionary(Registry::MERC_SERVICE_ID, 'Dictionary'));
+        $this->response = $factory->getBusinessEntityList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/vetis-russian-enterprise",
+     *     tags={"Integration/dictionary"},
+     *     summary="Словарь Отечественные предприятия",
+     *     description="Словарь Отечественные предприятия",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "search":{
+     *                          "name": "Ко"
+     *                      },
+     *                      "pagination":{
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "name": "ИП Рогов Андрей Сергеевич",
+     *                      "uuid": "00000c3b-48d1-40bf-ba74-4899f99d032a",
+     *                      "guid": "0605cda7-e107-49af-abfe-970714f99849",
+     *                      "inn": null,
+     *                      "address": "Российская Федерация, г. Москва, Осенний б-р",
+     *                      "active": 1
+     *                  },
+     *                  {
+     *                      "name": "Пудожское райпо",
+     *                      "uuid": "0000331b-68ec-42a7-9ef6-b1715af275fa",
+     *                      "guid": "58b751b5-d236-4c97-9f3c-fa21268e7f21",
+     *                      "inn": null,
+     *                      "address": "353795 ст.Андреевская ул.Красная д. 12",
+     *                      "active": 1
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function actionVetisRussianEnterprise()
+    {
+        /** @var \api_web\modules\integration\classes\dictionaries\MercDictionary $factory */
+        $factory = (new Dictionary(Registry::MERC_SERVICE_ID, 'Dictionary'));
+        $this->response = $factory->getRussianEnterpriseList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/vetis-foreign-enterprise",
+     *     tags={"Integration/dictionary"},
+     *     summary="Словарь Отечественные предприятия",
+     *     description="Словарь Отечественные предприятия",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "pagination":{
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "Curvaceiras",
+     *                          "uuid": "00000c3b-48d1-40bf-ba74-4899f99d032a",
+     *                          "guid": "0605cda7-e107-49af-abfe-970714f99849",
+     *                          "inn": null,
+     *                          "address": "Estrada da Lamarosa, Paialvo - Tomar",
+     *                          "active": 1
+     *                      },
+     *                      {
+     *                          "name": "ФОП Гастов И.В.",
+     *                          "uuid": "0000331b-68ec-42a7-9ef6-b1715af275fa",
+     *                          "guid": "58b751b5-d236-4c97-9f3c-fa21268e7f21",
+     *                          "inn": null,
+     *                          "address": "Киевская область, пгт Ворзель, ул.Ворошилова 44",
+     *                          "active": 1
+     *                      }
+     *                  },
+     *                  "pagination": {
+     *                       "page": 1,
+     *                       "total_page": 17,
+     *                       "page_size": 12
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function actionVetisForeignEnterprise()
+    {
+        /** @var \api_web\modules\integration\classes\dictionaries\MercDictionary $factory */
+        $factory = (new Dictionary(Registry::MERC_SERVICE_ID, 'Dictionary'));
+        $this->response = $factory->getForeignEnterpriseList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/vetis-transport",
+     *     tags={"Integration/dictionary"},
+     *     summary="Словарь Транспортных средств",
+     *     description="Словарь Транспортных средств",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "org_id": 1,
+     *                      "search": {
+     *                          "vehicle_number": "т228гк"
+     *                      },
+     *                      "pagination":{
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "vehicle_number": "номер машины",
+     *                          "trailer_number": "номер полуприцепа",
+     *                          "container_number": "номер контейнера",
+     *                          "transport_storage_type": "способ хранения",
+     *                          "id": 1
+     *                      },
+     *                      {
+     *                          "vehicle_number": "номер машины",
+     *                          "trailer_number": "номер полуприцепа",
+     *                          "container_number": "номер контейнера",
+     *                          "transport_storage_type": "способ хранения",
+     *                          "id": 2
+     *                      }
+     *                  },
+     *                  "pagination": {
+     *                       "page": 1,
+     *                       "total_page": 17,
+     *                       "page_size": 12
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function actionVetisTransport()
+    {
+        /** @var \api_web\modules\integration\classes\dictionaries\MercDictionary $factory */
+        $factory = (new Dictionary(Registry::MERC_SERVICE_ID, 'Dictionary'));
+        $this->response = $factory->getTransportList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/vetis-product-item",
+     *     tags={"Integration/dictionary"},
+     *     summary="Словарь Отечественные предприятия",
+     *     description="Словарь Отечественные предприятия",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "pagination":{
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "Сельдь ф/к с луком",
+     *                          "uuid": "00f4334f-23d5-468b-81c7-258f097bab0e",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                          "form": "Рыба и морепродукты",
+     *                          "article": "null",
+     *                          "gtin": "null",
+     *                          "gost": "",
+     *                          "active": 1
+     *                      },
+     *                      {
+     *                          "name": "Шашлык",
+     *                          "uuid": "00f4682b-b09b-42ef-8773-6a4beea42680",
+     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
+     *                          "form": "Пищевые продукты",
+     *                          "article": "1134",
+     *                          "gtin": "null",
+     *                          "gost": "null",
+     *                          "active": 1
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function actionVetisProductItem()
+    {
+        $this->response = (new VetisWaybill())->getProductItemList($this->request);
     }
 }

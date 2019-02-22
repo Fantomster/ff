@@ -41,15 +41,30 @@ class iikoWaybill extends Waybill
             $documentNumber = $document_id;
         }
 
-        $doc_date = \Yii::$app->formatter->asDatetime($this->doc_date, WebApiHelper::$formatDate);
+        $doc_date = \gmdate('Y-m-d H:i:s', strtotime($this->doc_date));
+        $doc_date = WebApiHelper::asDatetime($doc_date);
+
+        //Учетный номер документа
         $xml->addChild('documentNumber', $documentNumber);
+        //Входящий номер внешнего документа
         $xml->addChild('incomingDocumentNumber', $incomingDocumentNumber);
+        //Номер счет-фактуры
         $xml->addChild('invoice', $this->outer_number_additional);
+        //Комментарий
         $xml->addChild('comment', $this->outer_note);
+        //Дата входящего документа
         $xml->addChild('dateIncoming', $doc_date);
+        #Входящая дата внешнего документа     !!!Не реализовано в iiko!!!
         $xml->addChild('incomingDate', $doc_date);
+        //Дата отсрочки платежа
+        if (!empty($this->payment_delay_date)) {
+            $xml->addChild('dueDate', WebApiHelper::asDatetime(\gmdate('Y-m-d H:i:s', strtotime($this->payment_delay_date))));
+        }
+        //Склад. Если указан, то в каждой позиции накладной нужно указать этот же склад.
         $xml->addChild('defaultStore', $this->outerStore->outer_uid);
+        //Поставщик
         $xml->addChild('supplier', $this->outerAgent ? $this->outerAgent->outer_uid : null);
+        //Статус накладной
         $xml->addChild('status', 'NEW');
 
         $items = $xml->addChild('items');

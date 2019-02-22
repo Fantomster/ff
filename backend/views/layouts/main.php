@@ -92,6 +92,10 @@ if ($countSettingChange > 0) {
                     'label' => 'Разное',
                     'url'   => ['/statistics/misc'],
                 ],
+                [
+                    'label' => 'Расширенная отчетность',
+                    'url'   => ['/statistics/extended-reports'],
+                ],
             ],
         ],
     ];
@@ -140,6 +144,10 @@ if ($countSettingChange > 0) {
                          'label' => 'Оператор заказов',
                          'url'   => ['/order/operator'],
                      ],
+                     [
+                         'label' => 'Промо-акции',
+                         'url'   => ['/promo-action/index'],
+                     ],
                  ],
                 ],
                 [
@@ -160,6 +168,22 @@ if ($countSettingChange > 0) {
                         [
                             'label' => 'Сотрудники ресторанов',
                             'url'   => ['/client/restors'],
+                        ],
+                        [
+                            'label' => 'Роли',
+                            'url'   => ['/rbac/role'],
+                        ],
+                        [
+                            'label' => 'Разрешения',
+                            'url'   => ['/rbac/permission'],
+                        ],
+                        [
+                            'label' => 'Правила',
+                            'url'   => ['/rbac/rule'],
+                        ],
+                        [
+                            'label' => 'Маршруты',
+                            'url'   => ['/rbac/route'],
                         ],
                     ],
                 ],
@@ -281,7 +305,7 @@ if ($countSettingChange > 0) {
             . '</li>';
     }
     echo Nav::widget([
-        'options'      => ['class' => 'navbar-nav navbar-right'],
+        'options'      => ['class' => 'navbar-nav navbar-left'],
         'items'        => $menuItems,
         'encodeLabels' => false,
     ]);

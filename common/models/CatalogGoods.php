@@ -21,7 +21,7 @@ use yii\behaviors\TimestampBehavior;
  * @property int              $vat              Ставка НДС
  * @property int              $service_id       Указатель на ID сервиса
  *
- * @property CatalogBaseGoods $baseGoods
+ * @property CatalogBaseGoods $baseProduct
  * @property GoodsNotes       $goodsNotes
  * @property Organization     $organization
  * @property Catalog          $catalog

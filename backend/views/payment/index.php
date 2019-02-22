@@ -1,8 +1,6 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
-use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
@@ -82,7 +80,7 @@ ksort($types);
                     'attribute'=>'date',
                     'pluginOptions'=>[
                         'autoclose'=>true,
-                        'format'=>'dd.mm.yyyy',
+                        'format'=>'dd-mm-yyyy',
                     ]
                 ]),
                 'value' => function($data) {

@@ -4,7 +4,9 @@ namespace api_web\controllers;
 
 use api_web\classes\CatalogWebApi;
 use api_web\classes\VendorWebApi;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
+use yii\filters\AccessControl;
 
 /**
  * Class VendorController
@@ -15,6 +17,57 @@ use api_web\components\WebApiController;
 class VendorController extends WebApiController
 {
     public $className = VendorWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'search',
+                        'create',
+                        'update',
+                        'upload-file',
+                    ],
+                    'roles'      => [Registry::PURCHASER_RESTAURANT],
+                    'roleParams' => ['user' => $this->user]
+                ],
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'get',
+                        'upload-logo',
+                        'personal-catalog-list',
+                        'temp-catalog-list',
+                        'get-list-main-index',
+                        'delete-item-temporary',
+                        'upload-temporary',
+                        'prepare-temporary',
+                        'delete-item-personal-catalog',
+                        'import-custom-catalog',
+                        'delete-main-catalog',
+                        'change-main-index',
+                        'cancel-temporary',
+                        'get-temp-main-catalog',
+                        'get-temp-duplicate-position',
+                        'auto-delete-duplicate-temporary',
+                        'set-currency-for-personal-catalog'
+                    ],
+                    'roles'      => [Registry::OPERATOR],
+                    'roleParams' => ['user' => $this->user]
+                ]
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
+
     /**
      * Отключение логирования
      *

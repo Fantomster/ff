@@ -46,6 +46,7 @@ class DynamicUsageSearch extends \yii\base\Model
     public $w1_vendor;
     public $sort;
     public $start_date;
+    public $searchString;
 
     public function __construct(array $config = [])
     {
@@ -65,7 +66,7 @@ class DynamicUsageSearch extends \yii\base\Model
     public function rules()
     {
         return [
-            [['org_name', 'franchisee_name', 'start_date'], 'string'],
+            [['start_date','searchString'], 'string'],
         ];
     }
 
@@ -191,8 +192,12 @@ class DynamicUsageSearch extends \yii\base\Model
                         "franchisee_region"
                     ])
             ])
-            ->filterWhere(["LIKE", "org_name", $this->org_name])
-            ->andFilterWhere(["LIKE", "franchisee_name", $this->franchisee_name])
+            ->filterWhere(["LIKE", "org_name", $this->searchString])
+            ->orFilterWhere(["org_id" => $this->searchString])
+            ->orFilterWhere(["LIKE", "franchisee_name", $this->searchString])
+            ->orFilterWhere(["LIKE", "org_contact_name", $this->searchString])
+            ->orFilterWhere(["LIKE", "org_email", $this->searchString])
+            ->orFilterWhere(["LIKE", "org_city", $this->searchString])
             ->orderBy([
                 new Expression("CASE WHEN order_cnt > 0 then 1 else 2 end"),
                 new Expression("franchisee_region"),

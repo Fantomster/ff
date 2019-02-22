@@ -525,42 +525,55 @@ class IntegrationWebApi extends WebApi
         if (!$checkOrg) {
             return [];
         } else {
-            $client = \common\models\Organization::findOne($searchBusiness);
+            $client = Organization::findOne($searchBusiness);
         }
 
-        /** @var SqlDataProvider $dataProvider */
-        $dataProvider = (new OuterProductMapSearch())->search($client, $post);
-        $pagination = new \yii\data\Pagination();
-        $pagination->setPage($page - 1);
-        $pagination->setPageSize($pageSize);
-        $dataProvider->setPagination($pagination);
-        $models = $dataProvider->getModels();
-        $arVendors = [];
+        if (!empty($client->getSuppliers(null, false))) {
+            /** @var SqlDataProvider $dataProvider */
+            $dataProvider = (new OuterProductMapSearch())->search($client, $post);
+            $pagination = new \yii\data\Pagination();
+            $pagination->setPage($page - 1);
+            $pagination->setPageSize($pageSize);
+            $dataProvider->setPagination($pagination);
+            $models = $dataProvider->getModels();
+            $arVendors = [];
 
-        $isChildOrganization = false;
-        if ($mainOrg = IntegrationSettingValue::getSettingsByServiceId($post['service_id'], $client->id, ['main_org'])) {
-            $isChildOrganization = true;
-            $client = Organization::findOne($mainOrg);
-            $arVendors = array_keys($client->getSuppliers('', false));
-        }
-
-        if (!empty($models)) {
-            $result = new \SplObjectStorage();
-            foreach (WebApiHelper::generator($models) as $model) {
-                $result->attach((object)$this->prepareOutProductMap($model, $isChildOrganization, $arVendors));
+            $isChildOrganization = false;
+            if ($mainOrg = IntegrationSettingValue::getSettingsByServiceId($post['service_id'], $client->id, ['main_org'])) {
+                $isChildOrganization = true;
+                $client = Organization::findOne($mainOrg);
+                $arVendors = array_keys($client->getSuppliers('', false));
             }
+
+            if (!empty($models)) {
+                $result = new \SplObjectStorage();
+                foreach (WebApiHelper::generator($models) as $model) {
+                    $result->attach((object)$this->prepareOutProductMap($model, $isChildOrganization, $arVendors));
+                }
+            } else {
+                $result = [];
+            }
+
+            $return = [
+                'pagination' => [
+                    'page'       => ($dataProvider->pagination->page + 1) ?? 0,
+                    'page_size'  => $dataProvider->pagination->pageSize,
+                    'total_page' => ceil($dataProvider->totalCount / $pageSize)
+                ]
+            ];
         } else {
             $result = [];
+            $return = [
+                'pagination' => [
+                    'page'       => 1,
+                    'page_size'  => 12,
+                    'total_page' => 0
+                ]
+            ];
         }
 
-        return [
-            'products'   => $result,
-            'pagination' => [
-                'page'       => ($dataProvider->pagination->page + 1),
-                'page_size'  => $dataProvider->pagination->pageSize,
-                'total_page' => ceil($dataProvider->totalCount / $pageSize)
-            ]
-        ];
+        $return['products'] = $result;
+        return $return;
     }
 
     /**

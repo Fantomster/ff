@@ -55,11 +55,9 @@ class AmoSearch extends AmoFields
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
-            'amo_field'           => $this->amo_field,
-            'responsible_user_id' => $this->responsible_user_id,
-            'pipeline_id'         => $this->pipeline_id,
-        ]);
+        $query->andFilterWhere(['like', 'amo_field', $this->amo_field])
+            ->andFilterWhere(['responsible_user_id' => $this->responsible_user_id])
+            ->andFilterWhere(['pipeline_id' => $this->pipeline_id]);
 
         return $dataProvider;
     }

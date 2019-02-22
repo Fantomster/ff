@@ -27,6 +27,7 @@ class OrderStatus extends ActiveRecord
     const STATUS_FORMING = 7;
     const STATUS_EDI_SENT_BY_VENDOR = 8;
     const STATUS_EDI_ACCEPTANCE_FINISHED = 9;
+    const STATUS_PREORDER = 12;
 
     static $clientPermissionsDef = [
         'edit'     => true,

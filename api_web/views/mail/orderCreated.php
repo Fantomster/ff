@@ -31,6 +31,12 @@ $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['r
                                     <img src="https://static.mixcart.ru/mix_cart_bezfona.png" alt="logo" width="120"
                                          border="0" style="border:0;display:block;">
                                 </td>
+                                <td style="width: 400px;">
+                                    <div style="background: #66bb81; color: #ffffff; text-align: center; padding: 10px 0;">
+                                        <span style="display: block; font-size: 20px; font-weight: bold; font-family: 'Open Sans', Helvetica, sans-serif;">Устали переправлять заказы?</span>
+                                        <a href="https://mixcart.ru/host-files/MixCart_EDI.pdf"><span style="color: #ffffff; font-size: 18px; font-weight: bold; font-family: 'Open Sans', Helvetica, sans-serif; text-decoration: underline;">Настройте EDI</span></a>
+                                    </div>
+                                </td>
                             </tr>
                             <tr>
                                 <td valign="top"

@@ -6,7 +6,7 @@ use api\common\models\merc\MercVsd;
 
 ?>
 <?php
-$lic = mercService::getLicense();
+$lic = mercService::getLicense(Yii::$app->user->identity->organization_id);
 $timestamp_now = time();
 ($lic->status_id == 1) && ($timestamp_now <= (strtotime($lic->td))) ? $lic_merc = 1 : $lic_merc = 0;
 ?>
@@ -45,14 +45,14 @@ $timestamp_now = time();
         echo Html::a(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['done', 'uuid' => $document->UUID], ['class' => 'btn btn-success']) . ' ' .
             Html::a(Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']), ['done-partial', 'uuid' => $document->UUID], ['class' => 'btn btn-warning', 'data' => [
                 //'pjax'=>0,
-                'target' => '#ajax-load',
-                'toggle' => 'modal',
+                'target'   => '#ajax-load',
+                'toggle'   => 'modal',
                 'backdrop' => 'static',
             ],]) . ' ' .
             Html::a(Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']), ['done-partial', 'uuid' => $document->UUID, 'reject' => true], ['class' => 'btn btn-danger', 'data' => [
                 //'pjax'=>0,
-                'target' => '#ajax-load',
-                'toggle' => 'modal',
+                'target'   => '#ajax-load',
+                'toggle'   => 'modal',
                 'backdrop' => 'static',
             ],]);
     } ?>

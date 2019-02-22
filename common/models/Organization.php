@@ -9,6 +9,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
 use api\common\models\RkServicedata;
+use api_web\components\Registry;
 use common\models\edi\EdiOrganization;
 use common\models\licenses\LicenseOrganization;
 use common\models\vetis\VetisCountry;
@@ -92,6 +93,7 @@ use common\models\guides\Guide;
  * @property Cart[]                     $cart
  * @property User[]                     $users
  * @property CartContent[]              $cartContents
+ * @property Catalog                    $baseCatalog
  * @property DeliveryRegions[]          $deliveryRegionsAllow
  * @property DeliveryRegions[]          $deliveryRegionsExclude
  * @property FranchiseeAssociate[]      $franchiseeAssociate
@@ -106,6 +108,7 @@ use common\models\guides\Guide;
  * @property Guide                      $Favorite
  * @property Payment[]                  $Payments
  * @property VetisCountry               $vetisCountry
+ * @property OrganizationContact[]      $organizationContact
  */
 class Organization extends \yii\db\ActiveRecord
 {
@@ -115,6 +118,7 @@ class Organization extends \yii\db\ActiveRecord
     const TYPE_RESTAURANT = 1;
     const TYPE_SUPPLIER = 2;
     const TYPE_FRANCHISEE = 3;
+    const TYPE_LAZY_VENDOR = 4;
     const WHITE_LIST_OFF = 0;
     const WHITE_LIST_ON = 1;
     const STEP_OK = 0;
@@ -462,6 +466,20 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
+     * get count of suppliers for this organization
+     *
+     * @return integer
+     */
+    public function getSuppliersCount()
+    {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT) {
+            return 0;
+        }
+        $count = RelationSuppRest::find()->where(['rest_org_id' => $this->id, 'status' => 1, 'deleted' => 0])->count();
+        return $count;
+    }
+
+    /**
      * Get the list of organization type restaurant suppliers - filtered by categories
      *
      * @var $addAllOption bool "Don't use filter" indicator
@@ -598,11 +616,41 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param null $vendor_id
+     * @return array
+     */
+    public function getCatalogsLazyVendor($vendor_id = null)
+    {
+        $tblRSR = RelationSuppRest::tableName();
+        $tblCat = Catalog::tableName();
+
+        $query = RelationSuppRest::find()
+            ->select(["$tblRSR.cat_id as cat_id"])
+            ->leftJoin($tblCat, "$tblRSR.cat_id = $tblCat.id")
+            ->innerJoin(Organization::tableName() . ' as org', "org.id = $tblRSR.supp_org_id AND org.type_id = :type", [
+                ':type' => Organization::TYPE_LAZY_VENDOR
+            ])
+            ->where([
+                "$tblRSR.rest_org_id" => $this->id,
+                "$tblRSR.deleted"     => 0,
+                "$tblRSR.status"      => 1,
+                "$tblCat.status" => Catalog::STATUS_ON
+            ]);
+
+        if ($vendor_id) {
+            $query->andFilterWhere(["$tblRSR.supp_org_id" => $vendor_id]);
+        }
+
+        $catalogs = ArrayHelper::getColumn($query->asArray()->all(), 'cat_id');
+        return $catalogs;
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getDelivery()
     {
-        if ($this->type_id !== Organization::TYPE_SUPPLIER) {
+        if (!in_array($this->type_id, [Organization::TYPE_SUPPLIER, Organization::TYPE_LAZY_VENDOR])) {
             return null;
         }
         return $this->hasOne(Delivery::class, ['vendor_id' => 'id']);
@@ -650,7 +698,7 @@ class Organization extends \yii\db\ActiveRecord
             return $this->hasMany(DeliveryRegions::class, ['supplier_id' => 'id'])->andWhere(['exception' => 1]);
         }
         return null;
-}
+    }
 
     /**
      * Метод возвращает корзину организации//пользователя
@@ -832,23 +880,23 @@ class Organization extends \yii\db\ActiveRecord
         $tblOrderChat = OrderChat::tableName();
         $tblOrder = Order::tableName();
         $tblMA = ManagerAssociate::tableName();
-        
+
         $subQuery = (new Query())
-                ->select([new \yii\db\Expression("MIN($tblOrderChat.id) AS id"), "$tblOrderChat.order_id"])
-                ->from($tblOrderChat)
-                ->where(["$tblOrderChat.recipient_id" => $this->id, "$tblOrderChat.is_system" => 0, "$tblOrderChat.viewed" => 0])
-                ->groupBy("$tblOrderChat.order_id");
+            ->select([new \yii\db\Expression("MIN($tblOrderChat.id) AS id"), "$tblOrderChat.order_id"])
+            ->from($tblOrderChat)
+            ->where(["$tblOrderChat.recipient_id" => $this->id, "$tblOrderChat.is_system" => 0, "$tblOrderChat.viewed" => 0])
+            ->groupBy("$tblOrderChat.order_id");
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
             $query = OrderChat::find()
-                    ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
-                    ->leftJoin(["ord" => $tblOrder], "ord.id = $tblOrderChat.order_id")
-                    ->leftJoin(["ma" => $tblMA], "ord.client_id = ma.organization_id")
-                    ->where(["ma.manager_id" => $userId])
-                    ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
+                ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
+                ->leftJoin(["ord" => $tblOrder], "ord.id = $tblOrderChat.order_id")
+                ->leftJoin(["ma" => $tblMA], "ord.client_id = ma.organization_id")
+                ->where(["ma.manager_id" => $userId])
+                ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
         } else {
             $query = OrderChat::find()
-                    ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
-                    ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
+                ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
+                ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
         }
 
         return $query->all();
@@ -861,28 +909,28 @@ class Organization extends \yii\db\ActiveRecord
     {
         $roleId = Yii::$app->getUser()->identity->role->id;
         $userId = Yii::$app->user->id;
-        
+
         $tblOrderChat = OrderChat::tableName();
         $tblOrder = Order::tableName();
         $tblMA = ManagerAssociate::tableName();
-        
+
         $subQuery = (new Query())
-                ->select([new \yii\db\Expression("MIN($tblOrderChat.id) AS id"), "$tblOrderChat.order_id"])
-                ->from($tblOrderChat)
-                ->where(["$tblOrderChat.recipient_id" => $this->id, "$tblOrderChat.is_system" => 1, "$tblOrderChat.viewed" => 0])
-                ->groupBy("$tblOrderChat.order_id");
-        
+            ->select([new \yii\db\Expression("MIN($tblOrderChat.id) AS id"), "$tblOrderChat.order_id"])
+            ->from($tblOrderChat)
+            ->where(["$tblOrderChat.recipient_id" => $this->id, "$tblOrderChat.is_system" => 1, "$tblOrderChat.viewed" => 0])
+            ->groupBy("$tblOrderChat.order_id");
+
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
             $query = OrderChat::find()
-                    ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
-                    ->leftJoin(["ord" => $tblOrder], "ord.id = $tblOrderChat.order_id")
-                    ->leftJoin(["ma" => $tblMA], "ord.client_id = ma.organization_id")
-                    ->where(["ma.manager_id" => $userId])
-                    ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
+                ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
+                ->leftJoin(["ord" => $tblOrder], "ord.id = $tblOrderChat.order_id")
+                ->leftJoin(["ma" => $tblMA], "ord.client_id = ma.organization_id")
+                ->where(["ma.manager_id" => $userId])
+                ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
         } else {
             $query = OrderChat::find()
-                    ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
-                    ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
+                ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
+                ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
         }
         return $query->all();
     }
@@ -1009,12 +1057,12 @@ class Organization extends \yii\db\ActiveRecord
         $tblFA = FranchiseeAssociate::tableName();
         $tblFr = Franchisee::tableName();
         $tblOrg = Organization::tableName();
-        
+
         return Franchisee::find()
-                ->leftJoin($tblFA, "$tblFA.franchisee_id = $tblFr.id")
-                ->leftJoin($tblOrg, "$tblOrg.id = $tblFA.organization_id")
-                ->where(["$tblOrg.id" => $this->id])
-                ->one();
+            ->leftJoin($tblFA, "$tblFA.franchisee_id = $tblFr.id")
+            ->leftJoin($tblOrg, "$tblOrg.id = $tblFA.organization_id")
+            ->where(["$tblOrg.id" => $this->id])
+            ->one();
     }
 
     /**
@@ -1847,11 +1895,15 @@ class Organization extends \yii\db\ActiveRecord
             }
         }
 
-        if (!empty(iikoService::getLicense())) {
+        if (!empty(iikoService::getLicense($this->id))) {
             $return['iiko'] = true;
         }
 
-        if (!empty(TillypadService::getLicense())) {
+        if (!empty(OneSService::getLicense($this->id))) {
+            $return['odinsobsh'] = true;
+        }
+
+        if (!empty(TillypadService::getLicense($this->id))) {
             $return['tillypad'] = true;
         }
 
@@ -1864,7 +1916,7 @@ class Organization extends \yii\db\ActiveRecord
     public function getLicenseList()
     {
         $result = [];
-        $lic = RkServicedata::getLicense();
+        $lic = RkServicedata::getLicense($this->id);
         if ($lic != null) {
             $result['rkws'] = $lic;
             $org = $lic['service_id'];
@@ -1872,22 +1924,22 @@ class Organization extends \yii\db\ActiveRecord
             $result['rkws_ucs'] = $lic_ucs;
         }
 
-        $lic = iikoService::getLicense();
+        $lic = iikoService::getLicense($this->id);
         if ($lic != null) {
             $result['iiko'] = $lic;
         }
 
-        $lic = TillypadService::getLicense();
+        $lic = TillypadService::getLicense($this->id);
         if ($lic != null) {
             $result['tillypad'] = $lic;
         }
 
-        $lic = mercService::getLicense();
+        $lic = mercService::getLicense($this->id);
         if ($lic != null) {
             $result['mercury'] = $lic;
         }
 
-        $lic = OneSService::getLicense();
+        $lic = OneSService::getLicense($this->id);
         if ($lic != null) {
             $result['odinsobsh'] = $lic;
         }
@@ -1900,7 +1952,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getVsdCount()
     {
-        $lic = mercService::getLicense();
+        $lic = mercService::getLicense($this->id);
         if ($lic == null) {
             return 0;
         }
@@ -2070,5 +2122,13 @@ class Organization extends \yii\db\ActiveRecord
             $name = "{$this->legal_entity} ({$this->name})";
         }
         return $name;
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getOrganizationContact()
+    {
+        return $this->hasMany(OrganizationContact::class, ['organization_id' => 'id']);
     }
 }

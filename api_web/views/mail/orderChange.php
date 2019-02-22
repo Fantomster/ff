@@ -21,6 +21,7 @@ if (!empty($lastMessage)) {
     $ulStyle = "padding: 0; margin: 0;font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #8c8f8d;";
     $liStyle = "margin: 0;font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #8c8f8d;";
     $messageList = str_replace("{ul_style}", $ulStyle, str_replace("{li_style}", $liStyle, $messageList));
+    $messageList = str_replace('<span class="value-old">', '<span style="color: grey; text-decoration: line-through; font-size: 12px;">', $messageList);
 }
 ?>
     <!-- ШАПКА -->

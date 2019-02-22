@@ -4,24 +4,11 @@ namespace frontend\modules\clientintegr\modules\merc\controllers;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
-use api\common\models\merc\MercStockEntry;
-use api\common\models\merc\MercVisits;
 use api\common\models\merc\search\mercProductSearch;
-use api\common\models\merc\search\mercStockEntrySearch;
 use common\models\vetis\VetisProductItem;
 use console\modules\daemons\classes\MercStoreEntryList;
-use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getStockEntry;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\LoadStockEntryList;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
-use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
-use frontend\modules\clientintegr\modules\merc\models\dateForm;
-use frontend\modules\clientintegr\modules\merc\models\expiryDate;
-use frontend\modules\clientintegr\modules\merc\models\inputDate;
 use frontend\modules\clientintegr\modules\merc\models\productForm;
-use frontend\modules\clientintegr\modules\merc\models\productionDate;
-use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
 use Yii;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
@@ -36,12 +23,12 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 // We will override the default rule config with the new AccessRule class
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'rules' => [
+                'rules'      => [
                     [
                         'allow' => false,
                         // Allow restaurant managers
@@ -52,7 +39,7 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
                         ],
                     ],
                     [
-                        'allow' => TRUE,
+                        'allow' => true,
                         'roles' => ['@'],
                     ],
 
@@ -63,7 +50,7 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function beforeAction($action)
     {
-        $lic = mercService::getLicense();
+        $lic = mercService::getLicense(Yii::$app->user->identity->organization_id);
 
         if (!isset($lic) && ($this->getRoute() != 'clientintegr/merc/default/nolic')) {
             $this->redirect(['nolic']);
@@ -83,12 +70,12 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionIndex()
     {
-        $lic = mercService::getLicense();
+        $lic = mercService::getLicense(Yii::$app->user->identity->organization_id);
         $searchModel = new mercProductSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $params = ['searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'lic' => $lic];
+        $params = ['searchModel'  => $searchModel,
+                   'dataProvider' => $dataProvider,
+                   'lic'          => $lic];
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index', $params);
@@ -146,7 +133,7 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionUpdate($uuid)
     {
         $product = VetisProductItem::findOne(['uuid' => $uuid, 'last' => true, 'active' => true]);
-        if(is_null($product)) {
+        if (is_null($product)) {
             Yii::$app->session->setFlash('error', 'Позиция не найдена или не активна!');
             return $this->redirect(['index']);
         }
@@ -181,7 +168,7 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionDelete($uuid)
     {
-       try {
+        try {
             $result = mercuryApi::getInstance()->modifyProducerStockListOperation('DELETE', $uuid);
             if (!isset($result)) {
                 throw new \Exception('Error delete Product');

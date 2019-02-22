@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 use backend\models\DynamicUsageSearch;
+use backend\models\ExtendedReportsSearch;
 use backend\models\MercuryReportSearch;
 use backend\models\OrgUseMercFrequently;
 use common\models\OrderStatus;
@@ -35,7 +36,7 @@ class StatisticsController extends Controller
                 ],
                 'rules'      => [
                     [
-                        'actions' => ['index', 'registered', 'orders', 'turnover', 'misc', 'dynamics', 'mercury', 'merc-active-org'],
+                        'actions' => ['index', 'registered', 'orders', 'turnover', 'misc', 'dynamics', 'mercury', 'merc-active-org','extended-reports'],
                         'allow'   => true,
                         'roles'   => [
                             Role::ROLE_ADMIN,
@@ -240,7 +241,7 @@ class StatisticsController extends Controller
             $status = (int)$status;
             $select .= ", sum(case when $orderTable.status=$status then 1 else 0 end) as status_$status";
             $labelsTotal[] = $statusesList[$status];
-            $colorsTotal[] = $colorsList[$status];
+            $colorsTotal[] = $colorsList[$status] ?? $colorsList[1];
         }
 
         $ordersStat = (new Query())->select($select)->from($orderTable)
@@ -295,7 +296,7 @@ class StatisticsController extends Controller
 
         $leftJoinInnerSelect = (new Query())->select("*")
             ->from("$orderTable a")
-            ->where(["<>", "a.status", ':qp0'])
+            ->where(["a.status" => ':qp0'])
             ->andWhere(['BETWEEN', "a.created_at", ':qp1', ':qp2'])
             ->groupBy(["a.client_id"])
             ->orderBy("a.id")
@@ -325,7 +326,7 @@ class StatisticsController extends Controller
             ->from("($fromSelect) aa")
             ->leftJoin("($leftJoinOuterSelect) bb", "aa.year = bb.year and aa.month=bb.month and aa.day=bb.day")
             ->params([
-                ':qp0' => Order::STATUS_FORMING,
+                ':qp0' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_PROCESSING, Order::STATUS_DONE],
                 ':qp1' => $dt->format('Y-m-d'),
                 ':qp2' => $end->format('Y-m-d'),
                 ':qp3' => Organization::STATUS_WHITELISTED,
@@ -712,10 +713,10 @@ class StatisticsController extends Controller
         $today = new \DateTime();
         //var_dump(Yii::$app->request->post());
         $start_date = !empty(Yii::$app->request->get("start_date")) ? Yii::$app->request->get("start_date") : $today->format('d.m.Y');
-        $SearchModel = new DynamicUsageSearch();
-        $DataProvider = $SearchModel->search($params);
+        $searchModel = new DynamicUsageSearch();
+        $dataProvider = $searchModel->search($params);
 
-        return $this->render('dynamics', compact('SearchModel', 'DataProvider', 'start_date'));
+        return $this->render('dynamics', compact('searchModel', 'dataProvider', 'start_date'));
 
     }
 
@@ -757,5 +758,17 @@ class StatisticsController extends Controller
             ]
         ]);
         return $this->render('merc-active-org', compact('dataProviderIn', 'dataProviderNotIn'));
+    }
+
+    public function actionExtendedReports()
+    {
+        $searchModel = new ExtendedReportsSearch();
+        $searchModel->initDates();
+
+        $report1 = $searchModel->FranchiseeTurnoverFiguresSearch();
+        $report2 = $searchModel->NewRegistrationsSearch();
+        $report3 = $searchModel->MercuryReportSearch();
+
+        return $this->render('extended-reports', compact('searchModel', 'report1', 'report2', 'report3'));
     }
 }

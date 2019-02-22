@@ -203,7 +203,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
     /**
      * @return double
      */
-    public function getSumByWaybillid($number)
+    public static function getSumByWaybillid($number)
     {
         Yii::$app->get('db_api');
         $sum = 0;

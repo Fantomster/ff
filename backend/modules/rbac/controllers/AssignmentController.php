@@ -111,7 +111,7 @@ class AssignmentController extends Controller
 
         return $this->render('view', [
             'user'          => $model->user,
-            'items'         => $model->getUserItemsByOrg($orgId),
+            'items'         => $orgId ? $model->getUserItemsByOrg($orgId) : [],
             'usernameField' => $this->usernameField,
             'orgId'         => $orgId,
             'orgList'       => $orgList

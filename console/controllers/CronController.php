@@ -576,4 +576,9 @@ class CronController extends Controller
             }
         }
     }
+    
+    public function actionWipeMercLogs()
+    {
+        Yii::$app->db_api->createCommand()->truncateTable(\api\common\models\merc\mercLog::tableName())->execute();
+    }
 }

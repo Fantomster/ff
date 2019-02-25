@@ -466,7 +466,7 @@ class EDIClass extends Component
                 $catalogBaseGood->units = $good['units'];
                 $catalogBaseGood->ed = ($good['ed'] == '') ? "кг" : $good['ed'];
                 $catalogBaseGood->category_id = null;
-                $catalogBaseGood->barcode = $barcode;
+                $catalogBaseGood->barcode = (String)$barcode;
                 $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
                 $res = $catalogBaseGood->save();
 

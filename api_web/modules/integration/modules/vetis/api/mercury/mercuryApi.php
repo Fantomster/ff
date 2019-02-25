@@ -9,6 +9,8 @@ use api_web\modules\integration\modules\vetis\api\mercLogger;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use frontend\modules\clientintegr\modules\merc\models\productForm;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentDone;
+use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
+use Yii;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -52,17 +54,26 @@ class mercuryApi extends baseApi
      * @throws \yii\base\InvalidArgumentException
      * @throws \yii\base\InvalidConfigException
      */
-    private function getSubmitApplicationRequest()
+    private function getSubmitApplicationRequest($get_array = false)
     {
-        $request = new submitApplicationRequest();
-        $request->apiKey = $this->apiKey;
+        if (!$get_array) {
+            $request = new submitApplicationRequest();
+            $request->apiKey = $this->apiKey;
 
-        $request->application = new Application();
-        $request->application->serviceId = $this->service_id;
-        $request->application->issuerId = $this->issuerID;
-        $request->application->issueDate = \Yii::$app->formatter->asDate('now', 'yyyy-MM-dd') . 'T' . \Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+            $request->application = new Application();
+            $request->application->serviceId = $this->service_id;
+            $request->application->issuerId = $this->issuerID;
+            $request->application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd') . 'T' . Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+        } else {
+            $request['apiKey'] = $this->apiKey;
 
+            $request['application']['serviceId'] = $this->service_id;
+            $request['application']['issuerId'] = $this->issuerID;
+            $request['application']['issueDate'] = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd') . 'T' . Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+
+        }
         return $request;
+
     }
 
     /**
@@ -165,9 +176,7 @@ class mercuryApi extends baseApi
         //Готовим запрос
         $client = $this->getSoapClient();
 
-        $request = $this->getSubmitApplicationRequest();
-
-        $appData = new ApplicationDataWrapper();
+        $request = $this->getSubmitApplicationRequest(true);
 
         //Формируем тело запроса
         $config['login'] = $this->vetisLogin;
@@ -186,12 +195,12 @@ class mercuryApi extends baseApi
         $vetDoc->init($config);
 
         $var = new \SoapVar($vetDoc->getProcessIncomingConsignmentRequest(), SOAP_ENC_ARRAY, 'ProcessIncomingConsignmentRequest', 'http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2');
-        $appData->any['ns3:processIncomingConsignmentRequest'] = $var;
 
-        $request->application->data = $appData;
+        $request['application']['data']['any'] = ['ns3:processIncomingConsignmentRequest' => $var];
 
         try {
             $result = $client->submitApplicationRequest($request);
+
             $reuest_xml = $client->__getLastRequest();
 
             $app_id = $result->application->applicationId;
@@ -205,22 +214,60 @@ class mercuryApi extends baseApi
             } while ($status == 'IN_PROCESS');
 
             //Пишем лог
-            mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+            if (!isset($result->application->errors)) {
+                try {
+                    mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+                } catch (\Exception $e) {
+                }
+            } else {
+                $errors = is_array($result->application->errors->error) ? $result->application->errors->error : [$result->application->errors->error];
+                $err = true;
+                foreach ($errors as $error) {
+                    switch ($error->code) {
+                        case "MERC14257" :
+                            $err = false;
+                            $rejectedData = new rejectedForm();
+                            $rejectedData->decision = VetDocumentDone::ACCEPT_ALL;
+                            $rejectedData->reason = "ТТН верна";
+                            $rejectedData->description = "ТТН верна";
+                            $rejectedData->uuid = $UUID;
+                            $result = $this->getVetDocumentDone($UUID, $rejectedData);
+                            break;
+                        case "MERC14268" :
+                            $err = false;
+                            $vsd = MercVsd::findOne(['uuid' => $UUID]);
+                            $vsd->status = MercVsd::DOC_STATUS_UTILIZED;
+                            $vsd->save();
+                            $result = $vsd;
+                            break;
+                        case "MERC14256" :
+                            $err = false;
+                            $rejectedData = new rejectedForm();
+                            $rejectedData->decision = VetDocumentDone::ACCEPT_ALL;
+                            $rejectedData->reason = "Номер транспортного средства верен";
+                            $rejectedData->description = "Номер транспортного средства верен";
+                            $rejectedData->uuid = $UUID;
+                            $result = $this->getVetDocumentDone($UUID, $rejectedData);
+                            break;
+                    }
+                    if (!$err) {
+                        break;
+                    }
+                }
+                if ($err) {
+                    mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+                }
+            }
 
             if ($status == 'COMPLETED') {
                 $doc[] = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
                 (new VetDocumentsChangeList())->updateDocumentsList($doc[0]);
-            } else {
-                $result = null;
+                $result = MercVsd::findOne(['uuid' => $UUID]);
             }
         } catch (\SoapFault $e) {
-            $result = null;
             \Yii::error($e->detail);
-        } catch (\Throwable $e) {
-            $result = null;
-            \Yii::error($e->getMessage());
+            die();
         }
-
         return $result;
     }
 

@@ -122,7 +122,7 @@ class EDIClass extends Component
                 throw new Exception(Yii::t('error', 'common.user.not.found', ['ru' => 'Такого пользователя не существует.']));
             }
 
-            $positions = $head->POSITION ?? null;
+            $positions = $simpleXMLElement->xpath('/ORDRSP/HEAD/POSITION') ?? null;
             $isDesadv = false;
 
             if (!count($positions)) {

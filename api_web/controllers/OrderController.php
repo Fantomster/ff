@@ -30,7 +30,6 @@ class OrderController extends WebApiController
                     'allow'      => true,
                     'actions'    => [
                         'products',
-                        'products-list-for-unconfirmed-vendor',
                     ],
                     'roles'      => [Registry::OPERATOR],
                     'roleParams' => ['user' => $this->user]
@@ -43,22 +42,15 @@ class OrderController extends WebApiController
                         'history-count',
                         'status-list',
                         'save-to-pdf',
-                        'save-to-excel-by-unconfirmed-vendor',
-                        'save-to-pdf-by-unconfirmed-vendor',
                         'save-to-excel',
                         'complete',
-                        'complete-order-by-unconfirmed-vendor',
                         'repeat',
                         'update',
-                        'update-order-by-unconfirmed-vendor',
                         'cancel',
-                        'cancel-order-by-unconfirmed-vendor',
                         'comment',
                         'product-comment',
                         'set-document-number',
-                        'info-by-unconfirmed-vendor',
-                        'messages-by-unconfirmed-vendor',
-                        'send-message-by-unconfirmed-vendor',
+
                     ],
                     'roles'      => [
                         Registry::PROCUREMENT_INITIATOR,
@@ -70,10 +62,25 @@ class OrderController extends WebApiController
                     'allow'      => true,
                     'actions'    => [
                         'categories',
-                        'categories-for-unconfirmed-vendor',
                     ],
                     'roles'      => [Registry::OPERATOR],
                     'roleParams' => ['user' => $this->user]
+                ],
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'categories-for-unconfirmed-vendor',
+                        'info-by-unconfirmed-vendor',
+                        'messages-by-unconfirmed-vendor',
+                        'send-message-by-unconfirmed-vendor',
+                        'complete-order-by-unconfirmed-vendor',
+                        'update-order-by-unconfirmed-vendor',
+                        'cancel-order-by-unconfirmed-vendor',
+                        'save-to-excel-by-unconfirmed-vendor',
+                        'save-to-pdf-by-unconfirmed-vendor',
+                        'products-list-for-unconfirmed-vendor',
+                    ],
+                    'roles'   => []
                 ],
             ],
         ];

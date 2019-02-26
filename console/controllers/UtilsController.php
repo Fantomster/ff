@@ -3,7 +3,6 @@
 namespace console\controllers;
 
 use api\common\models\merc\MercVsd;
-use api_web\helpers\Product;
 use common\models\vetis\VetisProductItem;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentsChangeList;
@@ -13,6 +12,7 @@ use yii\helpers\ArrayHelper;
 use common\models\Catalog;
 use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
+use common\components\edi\EDIClass;
 
 class UtilsController extends Controller
 {
@@ -396,7 +396,7 @@ class UtilsController extends Controller
             }
         }
     }
-    
+
     public function actionCopyGuide(int $guideId, array $clientsList)
     {
         $guide = \common\models\guides\Guide::findOne(['id' => $guideId]);
@@ -405,5 +405,12 @@ class UtilsController extends Controller
         }
         var_dump($clientsList);
         $guide->copyTo($clientsList);
+    }
+
+    public function actionTestEdi() // тестовая функция для отладки EDI
+    {
+        $content = '';
+        $providerID = 1;
+        EDIClass::parseFile($content, $providerID);
     }
 }

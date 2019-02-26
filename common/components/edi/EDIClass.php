@@ -26,6 +26,7 @@ use yii\base\Controller;
 use yii\base\Exception;
 use yii\db\Expression;
 use Yii;
+use yii\web\NotFoundHttpException;
 
 /**
  * Class EDIClass
@@ -98,11 +99,11 @@ class EDIClass extends Component
 
             $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier, 'provider_id' => $providerID]);
             if (!$ediOrganization) {
-                throw new Exception('no EDI organization found');
+                throw new NotFoundHttpException(Yii::t('error', 'common.edi.organization.not.found', ['ru' => 'Такой организации в EDI не существует.']));
             }
             $organization = Organization::findOne(['id' => $ediOrganization->organization_id]);
             if (!$organization) {
-                throw new Exception('no organization found');
+                throw new NotFoundHttpException(Yii::t('error', 'common.organization.not.found', ['ru' => 'Такой организации не существует.']));
             }
 
             if ($isLeraData) {
@@ -112,13 +113,13 @@ class EDIClass extends Component
                 $order = Order::findOne(['id' => $orderID, 'vendor_id' => $ediOrganization->organization_id]);
             }
             if (!$order) {
-                throw new Exception('No such order');
+                throw new NotFoundHttpException(Yii::t('error', 'common.order.not.found', ['ru' => 'Такого заказа не существует.']));
             }
 
             \Yii::$app->language = $order->ediOrder->lang ?? 'ru';
             $user = User::findOne(['id' => $order->created_by_id]);
             if (!$user) {
-                throw new Exception('No such user');
+                throw new NotFoundHttpException(Yii::t('error', 'common.user.not.found', ['ru' => 'Такого пользователя не существует.']));
             }
 
             $positions = $head->POSITION ?? null;
@@ -142,6 +143,7 @@ class EDIClass extends Component
             $changed = [];
             $deleted = [];
             $ordNotice = new OrderNotice();
+
             foreach ($positions as $position) {
                 if (!isset($position->PRODUCT)) continue;
                 $productIDBuyer = (int)$position->PRODUCTIDBUYER;
@@ -166,7 +168,7 @@ class EDIClass extends Component
                 $ordNotice->cancelOrder($user, $organization, $order);
                 $order->status = OrderStatus::STATUS_REJECTED;
                 if (!$order->save()) {
-                    throw new Exception('Error saving order');
+                    throw new NotFoundHttpException(Yii::t('error', 'common.order.not.saving', ['ru' => 'Заказ сохранить не удалось.']));
                 }
                 return true;
             }
@@ -228,66 +230,69 @@ class EDIClass extends Component
                 $clone = clone $orderContent;
                 $changed[] = $clone;
                 if (!$orderContent->save()) {
-                    throw new Exception('Error saving order content');
+                    throw new NotFoundHttpException(Yii::t('error', 'common.order.content.not.saving', ['ru' => 'Товарную позицию заказа сохранить не удалось.']));
                 }
             }
 
-            foreach ($positions as $position) {
+            foreach ($positions as $position) { // цикл для каждой товарной позиции
                 if ($position->PRODUCTTYPE == self::EDI_ORDERSP_GOOD_NO_DELIVERY) continue;
-                $quantity = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
-                if (!$quantity || $quantity == 0.000 || $position->PRICE == 0.00) continue;
-                $contID = (int)$position->PRODUCTIDBUYER;
+                $quantity = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY; // Определение количества товара
+                if (!$quantity || $quantity == 0.000 || $position->PRICE == 0.00) continue; // Если количество не задано, равно нулю или нулевая цена, то цикл продолжаем со следующего товара
+                $contID = (int)$position->PRODUCTIDBUYER; // Артикул товара в базе Микскарта
                 if (!$contID) {
-                    $contID = (int)$position->PRODUCT;
+                    $contID = (int)$position->PRODUCT; // Если такого товара в базе Микскарта нет, то берётся артикул в базе поставщика
                 }
-                if (!$contID) continue;
-                $barcode = $position->PRODUCT;
-                if (!in_array($contID, $orderContentArr) && !in_array($barcode, $barcodeArray)) {
-                    $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
-                    if (!$good) {
-                        $rel = RelationSuppRest::findOne(['supp_org_id' => $order->vendor_id, 'rest_org_id' => $ediOrganization->organization_id]);
-                        if (empty($rel)) {
-                            throw new Exception("Not found RelationSuppRest: supp_org_id = {$order->vendor_id} AND rest_org_id = {$ediOrganization->organization_id}");
+                if (!$contID) continue; // Если артикула не существует, то цикл продолжаем со следующего товара
+                $barcode = $position->PRODUCT; // Определяем бар-код
+                if (!in_array($contID, $orderContentArr) && !in_array($barcode, $barcodeArray)) { // Если позиции нет в массиве позиций заказа и бар-кода нет в массиве бар-кодов
+                    $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT, 'supp_org_id' => $order->vendor_id]); // Находим товар в CatalogBaseGoods по баркоду
+                    if (!$good) { // Если такого товара в CatalogBaseGoods нет, то
+                        $rel = RelationSuppRest::findOne(['supp_org_id' => $order->vendor_id, 'rest_org_id' => $order->client_id]);
+                        if (empty($rel)) { // Если зависимости поставщика с клиентом не существует, то выдаём об этом сообщение
+                            throw new Exception("Not found RelationSuppRest: supp_org_id = {$order->vendor_id} AND rest_org_id = {$order->client_id}");
                         }
-                        $good = new CatalogBaseGoods();
-                        $good->cat_id = $rel->cat_id;
-                        $good->article = $position->PRODUCTIDSUPPLIER;
-                        $good->product = $position->DESCRIPTION;
-                        $good->status = CatalogBaseGoods::STATUS_ON;
-                        $good->supp_org_id = $organization->id;
-                        $good->price = $position->PRICE;
-                        $good->units = 0;
-                        $good->ed = 0;
-                        $good->category_id = null;
-                        $good->barcode = $barcode;
-                        $good->edi_supplier_article = $barcode;
-                        $good->save();
+                        $good = new CatalogBaseGoods(); // Создаём новый товар в CatalogBaseGoods
+                        $good->cat_id = $rel->cat_id; // назначенный каталог берём из таблицы связей поставщика и клиента
+                        $good->article = $position->PRODUCTIDSUPPLIER; // Артикул устанавливаем из полученного поля "Артикул в базе поставщика"
+                        $good->product = $position->DESCRIPTION; // Название продукта берём из полученного поля "Описание продукта"
+                        $good->status = CatalogBaseGoods::STATUS_ON; // Устанавливаем статус товара "Активен"
+                        $good->supp_org_id = $organization->id; // Устанавливаем идентификатор организации-поставщика
+                        $good->price = $position->PRICE; // Цену продукта устанавливаем из полученного поля "Цена товара"
+                        $good->units = 0; // Количество единиц товара в товарной упаковке устанавливаем нулевым
+                        $good->ed = ''; // Название единицы измерения товара устанавливаем ''
+                        $good->category_id = null; // Идентификатор категории товаров устанавливаем неопределённым
+                        $good->barcode = $barcode; // Штрих-код товара в Market Place устанавливаем из полученного поля "Бар-код"
+                        $good->edi_supplier_article = $barcode; // Артикул товара для EDI устанавливаем из полученного поля "Бар-код"
+                        if (!$good->save()) { // Остальные позиции устанавливаем по умолчанию и сохраняем
+                            \Yii::error('Do not save new position in Catalog Base Goods');
+                        }
                     };
-                    if ($isDesadv) {
-                        $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
+                    if ($isDesadv) { // Бесполезная развилка, т.к. isDesadv = true только, если count($positions) не существует
+                        $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY; // Количество товара в заказе равно значению из полученного поля "Поставленное количество" (никогда не выполняется)
                     } else {
-                        $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+                        $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY; // Количество товара в заказе равно значению из полученного поля "Принятое количество"
                     }
-                    $quan = (float)$quan;
-                    $price = (float)$position->PRICE;
-                    $newOrderContent = new OrderContent();
-                    $newOrderContent->order_id = $order->id;
-                    $newOrderContent->product_id = $good->id;
-                    $newOrderContent->quantity = $quan;
-                    $newOrderContent->price = $price;
-                    $newOrderContent->initial_quantity = $quan;
-                    $newOrderContent->product_name = $good->product;
-                    $newOrderContent->plan_quantity = $quan;
-                    $newOrderContent->plan_price = $price;
-                    $newOrderContent->units = $good->units;
-                    $newOrderContent->vat_product = $position->VAT ?? 0.00;
-                    $changed[] = $newOrderContent;
-                    if (!$newOrderContent->save()) {
-                        throw new Exception('Error saving order content');
+                    $quan = (float)$quan; // Переменная, отвечающая за количество товара в таблице заказов, приводится к типу числа с плавающей точкой
+                    $price = (float)$position->PRICE; // Переменная, отвечающая за цену товара в таблице заказов, приводится к типу числа с плавающей точкой из значения полученного поля "Цена"
+                    $newOrderContent = new OrderContent(); // Создаётся новая товарная позиция в заказе
+                    $newOrderContent->order_id = $order->id; // Устанавливаем номер заказа в новой товарной позиции
+                    $newOrderContent->product_id = $good->id; // Устанавливаем идентификатор продукта, который мы недавно создали в таблице catalog_base_goods
+                    $newOrderContent->quantity = $quan; // Устанавливаем количество товара
+                    $newOrderContent->price = $price; // Устанавливаем цену товара
+                    $newOrderContent->initial_quantity = $quan; // Устанавливаем первоначальное количество товара
+                    $newOrderContent->product_name = $good->product; // Устанавливаем наименование товарной позиции
+                    $newOrderContent->plan_quantity = $quan; // Устанавливаем изменённое количество товара
+                    $newOrderContent->plan_price = $price; // Устанавливаем изменённую цену товара
+                    $newOrderContent->units = $good->units; // Устанавливаем единицу измерения товароа
+                    $newOrderContent->vat_product = $position->VAT ?? 0.00; // Устанавливаем ставку НДС (если есть значение в полученном поле "Налог", то его, если нет, то 0.00 ???)
+                    $newOrderContent->article = $good->article; // Устанавливаем артикул товара
+                    $changed[] = $newOrderContent; // Записываем новую товарную позицию в заказе в массив изменений
+                    if (!$newOrderContent->save()) { // Пытаемся сохранить в заказе новую товарную позицию, если не удаётся, выдаём сообщение
+                        \Yii::error('Do not save new position in Order Content');
                     }
-                    $isPositionChanged = true;
-                    $total = $quan * $price;
-                    $summ += $total;
+                    $isPositionChanged = true; // Переменной, отвечающей за изменение позиции, присваиваем true
+                    $total = $quan * $price; // Переменной, отвечающей за сумму товарной позиции присваиваем значение, полученное из перемножения количества и цены товара
+                    $summ += $total; // К общей сумме прибавляем сумму данной товарной позиции
                 }
             }
 
@@ -319,7 +324,7 @@ class EDIClass extends Component
             }
             $order->accepted_by_id = $acceptedByID;
             if (!$order->save()) {
-                throw new Exception('Error saving order');
+                throw new NotFoundHttpException(Yii::t('error', 'common.order.not.saving', ['ru' => 'Заказ сохранить не удалось.']));
             }
 
             if ($isPositionChanged) {

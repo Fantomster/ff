@@ -34,6 +34,10 @@ use Yii;
  */
 class EDIClass extends Component
 {
+    const EDI_ORDERSP_GOOD_DELIVERY_WITHOUT_CHANGES = 1;
+    const EDI_ORDERSP_GOOD_DELIVERY_WITH_CHANGED_QUANTITY = 2;
+    const EDI_ORDERSP_GOOD_NO_DELIVERY = 3;
+
     public $ediDocumentType;
     public $fileName;
 
@@ -138,7 +142,6 @@ class EDIClass extends Component
             $changed = [];
             $deleted = [];
             $ordNotice = new OrderNotice();
-
             foreach ($positions as $position) {
                 if (!isset($position->PRODUCT)) continue;
                 $productIDBuyer = (int)$position->PRODUCTIDBUYER;
@@ -151,6 +154,10 @@ class EDIClass extends Component
                     $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->DELIVEREDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
                 } else {
                     $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->ACCEPTEDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
+                }
+                $arr[$contID]['PRODUCTTYPE'] = (int)$position->PRODUCTTYPE ?? self::EDI_ORDERSP_GOOD_DELIVERY_WITH_CHANGED_QUANTITY;
+                if ($position->PRODUCTTYPE == self::EDI_ORDERSP_GOOD_NO_DELIVERY) {
+                    $arr[$contID]['ACCEPTEDQUANTITY'] = 0.00;
                 }
                 $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
                 $totalPrice += $arr[$contID]['PRICE'];
@@ -169,6 +176,7 @@ class EDIClass extends Component
             $isPositionChanged = false;
             foreach ($order->orderContent as $orderContent) {
                 $index = $orderContent->id;
+                if (!isset($arr[$index])) continue;
                 $orderContentArr[] = $orderContent->id;
                 if (!isset($arr[$index]['BARCODE'])) {
                     if (isset($orderContent->ediOrderContent)) {
@@ -225,6 +233,7 @@ class EDIClass extends Component
             }
 
             foreach ($positions as $position) {
+                if ($position->PRODUCTTYPE == self::EDI_ORDERSP_GOOD_NO_DELIVERY) continue;
                 $quantity = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
                 if (!$quantity || $quantity == 0.000 || $position->PRICE == 0.00) continue;
                 $contID = (int)$position->PRODUCTIDBUYER;

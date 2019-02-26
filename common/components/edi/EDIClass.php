@@ -99,11 +99,11 @@ class EDIClass extends Component
 
             $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier, 'provider_id' => $providerID]);
             if (!$ediOrganization) {
-                throw new NotFoundHttpException(Yii::t('error', 'common.edi.organization.not.found', ['ru' => 'Такой организации в EDI не существует.']));
+                throw new Exception(Yii::t('error', 'common.edi.organization.not.found', ['ru' => 'Такой организации в EDI не существует.']));
             }
             $organization = Organization::findOne(['id' => $ediOrganization->organization_id]);
             if (!$organization) {
-                throw new NotFoundHttpException(Yii::t('error', 'common.organization.not.found', ['ru' => 'Такой организации не существует.']));
+                throw new Exception(Yii::t('error', 'common.organization.not.found', ['ru' => 'Такой организации не существует.']));
             }
 
             if ($isLeraData) {
@@ -113,13 +113,13 @@ class EDIClass extends Component
                 $order = Order::findOne(['id' => $orderID, 'vendor_id' => $ediOrganization->organization_id]);
             }
             if (!$order) {
-                throw new NotFoundHttpException(Yii::t('error', 'common.order.not.found', ['ru' => 'Такого заказа не существует.']));
+                throw new Exception(Yii::t('error', 'common.order.not.found', ['ru' => 'Такого заказа не существует.']));
             }
 
             \Yii::$app->language = $order->ediOrder->lang ?? 'ru';
             $user = User::findOne(['id' => $order->created_by_id]);
             if (!$user) {
-                throw new NotFoundHttpException(Yii::t('error', 'common.user.not.found', ['ru' => 'Такого пользователя не существует.']));
+                throw new Exception(Yii::t('error', 'common.user.not.found', ['ru' => 'Такого пользователя не существует.']));
             }
 
             $positions = $head->POSITION ?? null;
@@ -168,7 +168,7 @@ class EDIClass extends Component
                 $ordNotice->cancelOrder($user, $organization, $order);
                 $order->status = OrderStatus::STATUS_REJECTED;
                 if (!$order->save()) {
-                    throw new NotFoundHttpException(Yii::t('error', 'common.order.not.saving', ['ru' => 'Заказ сохранить не удалось.']));
+                    throw new Exception(Yii::t('error', 'common.order.not.saving', ['ru' => 'Заказ сохранить не удалось.']));
                 }
                 return true;
             }
@@ -230,7 +230,7 @@ class EDIClass extends Component
                 $clone = clone $orderContent;
                 $changed[] = $clone;
                 if (!$orderContent->save()) {
-                    throw new NotFoundHttpException(Yii::t('error', 'common.order.content.not.saving', ['ru' => 'Товарную позицию заказа сохранить не удалось.']));
+                    throw new Exception(Yii::t('error', 'common.order.content.not.saving', ['ru' => 'Товарную позицию заказа сохранить не удалось.']));
                 }
             }
 
@@ -264,7 +264,7 @@ class EDIClass extends Component
                         $good->barcode = $barcode; // Штрих-код товара в Market Place устанавливаем из полученного поля "Бар-код"
                         $good->edi_supplier_article = $barcode; // Артикул товара для EDI устанавливаем из полученного поля "Бар-код"
                         if (!$good->save()) { // Остальные позиции устанавливаем по умолчанию и сохраняем
-                            \Yii::error('Do not save new position in Catalog Base Goods');
+                            \Yii::error('Не удалось сохранить запись в таблице catalog_base_goods, скорее всего, из-за валидации');
                         }
                     };
                     if ($isDesadv) { // Бесполезная развилка, т.к. isDesadv = true только, если count($positions) не существует
@@ -288,7 +288,7 @@ class EDIClass extends Component
                     $newOrderContent->article = $good->article; // Устанавливаем артикул товара
                     $changed[] = $newOrderContent; // Записываем новую товарную позицию в заказе в массив изменений
                     if (!$newOrderContent->save()) { // Пытаемся сохранить в заказе новую товарную позицию, если не удаётся, выдаём сообщение
-                        \Yii::error('Do not save new position in Order Content');
+                        \Yii::error('Не удалось сохранить запись в таблице order_content, скорее всего, из-за валидации');
                     }
                     $isPositionChanged = true; // Переменной, отвечающей за изменение позиции, присваиваем true
                     $total = $quan * $price; // Переменной, отвечающей за сумму товарной позиции присваиваем значение, полученное из перемножения количества и цены товара

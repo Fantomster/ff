@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use api\common\models\iiko\iikoAgent;
 use common\components\SimpleChecker;
 use common\models\OrderStatus;
+use common\models\rbac\helpers\RbacHelper;
 use common\models\RelationCategory;
 use Yii;
 use common\models\Currency;
@@ -379,6 +380,7 @@ class ClientController extends DefaultController
                     $user->setRelationUserOrganization($user->organization->id, $user->role_id);
                     $user->wipeNotifications();
                     $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru' => 'Пользователь добавлен!']);
+                    RbacHelper::addRbacRole($user->id, $user->role_id, $user->organization->id);
                     //Yii::$app->db->createCommand($query)->queryScalar();
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 } else {

@@ -2,6 +2,7 @@
 
 namespace api\modules\v1\modules\mobile\controllers;
 
+use common\models\rbac\helpers\RbacHelper;
 use common\models\TestVendors;
 use Google\Spreadsheet\Exception\BadRequestException;
 use Yii;
@@ -15,7 +16,6 @@ use common\models\Role;
 use common\models\UserToken;
 use common\models\UserFcmToken;
 use api_web\classes\UserWebApi;
-
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
@@ -71,6 +71,12 @@ class UserController extends ActiveController
 
     }
 
+    /**
+     * @return array
+     * @throws \api_web\exceptions\ValidationException
+     * @throws \yii\base\InvalidArgumentException
+     * @throws \yii\db\Exception
+     */
     public function actionRegistration()
     {
 
@@ -102,8 +108,9 @@ class UserController extends ActiveController
                     $organization->save();
                     $user->setOrganization($organization, true)->save();
                     $user->setRelationUserOrganization($organization->id, $role::getManagerRole($organization->type_id));
+                    RbacHelper::addRbacRole($user->id, $user->role_id, $organization->id);
                     $transaction->commit();
-                } catch (Exception $ex) {
+                } catch (\Exception $ex) {
                     $transaction->rollBack();
                 }
                 if ($organization->type_id == Organization::TYPE_SUPPLIER) {
@@ -261,7 +268,7 @@ class UserController extends ActiveController
         $params = Yii::$app->request->queryParams;
         $pageSize = isset($params['per-page']) ? intval($params['per-page']) : 4;
         $dataProvider = new \yii\data\ArrayDataProvider([
-            'allModels' => (new UserWebApi())->getAllOrganization(),
+            'allModels'  => (new UserWebApi())->getAllOrganization(),
             'pagination' => [
                 'pageSize' => $pageSize,
             ],
@@ -311,8 +318,9 @@ class UserController extends ActiveController
             $profile->full_name = $profile->full_name."-".$user->id;
             $organization->name = $organization->name."-".$organization->id;
             $organization->save();
+            RbacHelper::addRbacRole($user->id, $user->role_id, $organization->id);
             $transaction->commit();
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $transaction->rollBack();
         }
 

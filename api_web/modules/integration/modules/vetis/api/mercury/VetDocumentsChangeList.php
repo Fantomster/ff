@@ -6,6 +6,7 @@ use api\common\models\merc\MercVsd;
 use common\models\vetis\VetisUnit;
 use api_web\modules\integration\modules\vetis\api\cerber\cerberApi;
 use yii\base\Model;
+use yii\helpers\Json;
 
 /**
  * Class VetDocumentsChangeList
@@ -19,11 +20,6 @@ class VetDocumentsChangeList extends Model
      */
     public $org_id;
 
-    private $logCategory = "vetis_log";    
-    
-    /**
-     * @param $list
-     */
     public function updateDocumentsList($list)
     {
         $list = is_array($list) ? $list : [$list];
@@ -36,8 +32,8 @@ class VetDocumentsChangeList extends Model
 
             $unit = VetisUnit::findOne(['guid' => $item->certifiedConsignment->batch->unit->guid, 'active' => true, 'last' => true]);
             VetisUnit::getUpdateData(0);
-            $sender = cerberApi::getInstance($this->org_id)->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
-            $recipient = cerberApi::getInstance($this->org_id)->getEnterpriseByUuid($item->certifiedConsignment->consignee->enterprise->uuid);
+            $sender = cerberApi::getInstance($this->org_id)->getEnterpriseByGuid($item->certifiedConsignment->consignor->enterprise->guid);
+            $recipient = cerberApi::getInstance($this->org_id)->getEnterpriseByGuid($item->certifiedConsignment->consignee->enterprise->guid);
 
             $producer = isset($item->certifiedConsignment->batch->origin->producer) ? MercVsd::getProduccerData($item->certifiedConsignment->batch->origin->producer, $this->org_id) : null;
 
@@ -60,6 +56,9 @@ class VetDocumentsChangeList extends Model
                 'sender_name'            => !isset($sender) ? null : $sender->name . ' (' . $sender->address->addressView . ')',
                 'finalized'              => $item->finalized,
                 'last_update_date'       => ($item->lastUpdateDate != "-") ? date('Y-m-d h:i:s', strtotime($item->lastUpdateDate)) : null,
+                /*'vehicle_number' => isset($item->certifiedConsignment->transportInfo->transportNumber->vehicleNumber) ? $item->certifiedConsignment->transportInfo->transportNumber->vehicleNumber : null,
+                'trailer_number' => isset($item->certifiedConsignment->transportInfo->transportNumber->trailerNumber) ? $item->certifiedConsignment->transportInfo->transportNumber->trailerNumber : null,
+                'container_number' => isset($item->certifiedConsignment->transportInfo->transportNumber->containerNumber) ? $item->certifiedConsignment->transportInfo->transportNumber->containerNumber : null,*/
                 'transport_storage_type' => $item->certifiedConsignment->transportStorageType,
                 'product_type'           => $item->certifiedConsignment->batch->productType,
                 'product_name'           => $item->certifiedConsignment->batch->productItem->name,
@@ -74,21 +73,24 @@ class VetDocumentsChangeList extends Model
                 'producer_name'          => isset($producer) ? $producer['name'][0] : null,
                 'producer_guid'          => isset($producer) ? $producer['guid'][0] : null,
                 'low_grade_cargo'        => (int)$item->certifiedConsignment->batch->lowGradeCargo,
-                'raw_data'               => serialize($item),
-                'owner_guid'             => isset($item->certifiedConsignment->batch->owner) ? $item->certifiedConsignment->batch->owner->guid : null,
-                'product_guid'           => isset($item->certifiedConsignment->batch->product->guid) ? $item->certifiedConsignment->batch->product->guid : null,
-                'sub_product_guid'       => isset($item->certifiedConsignment->batch->subProduct->guid) ? $item->certifiedConsignment->batch->subProduct->guid : null,
-                'product_item_guid'      => isset($item->certifiedConsignment->batch->productItem->guid) ? $item->certifiedConsignment->batch->productItem->guid : null,
-                'origin_country_guid'    => isset($item->certifiedConsignment->batch->origin->country->guid) ? $item->certifiedConsignment->batch->origin->country->guid : null,
-                'confirmed_by'           => isset($item->statusChange->specifiedPerson) ? json_encode(!is_array($item->authentication->laboratoryResearch) ? [$item->authentication->laboratoryResearch] : $item->authentication->laboratoryResearch) : null,
-                'other_info'             => json_encode([
+                'raw_data'               => Json::encode($item),
+
+                'owner_guid'          => isset($item->certifiedConsignment->batch->owner) ? $item->certifiedConsignment->batch->owner->guid : null,
+                'product_guid'        => isset($item->certifiedConsignment->batch->product->guid) ? $item->certifiedConsignment->batch->product->guid : null,
+                'sub_product_guid'    => isset($item->certifiedConsignment->batch->subProduct->guid) ? $item->certifiedConsignment->batch->subProduct->guid : null,
+                'product_item_guid'   => isset($item->certifiedConsignment->batch->productItem->guid) ? $item->certifiedConsignment->batch->productItem->guid : null,
+                'origin_country_guid' => isset($item->certifiedConsignment->batch->origin->country->guid) ? $item->certifiedConsignment->batch->origin->country->guid : null,
+                'confirmed_by'        => isset($item->statusChange->specifiedPerson) ? json_encode(!is_array($item->statusChange->specifiedPerson) ? [$item->statusChange->specifiedPerson] : $item->statusChange->specifiedPerson) : null,
+                'other_info'          => json_encode([
                     'locationProsperity' => isset($item->authentication->locationProsperity) ? $item->authentication->locationProsperity : null,
                     'cargoExpertized'    => isset($item->authentication->cargoExpertized) ? $item->authentication->cargoExpertized : null,
                     'specialMarks'       => isset($item->authentication->specialMarks) ? $item->authentication->specialMarks : null
                 ]),
-                'laboratory_research'    => isset($item->authentication->laboratoryResearch) ? json_encode($item->authentication->laboratoryResearch) : null,
-                'transport_info'         => isset($item->certifiedConsignment->transportInfo) ? json_encode($item->certifiedConsignment->transportInfo) : null,
-                'unit_guid'              => isset($item->certifiedConsignment->batch->unit->guid) ? $item->certifiedConsignment->batch->unit->guid : null
+                'laboratory_research' => isset($item->authentication->laboratoryResearch) ? json_encode($item->authentication->laboratoryResearch) : null,
+                'transport_info'      => isset($item->certifiedConsignment->transportInfo) ? json_encode($item->certifiedConsignment->transportInfo) : null,
+                'unit_guid'           => isset($item->certifiedConsignment->batch->unit->guid) ? $item->certifiedConsignment->batch->unit->guid : null,
+                'r13nClause'          => isset($item->authentication->r13nClause),
+                'location_prosperity' => isset($item->authentication->locationProsperity) ? $item->authentication->locationProsperity : null,
             ]);
 
             if (isset($item->referencedDocument)) {
@@ -99,10 +101,10 @@ class VetDocumentsChangeList extends Model
                     $docs = $item->referencedDocument;
                 }
 
-                foreach ($docs as $doc) {
-                    if (($doc->type >= 1) && ($doc->type <= 5)) {
-                        $model->waybill_number = (isset($doc->issueSeries) && (isset($doc->issueNumber))) ? MercVsd::getNumber($doc->issueSeries, $doc->issueNumber) : null;
-                        $model->waybill_date = isset($doc->issueDate) ? $doc->issueDate : null;
+                foreach ($docs as $item) {
+                    if (($item->type >= 1) && ($item->type <= 5)) {
+                        $model->waybill_number = (isset($item->issueSeries) && (isset($item->issueNumber))) ? MercVsd::getNumber($item->issueSeries, $item->issueNumber) : null;
+                        $model->waybill_date = isset($item->issueDate) ? $item->issueDate : null;
                         break;
                     }
                 }
@@ -112,39 +114,6 @@ class VetDocumentsChangeList extends Model
         }
     }
 
-    /**
-     * @param $last_visit
-     */
-    public function updateData($last_visit)
-    {
-        $api = mercuryApi::getInstance($this->org_id);
-        $listOptions = new ListOptions();
-        $listOptions->count = 100;
-        $listOptions->offset = 0;
-        $count = 0;
-        $this->log('Load' . PHP_EOL);
-
-        do {
-            $result = $api->getVetDocumentChangeList($last_visit, $listOptions);
-            $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
-            $count += $vetDocumentList->count;
-            $this->log('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
-
-            if ($vetDocumentList->count > 0) {
-                $this->updateDocumentsList($vetDocumentList->vetDocument);
-            }
-
-            if ($vetDocumentList->count < $vetDocumentList->total) {
-                $listOptions->offset += $vetDocumentList->count;
-            }
-
-        } while ($vetDocumentList->total > ($vetDocumentList->count + $vetDocumentList->offset));
-    }
-
-    /**
-     * @param $vsd_uuid_list
-     * @return bool
-     */
     public function handUpdateData($vsd_uuid_list)
     {
         $mask = '/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/';
@@ -163,18 +132,5 @@ class VetDocumentsChangeList extends Model
         }
 
         return true;
-    }
-
-    /**
-     * @param array|string $message
-     */
-    public function log($message)
-    {
-        if (is_array($message)) {
-            $message = print_r($message, true);
-        }
-        $message = $message . PHP_EOL;
-        $message .= str_pad('', 80, '=') . PHP_EOL;
-        \Yii::info($message, $this->logCategory);
     }
 }

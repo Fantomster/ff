@@ -260,9 +260,12 @@ class mercuryApi extends baseApi
                 (new VetDocumentsChangeList())->updateDocumentsList($doc[0]);
                 $result = MercVsd::findOne(['uuid' => $UUID]);
             }
+        } catch (\SoapFault $e) {
+            Yii::error($e->detail);
+            throw new \Exception($e->detail);
         } catch (\Throwable $e) {
             Yii::error($e->getMessage());
-            die();
+            throw new \Exception($e->getMessage());
         }
         return $result;
     }

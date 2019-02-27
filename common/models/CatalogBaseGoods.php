@@ -126,7 +126,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
             [['article'], 'string', 'max' => 50],
             [['edi_supplier_article'], 'string', 'max' => 30],
-            [['article', 'edi_supplier_article'], 'match', 'pattern' => '/^[0-9a-zа-я]{1,50}$/iu'],
+            [['article', 'edi_supplier_article'], 'match', 'pattern' => '/^[0-9a-zа-я -]{1,50}$/iu'],
             [['brand', 'region', 'weight'], 'string', 'max' => 255],
             [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process', 'except' => 'import'],
             [['note'], 'string', 'max' => 255],

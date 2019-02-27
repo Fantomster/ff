@@ -308,7 +308,6 @@ class EmailIntegrationController extends Controller
         ];
 
         foreach ($email['attachment'] as $name_file => $file) {
-            //print $setting->language.PHP_EOL;
             //Узнаём тип вложения
             $mime_type = array_keys($file)[0];
             //Декодируем имя файла
@@ -355,7 +354,7 @@ class EmailIntegrationController extends Controller
                 // запускаем обработку накладной
                 $parser->parse();
                 if ($parser->sumNotEqual === true) {
-                    $parser->sendMailNotEqualSum($email['from']['email'], $name_file, $setting->language);
+                    $parser->sendMailNotEqualSum($email['from']['email'], $name_file, $setting->language, $parser->sumWithoutTaxExcel, $parser->sumWithTaxExcel);
                 }
             } catch (ParseTorg12Exception $e) {
                 $this->log([

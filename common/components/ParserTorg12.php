@@ -113,8 +113,8 @@ class ParserTorg12
     private $tip_ooo_short = []; //массив кратких названий типов организаций
     private $tip_ooo_long = []; //массив полных названий типов организаций
     private $kodirov = true; // необходимость ручной раскодировки
-    private $sumWithoutTaxExcel = 0; //Сумма без НДС, указанная в накладной
-    private $sumWithTaxExcel = 0; //Сумма c НДС, указанная в накладной
+    public $sumWithoutTaxExcel = 0; //Сумма без НДС, указанная в накладной
+    public $sumWithTaxExcel = 0; //Сумма c НДС, указанная в накладной
     public $sumNotEqual = false; //совпадения общих сумм в накладной с суммами всех строк
     public $formulaHasSumWithoutTax = 0; //наличие формулы в ячейке Сумма всей накладной без НДС
     public $formulaHasSumWithTax = 0; //наличие формулы в ячейке Сумма всей накладной с НДС
@@ -215,9 +215,6 @@ class ParserTorg12
 
                 break;
             }
-
-            // если в накладной несовпадения общей суммы с суммами всех строк, то отправляем письмо
-            $this->processRows();
         }
     }
 
@@ -1246,6 +1243,7 @@ class ParserTorg12
                 $this->invoice->rows[$invoiceRow->num] = $invoiceRow;
             }
         }
+        //$this->sumWithoutTaxExcel = 50;
         if (($this->formulaHasSumWithoutTax == 0) && ($this->invoice->price_without_tax_sum != $this->sumWithoutTaxExcel))
             $this->sumNotEqual = true;
         if (($this->formulaHasSumWithTax == 0) && ($this->invoice->price_with_tax_sum != $this->sumWithTaxExcel))
@@ -1537,7 +1535,7 @@ class ParserTorg12
         return $has;
     }
 
-    public function sendMailNotEqualSum($email, $name_file, $language)
+    public function sendMailNotEqualSum($email, $name_file, $language, $sumWithoutTaxExcel, $sumWithTaxExcel)
     {
         /** @var \yii\swiftmailer\Mailer $mailer */
         /** @var \yii\swiftmailer\Message $message */

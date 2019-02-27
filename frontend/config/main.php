@@ -17,7 +17,7 @@ return [
 //                    'cloudWatchLog' => 'cloudWatchLog',
 //                    'groupName' => 'Errors_at_mixcart.test',
 //                ],        
-        'authManager'         => null,
+        'authManager'         => 'common\components\DbManager',
         'request'             => [
             'csrfParam'        => '_csrf-fk',
             'enableCsrfCookie' => true,

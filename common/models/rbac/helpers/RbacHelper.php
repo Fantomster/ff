@@ -11,13 +11,16 @@
 namespace common\models\rbac\helpers;
 
 use api_web\components\Registry;
+use api_web\exceptions\ValidationException;
 use common\models\Organization;
+use common\models\rbac\AuthAssignment;
 use yii\db\Query;
 
 class RbacHelper
 {
     /**
      * Маппинг старых role_id к новым ролям в RBAC
+     *
      * @var array $dictRoles
      */
     static $dictRoles = [
@@ -45,4 +48,27 @@ class RbacHelper
             ->indexBy('id')
             ->column();
     }
+
+    /**
+     * @param $userId
+     * @param $roleId
+     * @param $org_id
+     * @throws ValidationException
+     */
+    public static function addRbacRole($userId, $roleId, $org_id): void
+    {
+        if (array_key_exists($roleId, self::$dictRoles)) {
+            $authAssign = new AuthAssignment([
+                'item_name'       => self::$dictRoles[$roleId],
+                'user_id'         => $userId,
+                'organization_id' => $org_id
+            ]);
+
+            if (!$authAssign->save()) {
+                throw new ValidationException([], $authAssign->getFirstErrors());
+            }
+        }
+
+    }
+
 }

@@ -163,28 +163,9 @@ class UserWebApi extends \api_web\components\WebApi
         }
         $user->setRegisterAttributes($role_id, $status);
         $user->save();
-        $this->addRbacRole($user->id, $role_id, $org_id);
+        RbacHelper::addRbacRole($user->id, $role_id, $org_id);
 
         return $user;
-    }
-
-    /**
-     * @param $userId
-     * @param $roleId
-     * @param $org_id
-     * @throws ValidationException
-     */
-    public function addRbacRole($userId, $roleId, $org_id): void
-    {
-        $authAssign = new AuthAssignment([
-            'item_name'       => RbacHelper::$dictRoles[$roleId],
-            'user_id'         => $userId,
-            'organization_id' => $org_id
-        ]);
-
-        if (!$authAssign->save()) {
-            throw new ValidationException($authAssign->getFirstErrors());
-        }
     }
 
     /**

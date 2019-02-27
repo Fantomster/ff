@@ -15,7 +15,7 @@ return [
         ],
     ],
     'components'          => [
-        'authManager'  => null,
+        'authManager'  => 'common\components\DbManager',
         'request'      => [
             'csrfParam' => '_csrf-fk',
         ],

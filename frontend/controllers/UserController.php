@@ -8,7 +8,7 @@
 
 namespace frontend\controllers;
 
-use common\models\OrganizationSearch;
+use common\models\rbac\helpers\RbacHelper;
 use common\models\RelationSuppRest;
 use common\models\RelationUserOrganization;
 use common\models\search\BusinessSearch;
@@ -110,6 +110,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController
                     if ($profile->setUser($user->id)->save() && $organization->save() && $user->setOrganization($organization, true)->save()) {
                         $transaction->commit();
                         $this->afterRegister($user);
+                        RbacHelper::addRbacRole($user->id, $user->role_id, $organization->id);
                         return ['result' => 'success', 'message' => Yii::t('message', 'frontend.controllers.user.success', ['ru' => 'Регистрация прошла успешно'])];
                     } else {
                         $transaction->rollBack();
@@ -166,8 +167,9 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController
                     $organization->save();
                     $user->setOrganization($organization, true)->save();
                     $user->setRelationUserOrganization($organization->id, $role::getManagerRole($organization->type_id));
+                    RbacHelper::addRbacRole($user->id, $user->role_id, $organization->id);
                     $transaction->commit();
-                } catch (Exception $ex) {
+                } catch (\Exception $ex) {
                     $transaction->rollBack();
                 }
                 if ($organization->type_id == Organization::TYPE_SUPPLIER) {

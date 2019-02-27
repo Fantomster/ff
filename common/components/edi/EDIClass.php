@@ -26,6 +26,7 @@ use yii\base\Controller;
 use yii\base\Exception;
 use yii\db\Expression;
 use Yii;
+use yii\web\NotFoundHttpException;
 
 /**
  * Class EDIClass
@@ -34,9 +35,10 @@ use Yii;
  */
 class EDIClass extends Component
 {
-    const EDI_ORDERSP_GOOD_DELIVERY_WITHOUT_CHANGES = 1;
+
+    const EDI_ORDERSP_GOOD_DELIVERY_WITHOUT_CHANGES       = 1;
     const EDI_ORDERSP_GOOD_DELIVERY_WITH_CHANGED_QUANTITY = 2;
-    const EDI_ORDERSP_GOOD_NO_DELIVERY = 3;
+    const EDI_ORDERSP_GOOD_NO_DELIVERY                    = 3;
 
     public $ediDocumentType;
     public $fileName;
@@ -54,7 +56,7 @@ class EDIClass extends Component
         if (!$content) {
             return false;
         }
-        $dom = new \DOMDocument();
+        $dom              = new \DOMDocument();
         $dom->loadXML($content);
         $simpleXMLElement = simplexml_import_dom($dom);
 
@@ -63,13 +65,13 @@ class EDIClass extends Component
             $success = $this->handlePriceListUpdating($simpleXMLElement, $providerID);
         } elseif (strpos($content, 'ORDRSP>')) {
             $this->ediDocumentType = 'ORDRSP';
-            $success = $this->handleOrderResponse($simpleXMLElement, 1, $providerID, false);
+            $success               = $this->handleOrderResponse($simpleXMLElement, 1, $providerID, false);
         } elseif (strpos($content, 'DESADV>')) {
             $this->ediDocumentType = 'DESADV';
-            $success = $this->handleOrderResponse($simpleXMLElement, 2, $providerID, false);
+            $success               = $this->handleOrderResponse($simpleXMLElement, 2, $providerID, false);
         } elseif (strpos($content, 'ALCDES>')) {
             $this->ediDocumentType = 'ALCDES';
-            $success = $this->handleOrderResponse($simpleXMLElement, 3, $providerID, true);
+            $success               = $this->handleOrderResponse($simpleXMLElement, 3, $providerID, true);
         }
         return $success;
     }
@@ -89,44 +91,44 @@ class EDIClass extends Component
         try {
             $orderID = $simpleXMLElement->ORDERNUMBER;
             if ($isLeraData) {
-                $head = $simpleXMLElement->HEAD[0];
+                $head     = $simpleXMLElement->HEAD[0];
                 $supplier = $head->BUYER;
             } else {
-                $head = $simpleXMLElement->HEAD;
+                $head     = $simpleXMLElement->HEAD;
                 $supplier = $head->SUPPLIER;
             }
 
             $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier, 'provider_id' => $providerID]);
             if (!$ediOrganization) {
-                throw new Exception('no EDI organization found');
+                throw new Exception(Yii::t('error', 'common.edi.organization.not.found', ['ru' => 'Такой организации в EDI не существует.']));
             }
             $organization = Organization::findOne(['id' => $ediOrganization->organization_id]);
             if (!$organization) {
-                throw new Exception('no organization found');
+                throw new Exception(Yii::t('error', 'common.organization.not.found', ['ru' => 'Такой организации не существует.']));
             }
 
             if ($isLeraData) {
-                $order = Order::findOne(['id' => $orderID, 'client_id' => $ediOrganization->organization_id]);
+                $order        = Order::findOne(['id' => $orderID, 'client_id' => $ediOrganization->organization_id]);
                 $organization = Organization::findOne(['id' => $order->vendor_id]);
             } else {
                 $order = Order::findOne(['id' => $orderID, 'vendor_id' => $ediOrganization->organization_id]);
             }
             if (!$order) {
-                throw new Exception('No such order');
+                throw new Exception(Yii::t('error', 'common.order.not.found', ['ru' => 'Такого заказа не существует.']));
             }
 
             \Yii::$app->language = $order->ediOrder->lang ?? 'ru';
-            $user = User::findOne(['id' => $order->created_by_id]);
+            $user                = User::findOne(['id' => $order->created_by_id]);
             if (!$user) {
-                throw new Exception('No such user');
+                throw new Exception(Yii::t('error', 'common.user.not.found', ['ru' => 'Такого пользователя не существует.']));
             }
 
-            $positions = $head->POSITION ?? null;
-            $isDesadv = false;
+            $positions = $simpleXMLElement->xpath('/ORDRSP/HEAD/POSITION') ?? null;
+            $isDesadv  = false;
 
             if (!count($positions)) {
                 if ($isLeraData) {
-                    $seq = $head->PACKINGSEQUENCE[0];
+                    $seq       = $head->PACKINGSEQUENCE[0];
                     $positions = $seq->POSITION;
                 } else {
                     $positions = $head->PACKINGSEQUENCE->POSITION;
@@ -135,63 +137,68 @@ class EDIClass extends Component
             }
 
             $positionsArray = [];
-            $arr = [];
-            $barcodeArray = [];
-            $totalQuantity = 0;
-            $totalPrice = 0;
-            $changed = [];
-            $deleted = [];
-            $ordNotice = new OrderNotice();
+            $arr            = [];
+            $barcodeArray   = [];
+            $totalQuantity  = 0;
+            $totalPrice     = 0;
+            $changed        = [];
+            $deleted        = [];
+            $ordNotice      = new OrderNotice();
+
             foreach ($positions as $position) {
-                if (!isset($position->PRODUCT)) continue;
-                $productIDBuyer = (int)$position->PRODUCTIDBUYER;
+                if (!isset($position->PRODUCT))
+                    continue;
+                $productIDBuyer      = (int) $position->PRODUCTIDBUYER;
                 $productOrderContent = OrderContent::findOne(['order_id' => $order->id, 'product_id' => $productIDBuyer]);
-                if (!$productOrderContent) continue;
-                $contID = $productOrderContent->id;
-                $positionsArray[] = (int)$contID;
-                $arr[$contID] = $this->fillArrayData($position);
+                if (!$productOrderContent)
+                    continue;
+                $contID              = $productOrderContent->id;
+                $positionsArray[]    = (int) $contID;
+                $arr[$contID]        = $this->fillArrayData($position);
                 if ($isDesadv) {
-                    $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->DELIVEREDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
+                    $arr[$contID]['ACCEPTEDQUANTITY'] = (float) $position->DELIVEREDQUANTITY ?? (float) $position->ORDEREDQUANTITY;
                 } else {
-                    $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->ACCEPTEDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
+                    $arr[$contID]['ACCEPTEDQUANTITY'] = (float) $position->ACCEPTEDQUANTITY ?? (float) $position->ORDEREDQUANTITY;
                 }
-                $arr[$contID]['PRODUCTTYPE'] = (int)$position->PRODUCTTYPE ?? self::EDI_ORDERSP_GOOD_DELIVERY_WITH_CHANGED_QUANTITY;
+                $arr[$contID]['PRODUCTTYPE'] = (int) $position->PRODUCTTYPE ?? self::EDI_ORDERSP_GOOD_DELIVERY_WITH_CHANGED_QUANTITY;
                 if ($position->PRODUCTTYPE == self::EDI_ORDERSP_GOOD_NO_DELIVERY) {
                     $arr[$contID]['ACCEPTEDQUANTITY'] = 0.00;
                 }
                 $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
-                $totalPrice += $arr[$contID]['PRICE'];
+                $totalPrice    += $arr[$contID]['PRICE'];
             }
             if ($totalQuantity == 0.00 || $totalPrice == 0.00) {
                 $ordNotice->cancelOrder($user, $organization, $order);
                 $order->status = OrderStatus::STATUS_REJECTED;
                 if (!$order->save()) {
-                    throw new Exception('Error saving order');
+                    throw new Exception(Yii::t('error', 'common.order.not.saving', ['ru' => 'Заказ сохранить не удалось.']));
                 }
                 return true;
             }
 
-            $summ = 0;
-            $orderContentArr = [];
+            $summ              = 0;
+            $orderContentArr   = [];
             $isPositionChanged = false;
             foreach ($order->orderContent as $orderContent) {
-                $index = $orderContent->id;
-                if (!isset($arr[$index])) continue;
+                $index             = $orderContent->id;
+                if (!isset($arr[$index]))
+                    continue;
                 $orderContentArr[] = $orderContent->id;
                 if (!isset($arr[$index]['BARCODE'])) {
                     if (isset($orderContent->ediOrderContent)) {
-                        $index = $orderContent->ediOrderContent->barcode;
+                        $index             = $orderContent->ediOrderContent->barcode;
                         $orderContentArr[] = $index;
                     } else {
                         continue;
                     }
                 }
-                $good = CatalogBaseGoods::findOne(['barcode' => $arr[$index]['BARCODE']]);
-                if (!$good) continue;
+                $good           = CatalogBaseGoods::findOne(['barcode' => $arr[$index]['BARCODE']]);
+                if (!$good)
+                    continue;
                 $barcodeArray[] = $good->barcode;
 
-                $oldQuantity = (float)$orderContent->quantity;
-                $newQuantity = (float)$arr[$index]['ACCEPTEDQUANTITY'];
+                $oldQuantity = (float) $orderContent->quantity;
+                $newQuantity = (float) $arr[$index]['ACCEPTEDQUANTITY'];
 
                 $orderContent->setOldAttributes($orderContent->attributes);
                 if ($oldQuantity != $newQuantity) {
@@ -201,21 +208,21 @@ class EDIClass extends Component
                         continue;
                     }
                 }
-                $newPrice = (float)$arr[$index]['PRICE'];
+                $newPrice = (float) $arr[$index]['PRICE'];
                 if ($orderContent->price != $newPrice || $orderContent->quantity != $newQuantity) {
                     $isPositionChanged = true;
                 }
-                $summ += $newQuantity * $newPrice;
-                $orderContent->price = $newPrice;
-                $orderContent->quantity = $newQuantity;
-                $orderContent->vat_product = isset($arr[$index]['TAXRATE']) ? (int)$arr[$index]['TAXRATE'] : 0;
-                $orderContent->into_quantity = isset($arr[$index]['DELIVEREDQUANTITY']) ? $arr[$index]['DELIVEREDQUANTITY'] : null;
-                $orderContent->into_price = $newPrice;
-                $orderContent->into_price_vat = isset($arr[$index]['PRICEWITHVAT']) ? $arr[$index]['PRICEWITHVAT'] : null;
-                $orderContent->into_price_sum = isset($arr[$index]['AMOUNT']) ? $arr[$index]['AMOUNT'] : null;
+                $summ                             += $newQuantity * $newPrice;
+                $orderContent->price              = $newPrice;
+                $orderContent->quantity           = $newQuantity;
+                $orderContent->vat_product        = isset($arr[$index]['TAXRATE']) ? (int) $arr[$index]['TAXRATE'] : 0;
+                $orderContent->into_quantity      = isset($arr[$index]['DELIVEREDQUANTITY']) ? $arr[$index]['DELIVEREDQUANTITY'] : null;
+                $orderContent->into_price         = $newPrice;
+                $orderContent->into_price_vat     = isset($arr[$index]['PRICEWITHVAT']) ? $arr[$index]['PRICEWITHVAT'] : null;
+                $orderContent->into_price_sum     = isset($arr[$index]['AMOUNT']) ? $arr[$index]['AMOUNT'] : null;
                 $orderContent->into_price_sum_vat = isset($arr[$index]['AMOUNTWITHVAT']) ? $arr[$index]['AMOUNTWITHVAT'] : null;
-                $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
-                $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
+                $orderContent->edi_number         = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
+                $orderContent->merc_uuid          = $arr[$index]['UUID'] ?? null;
                 if ($documentType == 1) {
                     $orderContent->edi_recadv = $this->fileName;
                 }
@@ -225,69 +232,77 @@ class EDIClass extends Component
                 if ($documentType == 3) {
                     $orderContent->edi_alcdes = $this->fileName;
                 }
-                $clone = clone $orderContent;
+                $clone     = clone $orderContent;
                 $changed[] = $clone;
                 if (!$orderContent->save()) {
-                    throw new Exception('Error saving order content');
+                    throw new Exception(Yii::t('error', 'common.order.content.not.saving', ['ru' => 'Товарную позицию заказа сохранить не удалось.']));
                 }
             }
 
-            foreach ($positions as $position) {
-                if ($position->PRODUCTTYPE == self::EDI_ORDERSP_GOOD_NO_DELIVERY) continue;
-                $quantity = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
-                if (!$quantity || $quantity == 0.000 || $position->PRICE == 0.00) continue;
-                $contID = (int)$position->PRODUCTIDBUYER;
+            foreach ($positions as $position) { // цикл для каждой товарной позиции
+                if ($position->PRODUCTTYPE == self::EDI_ORDERSP_GOOD_NO_DELIVERY)
+                    continue;
+                $quantity = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY; // Определение количества товара
+                if (!$quantity || $quantity == 0.000 || $position->PRICE == 0.00)
+                    continue; // Если количество не задано, равно нулю или нулевая цена, то цикл продолжаем со следующего товара
+                $contID   = (int) $position->PRODUCTIDBUYER; // Артикул товара в базе Микскарта
                 if (!$contID) {
-                    $contID = (int)$position->PRODUCT;
+                    $contID = (int) $position->PRODUCT; // Если такого товара в базе Микскарта нет, то берётся артикул в базе поставщика
                 }
-                if (!$contID) continue;
-                $barcode = $position->PRODUCT;
-                if (!in_array($contID, $orderContentArr) && !in_array($barcode, $barcodeArray)) {
-                    $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
-                    if (!$good) {
-                        $rel = RelationSuppRest::findOne(['supp_org_id' => $order->vendor_id, 'rest_org_id' => $ediOrganization->organization_id]);
-                        if (empty($rel)) {
-                            throw new Exception("Not found RelationSuppRest: supp_org_id = {$order->vendor_id} AND rest_org_id = {$ediOrganization->organization_id}");
+                if (!$contID)
+                    continue; // Если артикула не существует, то цикл продолжаем со следующего товара
+                $barcode = $position->PRODUCT; // Определяем бар-код
+                if (!in_array($contID, $orderContentArr) && !in_array($barcode, $barcodeArray)) { // Если позиции нет в массиве позиций заказа и бар-кода нет в массиве бар-кодов
+                    $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT, 'supp_org_id' => $order->vendor_id]); // Находим товар в CatalogBaseGoods по баркоду
+                    if (!$good) { // Если такого товара в CatalogBaseGoods нет, то
+                        $rel = RelationSuppRest::findOne(['supp_org_id' => $order->vendor_id, 'rest_org_id' => $order->client_id]);
+                        if (empty($rel)) { // Если зависимости поставщика с клиентом не существует, то выдаём об этом сообщение
+                            throw new Exception("Not found RelationSuppRest: supp_org_id = {$order->vendor_id} AND rest_org_id = {$order->client_id}");
                         }
-                        $good = new CatalogBaseGoods();
-                        $good->cat_id = $rel->cat_id;
-                        $good->article = $position->PRODUCTIDSUPPLIER;
-                        $good->product = $position->DESCRIPTION;
-                        $good->status = CatalogBaseGoods::STATUS_ON;
-                        $good->supp_org_id = $organization->id;
-                        $good->price = $position->PRICE;
-                        $good->units = 0;
-                        $good->ed = 0;
-                        $good->category_id = null;
-                        $good->barcode = $barcode;
-                        $good->edi_supplier_article = $barcode;
-                        $good->save();
+                        $good                       = new CatalogBaseGoods(); // Создаём новый товар в CatalogBaseGoods
+                        $good->cat_id               = $rel->cat_id; // назначенный каталог берём из таблицы связей поставщика и клиента
+                        $good->article              = $position->PRODUCTIDSUPPLIER; // Артикул устанавливаем из полученного поля "Артикул в базе поставщика"
+                        $good->product              = $position->DESCRIPTION; // Название продукта берём из полученного поля "Описание продукта"
+                        $good->status               = CatalogBaseGoods::STATUS_ON; // Устанавливаем статус товара "Активен"
+                        $good->supp_org_id          = $organization->id; // Устанавливаем идентификатор организации-поставщика
+                        $good->price                = $position->PRICE; // Цену продукта устанавливаем из полученного поля "Цена товара"
+                        $good->units                = 0; // Количество единиц товара в товарной упаковке устанавливаем нулевым
+                        $good->ed                   = ''; // Название единицы измерения товара устанавливаем ''
+                        $good->category_id          = null; // Идентификатор категории товаров устанавливаем неопределённым
+                        $good->barcode              = $barcode; // Штрих-код товара в Market Place устанавливаем из полученного поля "Бар-код"
+                        $good->edi_supplier_article = $barcode; // Артикул товара для EDI устанавливаем из полученного поля "Бар-код"
+                        if (!$good->save()) { // Остальные позиции устанавливаем по умолчанию и сохраняем
+                            \Yii::error('Не удалось сохранить запись в таблице catalog_base_goods:');
+                            \Yii::error(print_r($good->getErrors(), true));
+                        }
                     };
-                    if ($isDesadv) {
-                        $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
+                    if ($isDesadv) { // Бесполезная развилка, т.к. isDesadv = true только, если count($positions) не существует
+                        $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY; // Количество товара в заказе равно значению из полученного поля "Поставленное количество" (никогда не выполняется)
                     } else {
-                        $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+                        $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY; // Количество товара в заказе равно значению из полученного поля "Принятое количество"
                     }
-                    $quan = (float)$quan;
-                    $price = (float)$position->PRICE;
-                    $newOrderContent = new OrderContent();
-                    $newOrderContent->order_id = $order->id;
-                    $newOrderContent->product_id = $good->id;
-                    $newOrderContent->quantity = $quan;
-                    $newOrderContent->price = $price;
-                    $newOrderContent->initial_quantity = $quan;
-                    $newOrderContent->product_name = $good->product;
-                    $newOrderContent->plan_quantity = $quan;
-                    $newOrderContent->plan_price = $price;
-                    $newOrderContent->units = $good->units;
-                    $newOrderContent->vat_product = $position->VAT ?? 0.00;
-                    $changed[] = $newOrderContent;
-                    if (!$newOrderContent->save()) {
-                        throw new Exception('Error saving order content');
+                    $quan                              = (float) $quan; // Переменная, отвечающая за количество товара в таблице заказов, приводится к типу числа с плавающей точкой
+                    $price                             = (float) $position->PRICE; // Переменная, отвечающая за цену товара в таблице заказов, приводится к типу числа с плавающей точкой из значения полученного поля "Цена"
+                    $newOrderContent                   = new OrderContent(); // Создаётся новая товарная позиция в заказе
+                    $newOrderContent->order_id         = $order->id; // Устанавливаем номер заказа в новой товарной позиции
+                    $newOrderContent->product_id       = $good->id; // Устанавливаем идентификатор продукта, который мы недавно создали в таблице catalog_base_goods
+                    $newOrderContent->quantity         = $quan; // Устанавливаем количество товара
+                    $newOrderContent->price            = $price; // Устанавливаем цену товара
+                    $newOrderContent->initial_quantity = $quan; // Устанавливаем первоначальное количество товара
+                    $newOrderContent->product_name     = $good->product; // Устанавливаем наименование товарной позиции
+                    $newOrderContent->plan_quantity    = $quan; // Устанавливаем изменённое количество товара
+                    $newOrderContent->plan_price       = $price; // Устанавливаем изменённую цену товара
+                    $newOrderContent->units            = $good->units; // Устанавливаем единицу измерения товароа
+                    $newOrderContent->vat_product      = $position->VAT ?? 0.00; // Устанавливаем ставку НДС (если есть значение в полученном поле "Налог", то его, если нет, то 0.00 ???)
+                    $newOrderContent->article          = $good->article; // Устанавливаем артикул товара
+                    $changed[]                         = $newOrderContent; // Записываем новую товарную позицию в заказе в массив изменений
+                    if (!$newOrderContent->save()) { // Пытаемся сохранить в заказе новую товарную позицию, если не удаётся, выдаём сообщение
+                        \Yii::error('Не удалось сохранить запись в таблице order_content:');
+                        \Yii::error(print_r($newOrderContent->getErrors(), true));
                     }
-                    $isPositionChanged = true;
-                    $total = $quan * $price;
-                    $summ += $total;
+                    $isPositionChanged = true; // Переменной, отвечающей за изменение позиции, присваиваем true
+                    $total             = $quan * $price; // Переменной, отвечающей за сумму товарной позиции присваиваем значение, полученное из перемножения количества и цены товара
+                    $summ              += $total; // К общей сумме прибавляем сумму данной товарной позиции
                 }
             }
 
@@ -297,18 +312,18 @@ class EDIClass extends Component
                 $orderStatus = OrderStatus::STATUS_PROCESSING;
             }
 
-            $order->status = $orderStatus;
-            $order->total_price = $summ;
-            $order->waybill_number = (int)$simpleXMLElement->DELIVERYNOTENUMBER ?? (int)$simpleXMLElement->NUMBER ?? '';
-            $order->edi_ordersp = $this->ediDocumentType;
-            $order->service_id = Registry::EDI_SERVICE_ID;
-            $order->edi_ordersp = $this->fileName ?? $order->id;
-            $order->edi_doc_date = $simpleXMLElement->DELIVERYNOTEDATE ?? null;
-            $deliveryDate = isset($simpleXMLElement->DELIVERYDATE) ? \Yii::$app->formatter->asDate($simpleXMLElement->DELIVERYDATE, 'yyyy.MM.dd HH:mm:ss') : null;
+            $order->status          = $orderStatus;
+            $order->total_price     = $summ;
+            $order->waybill_number  = (int) $simpleXMLElement->DELIVERYNOTENUMBER ?? (int) $simpleXMLElement->NUMBER ?? '';
+            $order->edi_ordersp     = $this->ediDocumentType;
+            $order->service_id      = Registry::EDI_SERVICE_ID;
+            $order->edi_ordersp     = $this->fileName ?? $order->id;
+            $order->edi_doc_date    = $simpleXMLElement->DELIVERYNOTEDATE ?? null;
+            $deliveryDate           = isset($simpleXMLElement->DELIVERYDATE) ? \Yii::$app->formatter->asDate($simpleXMLElement->DELIVERYDATE, 'yyyy.MM.dd HH:mm:ss') : null;
             $order->actual_delivery = $deliveryDate;
-            $order->ediProcessor = 1;
-            $managerAssociate = $organization->getAssociatedManagers($organization->id, true);
-            $acceptedByID = 1;
+            $order->ediProcessor    = 1;
+            $managerAssociate       = $organization->getAssociatedManagers($organization->id, true);
+            $acceptedByID           = 1;
             if ($managerAssociate) {
                 $acceptedByID = $managerAssociate->id;
             } else {
@@ -319,7 +334,7 @@ class EDIClass extends Component
             }
             $order->accepted_by_id = $acceptedByID;
             if (!$order->save()) {
-                throw new Exception('Error saving order');
+                throw new NotFoundHttpException(Yii::t('error', 'common.order.not.saving', ['ru' => 'Заказ сохранить не удалось.']));
             }
 
             if ($isPositionChanged) {
@@ -328,7 +343,7 @@ class EDIClass extends Component
                 $ordNotice->processingOrder($order, $user, $organization, $isDesadv);
             }
 
-            $action = ($isDesadv) ? " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
+            $action        = ($isDesadv) ? " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
             $systemMessage = $order->vendor->name . '' . $action;
             OrderController::sendSystemMessage($user, $order->id, $systemMessage);
             self::writeEdiDataToJournal($order->client_id, Yii::t('app', 'По заказу {order} получен файл {file}', ['order' => $order->id, 'file' => $this->fileName]), 'success', $user->id);
@@ -341,10 +356,10 @@ class EDIClass extends Component
                     $orgID = substr($supplier, 0, 8);
                 }
                 $arr = [
-                    'name'            => (String)$exceptionArray['file_id'],
+                    'name'            => (String) $exceptionArray['file_id'],
                     'organization_id' => $orgID,
                     'status'          => $exceptionArray['status'],
-                    'error_text'      => (String)$e->getMessage(),
+                    'error_text'      => (String) $e->getMessage(),
                     'json_data'       => $exceptionArray['json_data']
                 ];
                 $this->insertEdiErrorData($arr);
@@ -364,8 +379,8 @@ class EDIClass extends Component
      */
     public function handlePriceListUpdating($xml, $providerID): bool
     {
-        $supplierGLN = $xml->SUPPLIER;
-        $buyerGLN = $xml->BUYER;
+        $supplierGLN     = $xml->SUPPLIER;
+        $buyerGLN        = $xml->BUYER;
         $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplierGLN, 'provider_id' => $providerID]);
         if (!$ediOrganization) {
             \Yii::error('No EDI organization');
@@ -405,57 +420,57 @@ class EDIClass extends Component
             return false;
         } else {
             $relationCatalogID = $rel->cat_id;
-            $cat = Catalog::findOne(['id' => $relationCatalogID]);
+            $cat               = Catalog::findOne(['id' => $relationCatalogID]);
             if (!$relationCatalogID || $cat->type == Catalog::BASE_CATALOG) {
                 $relationCatalogID = $this->createCatalog($organization, $currency, $rest);
-                $rel->cat_id = $relationCatalogID;
-                $rel->status = Catalog::STATUS_ON;
+                $rel->cat_id       = $relationCatalogID;
+                $rel->status       = Catalog::STATUS_ON;
                 $rel->save();
             }
         }
 
         $baseCatalog = $organization->baseCatalog;
         if (!$baseCatalog) {
-            $baseCatalog = new Catalog();
-            $baseCatalog->type = Catalog::BASE_CATALOG;
+            $baseCatalog              = new Catalog();
+            $baseCatalog->type        = Catalog::BASE_CATALOG;
             $baseCatalog->supp_org_id = $organization->id;
-            $baseCatalog->name = \Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);
-            $baseCatalog->created_at = new Expression('NOW()');
+            $baseCatalog->name        = \Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);
+            $baseCatalog->created_at  = new Expression('NOW()');
         }
 
         $baseCatalog->currency_id = $currency->id ?? 1;
-        $baseCatalog->updated_at = new Expression('NOW()');
+        $baseCatalog->updated_at  = new Expression('NOW()');
         $baseCatalog->save();
-        $goods = $xml->CATALOGUE->POSITION ?? $xml->CATALOGUE[0]->POSITION;
+        $goods                    = $xml->CATALOGUE->POSITION ?? $xml->CATALOGUE[0]->POSITION;
 
-        $goodsArray = [];
+        $goodsArray   = [];
         $barcodeArray = [];
         foreach ($goods as $good) {
             $barcode = (is_array($good->PRODUCT)) ? $good->PRODUCT[0] : $good->PRODUCT;
-            $barcode = (String)$barcode;
+            $barcode = (String) $barcode;
             if (!$barcode) {
                 continue;
             }
-            $barcodeArray[] = $barcode;
-            $ed = (String)$good->UNIT ?? (String)$good->QUANTITYOFCUINTUUNIT;
-            $ed = OuterUnit::getInnerName($ed, Registry::EDI_SERVICE_ID);
+            $barcodeArray[]       = $barcode;
+            $ed                   = (String) $good->UNIT ?? (String) $good->QUANTITYOFCUINTUUNIT;
+            $ed                   = OuterUnit::getInnerName($ed, Registry::EDI_SERVICE_ID);
             $goodsArray[$barcode] = [
                 'ed'                   => $ed,
-                'name'                 => (String)$good->PRODUCTNAME ?? '',
-                'price'                => (float)$good->UNITPRICE ?? 0.0,
+                'name'                 => (String) $good->PRODUCTNAME ?? '',
+                'price'                => (float) $good->UNITPRICE ?? 0.0,
                 'article'              => $barcode,
-                'units'                => (float)$good->MINORDERQUANTITY ?? (float)$good->QUANTITYOFCUINTU ?? (float)$good->PACKINGMULTIPLENESS,
-                'edi_supplier_article' => (isset($good->IDSUPPLIER) && $good->IDSUPPLIER != '') ? (String)$good->IDSUPPLIER : $barcode,
-                'vat'                  => (int)$good->TAXRATE ?? null,
-                'action'               => (isset($good->ACTION) && $good->ACTION > 0) ? (int)$good->ACTION : null,
+                'units'                => (float) $good->MINORDERQUANTITY ?? (float) $good->QUANTITYOFCUINTU ?? (float) $good->PACKINGMULTIPLENESS,
+                'edi_supplier_article' => (isset($good->IDSUPPLIER) && $good->IDSUPPLIER != '') ? (String) $good->IDSUPPLIER : $barcode,
+                'vat'                  => (int) $good->TAXRATE ?? null,
+                'action'               => (isset($good->ACTION) && $good->ACTION > 0) ? (int) $good->ACTION : null,
             ];
         }
         $catalog_base_goods = (new \yii\db\Query())
-            ->select(['id', 'barcode'])
-            ->from(CatalogBaseGoods::tableName())
-            ->where(['cat_id' => $baseCatalog->id])
-            ->andWhere('barcode IS NOT NULL')
-            ->all();
+                ->select(['id', 'barcode'])
+                ->from(CatalogBaseGoods::tableName())
+                ->where(['cat_id' => $baseCatalog->id])
+                ->andWhere('barcode IS NOT NULL')
+                ->all();
         foreach ($catalog_base_goods as $base_good) {
             if (!in_array($base_good['barcode'], $barcodeArray) && !$isFollowActionRule) {
                 \Yii::$app->db->createCommand()->delete(CatalogGoods::tableName(), ['base_goods_id' => $base_good['id'], 'cat_id' => $relationCatalogID, 'service_id' => Registry::EDI_SERVICE_ID])->execute();
@@ -465,51 +480,53 @@ class EDIClass extends Component
         foreach ($goodsArray as $barcode => $good) {
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
             if (!$catalogBaseGood && $good['action'] != Registry::EDI_PRICAT_ACTION_TYPE_DELETE) {
-                $catalogBaseGood = new CatalogBaseGoods();
-                $catalogBaseGood->cat_id = $baseCatalog->id;
-                $catalogBaseGood->article = $good['article'];
-                $catalogBaseGood->product = $good['name'];
-                $catalogBaseGood->status = CatalogBaseGoods::STATUS_ON;
-                $catalogBaseGood->supp_org_id = $organization->id;
-                $catalogBaseGood->price = $good['price'];
-                $catalogBaseGood->units = $good['units'];
-                $catalogBaseGood->ed = ($good['ed'] == '') ? "кг" : $good['ed'];
-                $catalogBaseGood->category_id = null;
-                $catalogBaseGood->barcode = (String)$barcode;
+                $catalogBaseGood                       = new CatalogBaseGoods();
+                $catalogBaseGood->cat_id               = $baseCatalog->id;
+                $catalogBaseGood->article              = $good['article'];
+                $catalogBaseGood->product              = $good['name'];
+                $catalogBaseGood->status               = CatalogBaseGoods::STATUS_ON;
+                $catalogBaseGood->supp_org_id          = $organization->id;
+                $catalogBaseGood->price                = $good['price'];
+                $catalogBaseGood->units                = $good['units'];
+                $catalogBaseGood->ed                   = ($good['ed'] == '') ? "кг" : $good['ed'];
+                $catalogBaseGood->category_id          = null;
+                $catalogBaseGood->barcode              = (String) $barcode;
                 $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
-                $res = $catalogBaseGood->save();
+                $res                                   = $catalogBaseGood->save();
 
-                if (!$res) continue;
+                if (!$res)
+                    continue;
                 $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
-                $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price'], $good['vat']);
-                if (!$res2) continue;
+                $res2            = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price'], $good['vat']);
+                if (!$res2)
+                    continue;
             } else {
                 $catalogGood = CatalogGoods::findOne(['cat_id' => $relationCatalogID, 'base_goods_id' => $catalogBaseGood->id]);
                 if ($good['action'] == Registry::EDI_PRICAT_ACTION_TYPE_DELETE && $catalogGood && $catalogGood->service_id == Registry::EDI_SERVICE_ID) {
                     $catalogGood->delete();
                     continue;
                 }
-                if (!$isFollowActionRule
-                    || $good['action'] == Registry::EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE
-                    || $good['action'] == Registry::EDI_PRICAT_ACTION_TYPE_FIRST_UPDATE) {
+                if (!$isFollowActionRule || $good['action'] == Registry::EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE || $good['action'] == Registry::EDI_PRICAT_ACTION_TYPE_FIRST_UPDATE) {
                     if (!$catalogGood) {
                         $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price'], $good['vat']);
-                        if (!$res2) continue;
+                        if (!$res2)
+                            continue;
                     } else {
-                        $catalogGood->price = $good['price'];
+                        $catalogGood->price      = $good['price'];
                         $catalogGood->service_id = Registry::EDI_SERVICE_ID;
                         $catalogGood->save();
                     }
-                    $catalogBaseGood->units = $good['units'];
-                    $catalogBaseGood->product = $good['name'];
-                    $catalogBaseGood->article = $good['article'];
-                    $catalogBaseGood->ed = $good['ed'];
+                    $catalogBaseGood->units                = $good['units'];
+                    $catalogBaseGood->product              = $good['name'];
+                    $catalogBaseGood->article              = $good['article'];
+                    $catalogBaseGood->ed                   = $good['ed'];
                     $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
                 }
 
                 $catalogBaseGood->deleted = CatalogBaseGoods::DELETED_OFF;
-                $catalogBaseGood->status = CatalogBaseGoods::STATUS_ON;
-                if (!$catalogBaseGood->save()) continue;
+                $catalogBaseGood->status  = CatalogBaseGoods::STATUS_ON;
+                if (!$catalogBaseGood->save())
+                    continue;
             }
         }
 
@@ -525,13 +542,13 @@ class EDIClass extends Component
      */
     public function insertGood(int $catID, int $catalogBaseGoodID, float $price, int $vat = null): bool
     {
-        $catalogGood = new CatalogGoods();
-        $catalogGood->cat_id = $catID;
+        $catalogGood                = new CatalogGoods();
+        $catalogGood->cat_id        = $catID;
         $catalogGood->base_goods_id = $catalogBaseGoodID;
-        $catalogGood->price = $price;
-        $catalogGood->vat = $vat;
-        $catalogGood->service_id = Registry::EDI_SERVICE_ID;
-        $res = $catalogGood->save();
+        $catalogGood->price         = $price;
+        $catalogGood->vat           = $vat;
+        $catalogGood->service_id    = Registry::EDI_SERVICE_ID;
+        $res                        = $catalogGood->save();
         if ($res) {
             return true;
         } else {
@@ -547,14 +564,14 @@ class EDIClass extends Component
      */
     private function createCatalog(Organization $organization, $currency, Organization $rest): int
     {
-        $catalog = new Catalog();
-        $catalog->type = Catalog::CATALOG;
+        $catalog              = new Catalog();
+        $catalog->type        = Catalog::CATALOG;
         $catalog->supp_org_id = $organization->id;
-        $catalog->name = $rest->name . " " . date('d.m.Y');
-        $catalog->status = Catalog::STATUS_ON;
+        $catalog->name        = $rest->name . " " . date('d.m.Y');
+        $catalog->status      = Catalog::STATUS_ON;
         $catalog->currency_id = $currency->id ?? 1;
         $catalog->save();
-        $catalogID = $catalog->id;
+        $catalogID            = $catalog->id;
         return $catalogID;
     }
 
@@ -600,10 +617,10 @@ class EDIClass extends Component
     private function fillArrayData($position)
     {
         $arr = [
-            'DELIVEREDQUANTITY'  => (isset($position->DELIVEREDQUANTITY)) ? (float)$position->DELIVEREDQUANTITY : 0.00,
-            'PRICE'              => (float)$position->PRICE[0] ?? (float)$position->PRICE ?? 0,
-            'PRICEWITHVAT'       => (isset($position->PRICEWITHVAT)) ? (float)$position->PRICEWITHVAT : 0.00,
-            'TAXRATE'            => (isset($position->TAXRATE)) ? (int)$position->TAXRATE : 0,
+            'DELIVEREDQUANTITY'  => (isset($position->DELIVEREDQUANTITY)) ? (float) $position->DELIVEREDQUANTITY : 0.00,
+            'PRICE'              => (float) $position->PRICE[0] ?? (float) $position->PRICE ?? 0,
+            'PRICEWITHVAT'       => (isset($position->PRICEWITHVAT)) ? (float) $position->PRICEWITHVAT : 0.00,
+            'TAXRATE'            => (isset($position->TAXRATE)) ? (int) $position->TAXRATE : 0,
             'BARCODE'            => $position->PRODUCT,
             'WAYBILLNUMBER'      => isset($position->WAYBILLNUMBER) ? $position->WAYBILLNUMBER : null,
             'WAYBILLDATE'        => isset($position->WAYBILLDATE) ? $position->WAYBILLDATE : null,
@@ -625,7 +642,7 @@ class EDIClass extends Component
      */
     public static function writeEdiDataToJournal($organizationID, $response = null, $type = 'success', $userID = null)
     {
-        $userID = $userID ?? Yii::$app->user->id ?? null;
+        $userID         = $userID ?? Yii::$app->user->id ?? null;
         $organizationID = $organizationID ?? null;
         if ($userID && is_null($organizationID)) {
             $user = User::findOne($userID);
@@ -634,13 +651,14 @@ class EDIClass extends Component
             }
         }
 
-        $journal = new Journal();
-        $journal->user_id = $userID;
+        $journal                  = new Journal();
+        $journal->user_id         = $userID;
         $journal->organization_id = $organizationID;
-        $journal->service_id = Registry::EDI_SERVICE_ID;
-        $journal->response = $response;
-        $journal->type = $type;
-        $journal->operation_code = '0';
+        $journal->service_id      = Registry::EDI_SERVICE_ID;
+        $journal->response        = $response;
+        $journal->type            = $type;
+        $journal->operation_code  = '0';
         $journal->save();
     }
+
 }

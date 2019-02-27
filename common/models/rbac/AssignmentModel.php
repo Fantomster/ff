@@ -73,7 +73,7 @@ class AssignmentModel extends \yii2mod\rbac\models\AssignmentModel
      * @param $orgId
      * @return array
      */
-    public function getUserItemsByOrg($orgId): array
+    public function getUserItemsByOrg($orgId = null): array
     {
         $available = [];
         $assigned = [];
@@ -88,8 +88,10 @@ class AssignmentModel extends \yii2mod\rbac\models\AssignmentModel
             }
         }
 
-        foreach ((new DbManager())->getUserAssignmentsByOrg($this->userId, $orgId) as $item) {
-            $assigned[$item->roleName] = $available[$item->roleName];
+        if (!is_null($orgId)) {
+            foreach ((new DbManager())->getUserAssignmentsByOrg($this->userId, $orgId) as $item) {
+                $assigned[$item->roleName] = $available[$item->roleName];
+            }
         }
 
         return [

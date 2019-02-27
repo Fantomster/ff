@@ -152,29 +152,29 @@ class getVetDocumentByUUID extends Model
     public function attributeLabels()
     {
         return [
-            'UUID' => 'Идентификатор ВСД',
-            'issueSeries' => 'Серия ВСД',
-            'issueNumber' => 'Номер ВСД',
-            'issueDate' => 'Дата оформления ВСД',
-            'form' => 'Форма ВСД',
-            'type' => 'Тип ВСД',
-            'status' => 'Статус ВСД',
-            'consignor' => 'Сведения об отправителе продукции',
-            'consignee' => 'Сведения о получателе продукции',
-            'batch' => 'Сведения о партии продукции',
-            'purpose' => 'Цель. Назначение груза',
-            'broker' => 'Сведения о фирме-посреднике (перевозчике продукции)',
-            'transportInfo' => 'Сведения о транспорте',
-            'transportStorageType' => 'Способ хранения продукции при перевозке',
+            'UUID'                    => 'Идентификатор ВСД',
+            'issueSeries'             => 'Серия ВСД',
+            'issueNumber'             => 'Номер ВСД',
+            'issueDate'               => 'Дата оформления ВСД',
+            'form'                    => 'Форма ВСД',
+            'type'                    => 'Тип ВСД',
+            'status'                  => 'Статус ВСД',
+            'consignor'               => 'Сведения об отправителе продукции',
+            'consignee'               => 'Сведения о получателе продукции',
+            'batch'                   => 'Сведения о партии продукции',
+            'purpose'                 => 'Цель. Назначение груза',
+            'broker'                  => 'Сведения о фирме-посреднике (перевозчике продукции)',
+            'transportInfo'           => 'Сведения о транспорте',
+            'transportStorageType'    => 'Способ хранения продукции при перевозке',
             'cargoReloadingPointList' => 'Сведения о маршруте следования (пунктах перегрузки)',
-            'waybillSeries' => 'Серия товарно-транспортной накладной',
-            'waybillNumber' => 'Номер товарно-транспортной накладной',
-            'waybillDate' => 'Дата товарно-транспортной накладной',
-            'cargoExpertized' => 'Проводилась ли ветсанэкспертиза',
-            'expertiseInfo' => 'Результаты лабораторных исследований',
-            'confirmedBy' => 'Государственный ветврач, подписавший ВСД',
-            'locationProsperity' => 'Благополучие местности',
-            'specialMarks' => 'Особые отметки',
+            'waybillSeries'           => 'Серия товарно-транспортной накладной',
+            'waybillNumber'           => 'Номер товарно-транспортной накладной',
+            'waybillDate'             => 'Дата товарно-транспортной накладной',
+            'cargoExpertized'         => 'Проводилась ли ветсанэкспертиза',
+            'expertiseInfo'           => 'Результаты лабораторных исследований',
+            'confirmedBy'             => 'Государственный ветврач, подписавший ВСД',
+            'locationProsperity'      => 'Благополучие местности',
+            'specialMarks'            => 'Особые отметки',
         ];
     }
 
@@ -208,10 +208,10 @@ class getVetDocumentByUUID extends Model
 
         $this->consignor = [
             ['label' => 'Название предприятия',
-                'value' => isset($doc->sender_name) ? $doc->sender_name : null,
+             'value' => isset($doc->sender_name) ? $doc->sender_name : null,
             ],
             ['label' => 'Хозяйствующий субъект (владелец продукции):',
-                'value' => isset($hc) ? $hc->name . ', ИНН:' . $hc->inn : null,
+             'value' => isset($hc) ? $hc->name . ', ИНН:' . $hc->inn : null,
             ]
         ];
 
@@ -224,10 +224,10 @@ class getVetDocumentByUUID extends Model
 
         $this->consignee = [
             ['label' => 'Название предприятия',
-                'value' => isset($doc->recipient_name) ? $doc->recipient_name : null,
+             'value' => isset($doc->recipient_name) ? $doc->recipient_name : null,
             ],
             ['label' => 'Хозяйствующий субъект (владелец продукции):',
-                'value' => isset($hc) ? $hc->name . ', ИНН:' . $hc->inn : null,
+             'value' => isset($hc) ? $hc->name . ', ИНН:' . $hc->inn : null,
             ]
         ];
 
@@ -336,30 +336,30 @@ class getVetDocumentByUUID extends Model
 
         $transportInfo = json_decode($doc->transport_info, true);
         $this->transportInfo = (isset ($transport_info) && isset($transportInfo['transportType'])) ? ([
-            'type' => MercVsd::$transport_types[$transportInfo['transportType']],
+            'type'    => MercVsd::$transport_types[$transportInfo['transportType']],
             'numbers' => [
                 [
-                    'label' => 'Номер контейнера (при автомобильной перевозке)',
+                    'label'  => 'Номер контейнера (при автомобильной перевозке)',
                     'number' => isset($transportInfo['transportNumber']['containerNumber']) ? $transportInfo['transportNumber']['containerNumber'] : null,
                 ],
                 [
-                    'label' => 'Номер вагона',
+                    'label'  => 'Номер вагона',
                     'number' => isset ($transportInfo['transportNumber']['agonNumber']) ? $transportInfo['transportNumber']['wagonNumber'] : null,
                 ],
                 [
-                    'label' => 'Номер автомобиля',
+                    'label'  => 'Номер автомобиля',
                     'number' => isset($transportInfo['transportNumber']['vehicleNumber']) ? $transportInfo['transportNumber']['vehicleNumber'] : null,
                 ],
                 [
-                    'label' => 'Номер прицепа (полуприцепа)',
+                    'label'  => 'Номер прицепа (полуприцепа)',
                     'number' => isset($transportInfo['transportNumber']['trailerNumber']) ? $transportInfo['transportNumber']['trailerNumber'] : null,
                 ],
                 [
-                    'label' => 'Название судна (или номер контейнера)',
+                    'label'  => 'Название судна (или номер контейнера)',
                     'number' => isset($transportInfo['transportNumber']['shipName']) ? $transportInfo['transportNumber']['shipName'] : null,
                 ],
                 [
-                    'label' => 'Номер авиарейса',
+                    'label'  => 'Номер авиарейса',
                     'number' => isset($transportInfo['transportNumber']['flightNumber']) ? $transportInfo['transportNumber']['flightNumber'] : null,
                 ]
             ]
@@ -397,18 +397,19 @@ class getVetDocumentByUUID extends Model
 
         $this->confirmedBy = [
             ['label' => 'ФИО',
-                'value' => isset($confirmed_by['fio']) ? $confirmed_by['fio'] : "-"],
+             'value' => isset($confirmed_by['fio']) ? $confirmed_by['fio'] : "-"],
             ['label' => 'Должность',
-                'value' => isset($confirmed_by['post']) ? $confirmed_by['post'] : ""]
+             'value' => isset($confirmed_by['post']) ? $confirmed_by['post'] : ""]
         ];
 
         $laboratory_research = [json_decode($doc->laboratory_research, true)];
         foreach ($laboratory_research as $item) {
-            $this->laboratory_research = [
-                $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($item['actualDateTime'])) . " ( " . $item['conclusion'] . " )"
-            ];
+            if (isset($item['operator']) && isset($item['expertiseID']) && isset($item['actualDateTime']) && isset($item['conclusion'])) {
+                $this->laboratory_research = [
+                    $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($item['actualDateTime'])) . " ( " . $item['conclusion'] . " )"
+                ];
+            }
         }
-
     }
 
     /**

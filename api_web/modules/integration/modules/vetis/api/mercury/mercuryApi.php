@@ -91,34 +91,28 @@ class mercuryApi extends baseApi
         $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
 
         //Готовим запрос
-        $client = $this->getSoapClient();
+        $client = $this->getSoapClient('mercury');
 
-        $request = $this->getSubmitApplicationRequest();
-
-        $appData = new ApplicationDataWrapper();
+        $request = $this->getSubmitApplicationRequest(true);
 
         //Формируем тело запроса
-        $vetDocList = new GetVetDocumentChangesListRequest();
-        $vetDocList->localTransactionId = $localTransactionId;
-        $vetDocList->enterpriseGuid = $this->enterpriseGuid;
-        $vetDocList->initiator = new User();
-        $vetDocList->initiator->login = $this->vetisLogin;
+        $vetDocList['localTransactionId'] = $localTransactionId;
+        $vetDocList['enterpriseGuid'] = $this->enterpriseGuid;
+        $vetDocList['initiator']['login'] = $this->vetisLogin;
 
         if (isset($listOptions)) {
-            $vetDocList->listOptions = $listOptions;
+            $vetDocList['listOptions'] = $listOptions;
         }
 
-        $vetDocList->updateDateInterval = new DateInterval();
-        $vetDocList->updateDateInterval->beginDate = \Yii::$app->formatter->asDate($date_start, 'yyyy-MM-dd') . 'T' . \Yii::$app->formatter->asTime($date_start, 'HH:mm:ss') . '+03:00';
-        $vetDocList->updateDateInterval->endDate = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
+        $vetDocList['updateDateInterval']['beginDate'] = Yii::$app->formatter->asDate($date_start, 'yyyy-MM-dd') . 'T' . Yii::$app->formatter->asTime($date_start, 'HH:mm:ss') . '+03:00';
+        $vetDocList['updateDateInterval']['endDate'] = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
 
-        $appData->any['ns3:getVetDocumentChangesListRequest'] = $vetDocList;
+        $var = new \SoapVar($vetDocList, SOAP_ENC_ARRAY, 'GetVetDocumentChangesListRequest', 'http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2');
 
-        $request->application->data = $appData;
+        $request['application']['data']['any'] = ['ns3:getVetDocumentChangesListRequest' => $var];
 
         try {
             $result = $client->submitApplicationRequest($request);
-
             $reuest_xml = $client->__getLastRequest();
 
             $app_id = $result->application->applicationId;
@@ -134,11 +128,13 @@ class mercuryApi extends baseApi
             //Пишем лог
             mercLogger::getInstance()->addMercLog($result, 'MercVSDList', $localTransactionId, $reuest_xml, $client->__getLastResponse(), $this->org_id);
         } catch (\SoapFault $e) {
-            $result = null;
-            \Yii::error($e->detail);
+            Yii::error($e->detail);
+            var_dump($e->detail);
+            var_dump($client->__getLastRequest());
+            die();
         } catch (\Throwable $e) {
-            $result = null;
-            \Yii::error($e);
+            echo $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL;
+            Yii::error($e->getMessage());
         }
 
         return $result;
@@ -414,46 +410,7 @@ class mercuryApi extends baseApi
         return $result;
     }
 
-    /**
-     * @param $GUID
-     * @return mixed|null
-     */
-    public function getStockEntryByGuid($GUID)
-    {
-        $doc = MercVsd::findOne(['guid' => $GUID]);
-
-        if ($doc != null) {
-            return unserialize($doc->raw_data);
-        }
-
-        return null;
-    }
-
-    /**
-     * @param $UUID
-     * @return mixed|null
-     */
-    public function getStockEntryByUuid($UUID)
-    {
-        $doc = MercVsd::findOne(['uuid' => $UUID]);
-
-        if ($doc != null) {
-            return unserialize($doc->raw_data);
-        }
-
-        return null;
-    }
-
-    /**
-     * @param      $model
-     * @param int  $type
-     * @param null $data_raws
-     * @return mixed|null
-     * @throws \yii\base\InvalidArgumentException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \Exception
-     */
-    public function resolveDiscrepancyOperation(createStoreEntryForm $model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)
+    public function resolveDiscrepancyOperation($model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)
     {
         $result = null;
 
@@ -573,8 +530,11 @@ class mercuryApi extends baseApi
         mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
-            $result = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntry;
-            (new LoadStockEntryList())->updateDocumentsList([1 => $result]);
+            $stock = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntry;
+            (new LoadStockEntryList())->updateDocumentsList($stock);
+            $doc[] = $result->application->result->any['prepareOutgoingConsignmentResponse']->vetDocument;
+            (new VetDocumentsChangeList())->updateDocumentsList($doc[0]);
+            $result = $stock;
         } else {
             $result = null;
         }
@@ -791,17 +751,30 @@ class mercuryApi extends baseApi
 
         $appData = new ApplicationDataWrapper();
 
-        $data['localTransactionId'] = $localTransactionId;
-        $data['initiator']['login'] = $this->vetisLogin;
-        $data['cargoType']['guid'] = $cargoTypeGuid;
+        $data = new checkShipmentRegionalizationRequest();
 
-        $routePoints[]['enterprise']['guid'] = $recipient_guid;
-        $routePoints[]['enterprise']['guid'] = $sender_guid;
-        $data['shipmentRoute'] = $routePoints;
+        $data->localTransactionId = $localTransactionId;
+        $data->initiator = new User();
+        $data->initiator->login = $this->vetisLogin;
+        $data->cargoType = new SubProduct();
+        $data->cargoType->guid = $cargoTypeGuid;
+        $data->shipmentRoute = new ShipmentRoute();
 
-        $var = new \SoapVar($data, SOAP_ENC_ARRAY, 'CheckShipmentRegionalizationRequest', 'http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2');
+        $routePoint = new ShipmentRoutePoint();
+        $routePoint->enterprise = new Enterprise();
+        $routePoint->enterprise->guid = $recipient_guid;
 
-        $appData->any['ns3:checkShipmentRegionalizationRequest'] = $var;
+        $routePoints[] = $routePoint;
+
+        $routePoint = new ShipmentRoutePoint();
+        $routePoint->enterprise = new Enterprise();
+        $routePoint->enterprise->guid = $sender_guid;
+
+        $routePoints[] = $routePoint;
+
+        $data->shipmentRoute = $routePoints;
+
+        $appData->any['ns3:checkShipmentRegionalizationRequest'] = $data;
 
         $request->application->data = $appData;
 
@@ -856,61 +829,50 @@ class mercuryApi extends baseApi
         }
         $result = is_array($result) ? $result : [$result];
         $сonditions = null;
-        try {
             foreach ($result as $item) {
                 $item = json_decode(json_encode($item), true);
-                if ($item['appliedR13nRule']['decision'] == 2) {
-                    //Можно делать перемещение при соблюдении условий
+                switch ($item['appliedR13nRule']['decision']) {
+                    case 1 :
+                        break;                         //Можно делать перемещение без ограничений
+                    case 2 ://Можно делать перемещение при соблюдении условий
                     $requirements = !array_key_exists('relatedDisease', $item['appliedR13nRule']['requirement']) ? $item['appliedR13nRule']['requirement'] : [$item['appliedR13nRule']['requirement']];
                     foreach ($requirements as $requirement) {
-                        $сonditions[] = ['name'   => $requirement['relatedDisease']['name'],
-                                         'groups' => $this->getConditions($requirement)];
-                    }
+                        $сonditions[$requirement['relatedDisease']['name']] = $this->getConditions($requirement);
                 }
-
-                if ($item['appliedR13nRule']['decision'] == 3) {
-                    throw new BadRequestHttpException("Relocation prohibited by regionalization rules|{$item['appliedR13nRule']['requirement']['relatedDisease']['name']}", 1330);
-                }
+                        break;
+                    case 3 :
+                        throw new Exception('Пересещение запрещено правилами регионализации (' . $item['appliedR13nRule']['requirement']['relatedDisease']['name'] . ')!');
             }
-        } catch (\Exception $e) {
-            if ($e->getCode() != 1330) {
-                throw $e;
-            }
-            return $сonditions = ['reason_for_prohibition' => $e->getMessage()];
         }
         return $сonditions;
     }
 
-    /**
-     * @param $requirement
-     * @return array|null
-     * @throws BadRequestHttpException
-     */
     private function getConditions($requirement)
     {
         $conditions = null;
-        if ($requirement['type'] == 2) {
-            //Можно делать перемещение при соблюдении условий
+        switch ($requirement['type']) {
+            case 1 :
+                break;                         //Можно делать перемещение без ограничений
+            case 2 ://Можно делать перемещение при соблюдении условий
             $conditionGroups = is_array($requirement["conditionGroup"]) ? $requirement["conditionGroup"] : [$requirement["conditionGroup"]];
             $i = 0;
             foreach ($conditionGroups as $group) {
-                $conditions_group = null;
+                $i++;
                 $group = !array_key_exists('condition', $group) ? $group : $group['condition'];
                 $condition = !array_key_exists('guid', $group) ? $group : [$group];
                 foreach ($condition as $cond) {
                     if ($cond['active'] && $cond['last']) {
-                        $conditions_group[] = ['guid'    => $cond['guid'],
-                                               'title'   => $cond['text'],
-                                               'checked' => false];
+                        $conditions[] = ['guid'  => $cond['guid'],
+                                         'text'  => $cond['text'],
+                                         'group' => $i];
                     }
                 }
-                $conditions[] = $conditions_group;
             }
-        }
-
-        if ($requirement['type'] == 3) {
-            throw new BadRequestHttpException("Relocation prohibited by regionalization rules|{$requirement['relatedDisease']['name']}", 1330);
+                break;
+            case 3 :
+                throw new Exception('Пересещение запрещено правилами регионализации (' . $requirement['relatedDisease']['name'] . ')!');
         }
         return $conditions;
     }
 }
+

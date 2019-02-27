@@ -62,7 +62,7 @@ class WaybillHelper extends AuthHelper
             //}
 
             if ($storeHouseVersion == 5) {
-                $itemSum = str_replace('.', ',', $rec['sum']);
+                //$itemSum = str_replace('.', ',', $rec['sum']);
                 $nds = floatval($rec['vat'] / 100);
                 $vatSumValue = round($nds * $rec['sum']);
                 //$vatSumValue = str_replace('.', ',', $vatSumValue);

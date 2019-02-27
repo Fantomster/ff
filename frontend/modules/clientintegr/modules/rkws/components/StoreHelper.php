@@ -104,7 +104,7 @@ class StoreHelper extends AuthHelper
             $this->log(date("Y-m-d H:i:s") . ' : Store callback received... ');
             $this->log('CMDGUID: ' . $cmdguid . ' || POSID: ' . $posid);
             $this->log('=========================================');
-            $this->log(substr($getr, 0, 600));
+            $this->log($getr);
 
             // Checking if the Task is active
 

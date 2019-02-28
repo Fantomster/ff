@@ -295,7 +295,7 @@ class VetisWaybill extends WebApi
         }
         $records = $this->helper->getAvailableVsd($request['uuid']);
         try {
-            $api = mercuryApi::getInstance();
+            $api = \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi::getInstance();
             if (array_key_exists($request['uuid'], $records)) {
                 if ($api->getVetDocumentDone($request['uuid'])) {
                     $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_EXTINGUISHED, $request['uuid']);
@@ -342,7 +342,7 @@ class VetisWaybill extends WebApi
         ];
 
         try {
-            $api = mercuryApi::getInstance();
+            $api = \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi::getInstance();
             if ($api->getVetDocumentDone($uuid, $params)) {
                 $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_PARTIALLY_ACCEPTED, $uuid);
             }
@@ -384,7 +384,7 @@ class VetisWaybill extends WebApi
         ];
 
         try {
-            $api = mercuryApi::getInstance();
+            $api = \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi::getInstance();
             if ($api->getVetDocumentDone($uuid, $params)) {
                 $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_RETURNED, $uuid);
             }

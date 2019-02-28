@@ -213,8 +213,12 @@ class mercuryApi extends baseApi
                 $result = MercVsd::findOne(['uuid' => $UUID]);
             }
         } catch (\SoapFault $e) {
-            Yii::error($e->detail);
-            var_dump($e->detail);
+            if (property_exists($e, 'detail')) {
+                \Yii::error($e->detail);
+                var_dump($e->detail);
+            } else {
+                \Yii::error($e);
+            }
             die();
         }
         return $result;

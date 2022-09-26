@@ -5,7 +5,7 @@
     "main": "index.js",
     "dependencies": {
         "chromedriver": "^2.46.0",
-        "nightwatch": "^1.0.19"
+        "nightwatch": "^1.7.13"
     },
     "devDependencies": {},
     "scripts": {
